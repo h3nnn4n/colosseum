@@ -10,9 +10,6 @@ from colosseum.utils import random_id
 from .config import Config
 
 
-logging.basicConfig(level=logging.WARNING)
-
-
 # FIXME: We need to figure out what to call it. Probably should be ``game'',
 # but the other game calls it ``World''.
 class Game:

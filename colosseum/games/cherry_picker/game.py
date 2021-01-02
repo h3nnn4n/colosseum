@@ -4,9 +4,6 @@ from ..food_catcher.game import World as FoodCatcherWorld
 from .config import Config
 
 
-logging.basicConfig(level=logging.WARNING)
-
-
 class Game:
     def __init__(self):
         self._config = Config

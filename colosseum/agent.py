@@ -14,8 +14,7 @@ from uuid import uuid4
 import pexpect
 from pexpect.popen_spawn import PopenSpawn
 
-
-logging.basicConfig(level=logging.WARNING)
+from colosseum.utils import get_internal_id
 
 
 class Agent:

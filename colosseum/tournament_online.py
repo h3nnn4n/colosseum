@@ -1,5 +1,6 @@
 import itertools
 import json
+import logging
 import lzma
 import os
 import shutil
@@ -16,6 +17,7 @@ from dotenv import load_dotenv
 from colosseum.games.cherry_picker.game import Game as CherryPickerGame
 from colosseum.games.chess.game import Game as ChessGame
 from colosseum.games.food_catcher.game import World as FoodCatcherGame
+from colosseum.utils import get_internal_id
 
 from .agent import Agent
 from .match import match
@@ -256,4 +258,7 @@ def get_participant(participant_id):
 
 
 def online_tournament(tournament_id=None):
+    logging.basicConfig(
+        filename=f"online_tournament_{get_internal_id()}.log", level=logging.INFO
+    )
     MatchRunner.run_next_match()
