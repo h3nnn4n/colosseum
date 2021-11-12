@@ -7,8 +7,19 @@ import sys
 import numpy as np
 
 
+def get_internal_id():
+    import random
+    import string
+    from datetime import datetime
+
+    now = datetime.now()
+
+    random_string = "".join(random.choices(string.ascii_lowercase + string.ascii_uppercase + string.digits, k=6))
+    return "_".join([now.strftime("%y%m%d%H%M%S"), random_string])
+
+
 def main():
-    logging.basicConfig(filename="log.out", level=logging.INFO)
+    logging.basicConfig(filename=f"food_catcher_{get_internal_id()}.log", level=logging.INFO)
     agent_id = None
 
     while True:
