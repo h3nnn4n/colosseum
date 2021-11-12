@@ -26,7 +26,7 @@ def main():
                 response["set_id"] = "ok"
 
             if state.get("ping"):
-                logging.info(f"got ping")
+                logging.info("got ping")
                 response["pong"] = "foobar"
 
             if state.get("agent_positions"):

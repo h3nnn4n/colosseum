@@ -1,5 +1,6 @@
-from .agent import Agent
 import logging
+
+from .agent import Agent
 
 
 class Manager:
