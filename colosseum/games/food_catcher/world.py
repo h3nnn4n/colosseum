@@ -66,11 +66,16 @@ class World:
                 self.move_agent(agent_id, target)
 
     def move_agent(self, agent_id, target):
-        # FIXME: agent movement overshooting the target
         target = np.array(target)
         agent_position = np.array(self.agent_positions[agent_id][0]["position"])
         move_direction = target - agent_position
-        agent_position_new = agent_position + (move_direction / np.linalg.norm(move_direction) * self.agent_speed)
-        self.agent_positions[agent_id][0]["position"] = agent_position_new.tolist()
+        distance_to_target = np.linalg.norm(move_direction)
+        distance_to_move = min(self.agent_speed, distance_to_target)
 
-        logging.info(f"agent {agent_id} moved from {agent_position} to {agent_position_new} with target {target}")
+        if distance_to_move > 1e-4:
+            agent_position_new = agent_position + (move_direction / distance_to_target * distance_to_move)
+            self.agent_positions[agent_id][0]["position"] = agent_position_new.tolist()
+            logging.info(f"agent {agent_id} moved from {agent_position} to {agent_position_new} with target {target} speed {distance_to_move}")
+            return
+
+        logging.info(f"agent {agent_id} {agent_position=} is already at {target=}")
