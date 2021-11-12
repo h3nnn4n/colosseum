@@ -11,12 +11,18 @@ class World:
         self.height = 10
 
         self.agent_speed = 0.5
+        self.max_food_sources = 5
+        self.food_quantity_max = 50
+        self.food_quantity_min = 0.1
+        self.food_growth_rate = 0.1
 
-        self.food_positions = [{"position": (5, 5), "quantity": 10}]
+        self.food_positions = []
         self.agent_positions = defaultdict(list)
         self.agent_bases = defaultdict(list)
 
         self.agents = set()
+
+        self._spawn_food()
 
         logging.info("food_catcher initialized")
 
@@ -34,6 +40,21 @@ class World:
         self.agent_positions[agent.id].append({"position": (x, y), "id": 1})
         logging.info(f"agent {agent.id} registered")
 
+    def _spawn_food(self):
+        self.food_positions = [
+            {
+                "position": (uniform(0, self.width), uniform(0, self.height)),
+                "quantity": uniform(1, self.food_quantity_max),
+            }
+            for _ in range(self.max_food_sources)
+        ]
+
+    def _update_food(self):
+        for food in self.food_positions:
+            food["quantity"] = min(food["quantity"] * (1.0 + self.food_growth_rate), self.food_quantity_max)
+
+        self.food_positions = [food for food in self.food_positions if food["quantity"] >= self.food_quantity_min]
+
     @property
     def state(self):
         return {
@@ -43,6 +64,8 @@ class World:
         }
 
     def update(self, agent_actions):
+        self._update_food()
+
         # We shuffle to use as a tiebreaker when multiple agents are trying to
         # do the same thing at the same time
         shuffle(agent_actions)
@@ -75,7 +98,9 @@ class World:
         if distance_to_move > 1e-4:
             agent_position_new = agent_position + (move_direction / distance_to_target * distance_to_move)
             self.agent_positions[agent_id][0]["position"] = agent_position_new.tolist()
-            logging.info(f"agent {agent_id} moved from {agent_position} to {agent_position_new} with target {target} speed {distance_to_move}")
+            logging.info(
+                f"agent {agent_id} moved from {agent_position} to {agent_position_new} with target {target} speed {distance_to_move}"
+            )
             return
 
         logging.info(f"agent {agent_id} {agent_position=} is already at {target=}")
