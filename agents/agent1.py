@@ -13,10 +13,8 @@ def main():
         if state.get("die"):
             return
 
-        state["out"] = state["x"] + state["y"]
-        state["ping"] = "yes"
-
-        print(json.dumps(state))
+        if state.get("ping"):
+            print('{"pong": "foobar"}')
 
 
 if __name__ == "__main__":

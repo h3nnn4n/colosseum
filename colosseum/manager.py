@@ -10,10 +10,10 @@ class Manager:
         for agent in self.agents:
             agent.start()
 
-    def test(self):
-        for _ in range(10):
+    def ping(self):
+        for _ in range(2):
             for agent in self.agents:
-                agent.test()
+                agent.ping()
 
     def stop(self):
         for agent in self.agents:

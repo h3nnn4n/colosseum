@@ -9,7 +9,7 @@ def main():
     agent_paths = sys.argv[1:]
     manager = Manager(agent_paths)
     manager.start()
-    manager.test()
+    manager.ping()
     manager.stop()
 
 
