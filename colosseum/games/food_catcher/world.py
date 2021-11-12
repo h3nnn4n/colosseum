@@ -22,6 +22,8 @@ class World:
 
         self.agents = set()
 
+        self.name = "food_catcher"
+
         self._spawn_food()
 
         logging.info("food_catcher initialized")

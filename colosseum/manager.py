@@ -1,3 +1,4 @@
+import json
 import logging
 
 from .agent import Agent
@@ -8,8 +9,25 @@ class Manager:
         self._agent_paths = agent_paths
         self.agents = [Agent(agent_path) for agent_path in agent_paths]
         self.world = world
+        self._replay_enable = True
+        self._replay_filename = None
 
         self._tick = 0
+
+        self._set_replay_file()
+
+    def _set_replay_file(self):
+        if not self._replay_enable:
+            return
+
+        import random
+        import string
+        from datetime import datetime
+
+        now = datetime.now()
+        random_string = "".join(random.choices(string.ascii_lowercase + string.ascii_uppercase + string.digits, k=6))
+        random_part = "_".join([now.strftime("%y%m%d_%H%M%S"), random_string])
+        self._replay_filename = f"replay_{self.world.name}_{random_part}.jsonl"
 
     def start(self):
         for agent in self.agents:
@@ -30,6 +48,8 @@ class Manager:
 
         agent_actions = [agent.get_actions() for agent in self.agents]
 
+        self._save_replay(world_state, agent_actions)
+
         self.world.update(agent_actions)
 
         logging.info(f"tick {self._tick}")
@@ -39,3 +59,13 @@ class Manager:
         for agent in self.agents:
             agent.stop()
         logging.info("stopped")
+
+    def _save_replay(self, world_state, agent_actions):
+        if not self._replay_enable:
+            return
+
+        data = {"epoch": self._tick, "world_state": world_state, "agent_actions": agent_actions}
+
+        with open(self._replay_filename, "at") as f:
+            f.write(json.dumps(data))
+            f.write("\n")
