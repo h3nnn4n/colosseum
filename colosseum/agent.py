@@ -19,12 +19,14 @@ class Agent:
 
     def ping(self):
         try:
-            self._child_process.sendline(json.dumps({"ping": "foobar"}).encode())
-            raw_data = self._child_process.readline().decode().strip()
+            payload = {"ping": "foobar"}
+            self._child_process.sendline(json.dumps(payload).encode())
+            raw_data = self._child_process.readline()
+            data_str = raw_data.decode().strip()
             data = json.loads(raw_data)
             return data.get("pong") is not None
-        except Exception:
-            logging.warning(f"agent {self.id} failed to ack ping\n{locals()}")
+        except Exception as e:
+            logging.warning(f"agent {self.id} failed to ack ping: Exception {e}\n{locals()}")
             return False
 
     def stop(self, reason="end_of_game"):
