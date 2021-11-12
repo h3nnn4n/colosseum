@@ -28,13 +28,12 @@ def main():
             state = json.loads(data)
             response = {}
 
-            if state.get("die"):
-                break
+            if state.get("stop"):
+                logging.info(f"stopping, reason: {state.get('stop')}")
 
-            if state.get("set_id"):
-                agent_id = state.get("set_id")
+            if state.get("set_agent_id"):
+                agent_id = state.get("set_agent_id")
                 logging.info(f"{agent_id=}")
-                response["set_id"] = "ok"
 
             if state.get("ping"):
                 logging.info("got ping")

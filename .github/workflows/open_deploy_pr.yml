@@ -1,4 +1,4 @@
-name: Create production PR
+name: Create Deploy PR
 
 on:
   push:

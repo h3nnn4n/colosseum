@@ -52,7 +52,7 @@ flagged as cheating and the agent will be disqualified.
 
 ## End of game instruction
 
-When the simulation ends the agent will receive a key named `die` in the
+When the simulation ends the agent will receive a key named `stop` in the
 payload.  The value will be an object with a key `reason`, the values can be
 will be the reason, which may be `end_of_game` or `cheating_detected`.
 Aditional keys may be provided on an per game basis, and will be documented
