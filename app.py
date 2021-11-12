@@ -3,7 +3,7 @@
 import logging
 import sys
 
-from colosseum.games.food_catcher.world import World
+from colosseum.games.food_catcher.game import World
 from colosseum.manager import Manager
 
 
