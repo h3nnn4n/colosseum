@@ -1,0 +1,22 @@
+name: black
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.10'
+
+      - name: Install black
+        run: |
+          python3 -m pip install black==21.10b0
+
+      - name: Run black
+        run: |
+          python3 -m black --check .
