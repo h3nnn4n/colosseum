@@ -55,7 +55,7 @@ class Renderer:
 
         world_state = self.data["world_state"]
         foods = world_state["food_positions"]
-        all_agents = world_state["agent_positions"]
+        actors = world_state["actors"]
         all_bases = world_state["agent_bases"]
 
         # FIXME: Each agent should have its own color
@@ -64,10 +64,9 @@ class Renderer:
                 position = np.array(base["position"]) * self._scale
                 pygame.draw.circle(self.screen, colors["seagreen3"], position, 9, 0)
 
-        for agent_id, agents in all_agents.items():
-            for agent in agents:
-                position = np.array(agent["position"]) * self._scale
-                pygame.draw.circle(self.screen, colors["turquoise3"], position, 9, 0)
+        for actor in actors:
+            position = np.array(actor["position"]) * self._scale
+            pygame.draw.circle(self.screen, colors["turquoise3"], position, 9, 0)
 
         for food in foods:
             position = np.array(food["position"]) * self._scale

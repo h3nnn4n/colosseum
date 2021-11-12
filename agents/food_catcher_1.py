@@ -39,15 +39,17 @@ def main():
                 logging.info("got ping")
                 response["pong"] = "foobar"
 
-            if state.get("agent_positions"):
-                current_position = np.array(state["agent_positions"][agent_id][0]["position"])
+            if state.get("actors"):
+                my_actors = [actor for actor in state["actors"] if actor["owner_id"] == agent_id]
+                actor = my_actors[0]
+                current_position = np.array(actor["position"])
 
                 food_positions = state.get("food_positions")
                 if food_positions is not None:
                     food_position = np.array(food_positions[0].get("position"))
                     direction = food_position
 
-                    response["actions"] = [{"action": "move", "target": direction.tolist()}]
+                    response["actions"] = [{"action": "move", "target": direction.tolist(), "actor_id": actor["id"]}]
                     logging.info(f"{current_position=} {food_position=} {direction}")
 
             if agent_id:
