@@ -41,14 +41,14 @@ def main():
 
             if state.get("agent_positions"):
                 current_position = np.array(state["agent_positions"][agent_id][0]["position"])
-                logging.info(f"{current_position=}")
 
                 food_positions = state.get("food_positions")
                 if food_positions is not None:
                     food_position = np.array(food_positions[0])
-                    direction = food_position - current_position
+                    direction = food_position
 
-                    response["actions"] = [{"action": "move", "target": (direction[0], direction[1])}]
+                    response["actions"] = [{"action": "move", "target": direction.tolist()}]
+                    logging.info(f"{current_position=} {food_position=} {direction}")
 
             if agent_id:
                 response["agent_id"] = agent_id

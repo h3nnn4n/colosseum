@@ -28,8 +28,9 @@ class Manager:
         for agent in self.agents:
             agent.update_state(world_state)
 
-        for agent in self.agents:
-            agent.get_actions()
+        agent_actions = [agent.get_actions() for agent in self.agents]
+
+        self.world.update(agent_actions)
 
         logging.info(f"tick {self._tick}")
         self._tick += 1

@@ -10,6 +10,8 @@ class World:
         self.width = 10
         self.height = 10
 
+        self.agent_speed = 0.5
+
         self.food_positions = [(5, 5)]
         self.agent_positions = defaultdict(list)
         self.agent_bases = defaultdict(list)
@@ -48,16 +50,27 @@ class World:
         for agent_action in agent_actions:
             self.process_agent_actions(agent_action)
 
-    def process_agent_actions(self, agent_actions):
-        agent_id = agent_actions.get("agent_id")
+    def process_agent_actions(self, agent_action):
+        agent_id = agent_action.get("agent_id")
         if agent_id not in self.agents:
             logging.warning(f"agent with id {agent_id} is not registered. Ignoring")
             return
 
-        for agent_action in agent_actions.get("actions"):
-            action_type = agent_action.get("action")
+        actions = agent_action.get("actions", [])
+
+        for action in actions:
+            action_type = action.get("action")
 
             if action_type == "move":
-                target_ = agent_action.get("target")
-                target = np.array(target_)
-                print(target)
+                target = action.get("target")
+                self.move_agent(agent_id, target)
+
+    def move_agent(self, agent_id, target):
+        # FIXME: agent movement overshooting the target
+        target = np.array(target)
+        agent_position = np.array(self.agent_positions[agent_id][0]["position"])
+        move_direction = target - agent_position
+        agent_position_new = agent_position + (move_direction / np.linalg.norm(move_direction) * self.agent_speed)
+        self.agent_positions[agent_id][0]["position"] = agent_position_new.tolist()
+
+        logging.info(f"agent {agent_id} moved from {agent_position} to {agent_position_new} with target {target}")
