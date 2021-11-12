@@ -30,9 +30,7 @@ def main():
                 response["pong"] = "foobar"
 
             if state.get("agent_positions"):
-                current_position = np.array(
-                    state["agent_positions"][agent_id][0]["position"]
-                )
+                current_position = np.array(state["agent_positions"][agent_id][0]["position"])
                 logging.info(f"{current_position=}")
 
                 food_positions = state.get("food_positions")
@@ -40,9 +38,7 @@ def main():
                     food_position = np.array(food_positions[0])
                     direction = food_position - current_position
 
-                    response["actions"] = [
-                        {"action": "move", "target": (direction[0], direction[1])}
-                    ]
+                    response["actions"] = [{"action": "move", "target": (direction[0], direction[1])}]
 
             if agent_id:
                 response["agent_id"] = agent_id
