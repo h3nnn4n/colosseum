@@ -44,7 +44,7 @@ def main():
 
                 food_positions = state.get("food_positions")
                 if food_positions is not None:
-                    food_position = np.array(food_positions[0])
+                    food_position = np.array(food_positions[0].get("position"))
                     direction = food_position
 
                     response["actions"] = [{"action": "move", "target": direction.tolist()}]

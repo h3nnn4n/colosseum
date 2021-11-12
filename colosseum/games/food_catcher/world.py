@@ -12,7 +12,7 @@ class World:
 
         self.agent_speed = 0.5
 
-        self.food_positions = [(5, 5)]
+        self.food_positions = [{"position": (5, 5), "quantity": 10}]
         self.agent_positions = defaultdict(list)
         self.agent_bases = defaultdict(list)
 
