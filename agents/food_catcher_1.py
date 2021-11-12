@@ -53,7 +53,7 @@ def main():
             if agent_id:
                 response["agent_id"] = agent_id
 
-            print(json.dumps(response).encode())
+            print(json.dumps(response))
         except Exception as e:
             logging.info(data)
             logging.error(e)
