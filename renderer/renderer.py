@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import sys
+from time import sleep, time
 
 import numpy as np
 import pygame
@@ -18,11 +19,23 @@ class Renderer:
         # FIXME: This should be read from the replay file
         self._scale = np.array(self.size) / np.array([10, 10])
 
+        # Update the game state 10 times per second
+        self.tick_duration = 1.0 / 10.0
+
+        self._frame_timer = time()
+        self._tick_timer = time()
+
     def set_data(self, data):
         self._data = data
         self._current_tick = 0
 
-    def advance_tick(self):
+    def _advance_tick(self):
+        now = time()
+        if now - self._tick_timer < self.tick_duration:
+            return
+
+        self._tick_timer = now
+
         self._current_tick += 1
         if self._current_tick >= len(self._data):
             self._current_tick = 0
@@ -35,6 +48,8 @@ class Renderer:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit()
+
+        self._advance_tick()
 
         self.screen.fill(colors["white"])
 
@@ -59,3 +74,9 @@ class Renderer:
             pygame.draw.circle(self.screen, colors["maroon2"], position, 9, 0)
 
         pygame.display.flip()
+
+        now = time()
+        diff = now - self._frame_timer
+        if diff < (1.0 / 60.0):
+            sleep(diff)
+        self._frame_timer = time()

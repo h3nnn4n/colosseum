@@ -14,7 +14,6 @@ def main():
     renderer.set_data(data)
 
     while True:
-        renderer.advance_tick()
         renderer.update()
 
 
