@@ -6,11 +6,13 @@ import sys
 
 from colosseum.games.food_catcher.game import World
 from colosseum.manager import Manager
+from colosseum.utils import get_internal_id
 
 
 def main():
     agent_paths = sys.argv[1:]
-    logging.basicConfig(level=logging.INFO)
+
+    logging.basicConfig(filename=f"game_{get_internal_id()}.log", level=logging.INFO)
 
     world = World()
 

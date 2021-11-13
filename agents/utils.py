@@ -32,7 +32,6 @@ def send_commands(data):
 
 
 def get_internal_id():
-
     now = datetime.now()
 
     random_string = "".join(

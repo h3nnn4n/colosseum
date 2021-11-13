@@ -1,7 +1,19 @@
 import random
 import string
+from datetime import datetime
 
 import numpy as np
+
+
+def get_internal_id():
+    now = datetime.now()
+
+    random_string = "".join(
+        random.choices(
+            string.ascii_lowercase + string.ascii_uppercase + string.digits, k=6
+        )
+    )
+    return "_".join([now.strftime("%y%m%d%H%M%S"), random_string])
 
 
 def object_distance(a, b):
