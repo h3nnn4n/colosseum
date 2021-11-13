@@ -7,6 +7,8 @@ import sys
 import numpy as np
 from utils import object_distance, send_commands
 
+AGENT_ID = None
+
 
 def get_internal_id():
     import random
@@ -23,19 +25,25 @@ def get_internal_id():
     return "_".join([now.strftime("%y%m%d%H%M%S"), random_string])
 
 
+def get_state():
+    logging.debug("waiting for data")
+    data = sys.stdin.readline()
+    logging.debug(f"got data: {data}")
+    state = json.loads(data)
+    return state
+
+
 def main():
+    global AGENT_ID
+
     logging.basicConfig(
         filename=f"food_catcher_{get_internal_id()}.log", level=logging.INFO
     )
-    agent_id = None
 
     logging.debug("starting")
     while True:
         try:
-            logging.debug("waiting for data")
-            data = sys.stdin.readline()
-            logging.debug(f"got data: {data}")
-            state = json.loads(data)
+            state = get_state()
             response = {}
 
             if state.get("stop"):
@@ -43,8 +51,8 @@ def main():
                 break
 
             if state.get("set_agent_id"):
-                agent_id = state.get("set_agent_id")
-                logging.info(f"{agent_id=}")
+                AGENT_ID = state.get("set_agent_id")
+                logging.info(f"{AGENT_ID=}")
 
             if state.get("ping"):
                 logging.info("got ping")
@@ -53,7 +61,7 @@ def main():
             if state.get("actors"):
                 logging.debug("got world state")
                 my_actors = [
-                    actor for actor in state["actors"] if actor["owner_id"] == agent_id
+                    actor for actor in state["actors"] if actor["owner_id"] == AGENT_ID
                 ]
                 actor = my_actors[0]
                 current_position = np.array(actor["position"])
@@ -88,13 +96,12 @@ def main():
                         f"MOVE {current_position=} {food_position=} {distance_to_food}"
                     )
 
-            if agent_id:
-                response["agent_id"] = agent_id
+            if AGENT_ID:
+                response["agent_id"] = AGENT_ID
 
             logging.debug(f"sending {response}")
             send_commands(response)
         except Exception as e:
-            logging.info(data)
             logging.error(e)
             return
     logging.debug("finished")
