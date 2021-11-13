@@ -28,6 +28,7 @@ class World:
         self._deposit_max_distance = 0.15
         self._attack_range = 5
         self._eat_speed = 5
+        self._spawn_actor_cost = 100
         self._make_base_cost = 500
 
         self._spawn_food()
@@ -239,7 +240,14 @@ class World:
 
     def spawn(self, owner_id, base_id):
         base = self._get_base(base_id)
-        self._spawn_actor(owner_id, base.position)
+
+        if base.food < self._spawn_actor_cost:
+            return
+
+        base.drain_food(self._spawn_actor_cost)
+        actor = self._spawn_actor(owner_id, base.position)
+
+        logging.info(f"base {base_id} spawned actor {actor.id}")
 
     def make_base(self, owner_id, actor_id):
         actor = self._get_actor(actor_id)
@@ -256,7 +264,9 @@ class World:
         if position is None:
             position = (uniform(0, self.width), uniform(0, self.width))
 
-        self.actors.append(Actor().set_owner(owner_id).set_position(position))
+        actor = Actor().set_owner(owner_id).set_position(position)
+        self.actors.append(actor)
+        return actor
 
     def _spawn_base(self, owner_id, position=None):
         if position is None:
