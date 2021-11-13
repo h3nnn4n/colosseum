@@ -48,7 +48,7 @@ class Actor:
             actor_position_new = actor_position + (
                 move_direction / distance_to_target * distance_to_move
             )
-            self.position = actor_position_new.tolist()
+            self.position = tuple(actor_position_new.tolist())
             logging.info(
                 f"actor {self.id} moved from {actor_position} to {actor_position_new} with target {target} speed {distance_to_move}"
             )
