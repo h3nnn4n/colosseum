@@ -5,8 +5,7 @@ import logging
 import sys
 
 import numpy as np
-
-from colosseum.utils import object_distance
+from utils import object_distance, send_commands
 
 
 def get_internal_id():
@@ -51,7 +50,7 @@ def main():
                 response["pong"] = "foobar"
 
             if state.get("actors"):
-                print("got world state")
+                logging.debug("got world state")
                 my_actors = [
                     actor for actor in state["actors"] if actor["owner_id"] == agent_id
                 ]
@@ -91,7 +90,7 @@ def main():
             if agent_id:
                 response["agent_id"] = agent_id
 
-            print(json.dumps(response))
+            send_commands(response)
         except Exception as e:
             logging.info(data)
             logging.error(e)
