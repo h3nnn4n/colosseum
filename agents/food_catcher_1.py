@@ -5,32 +5,9 @@ import logging
 import sys
 
 import numpy as np
-from utils import object_distance, send_commands
+from utils import get_internal_id, get_state, object_distance, send_commands
 
 AGENT_ID = None
-
-
-def get_internal_id():
-    import random
-    import string
-    from datetime import datetime
-
-    now = datetime.now()
-
-    random_string = "".join(
-        random.choices(
-            string.ascii_lowercase + string.ascii_uppercase + string.digits, k=6
-        )
-    )
-    return "_".join([now.strftime("%y%m%d%H%M%S"), random_string])
-
-
-def get_state():
-    logging.debug("waiting for data")
-    data = sys.stdin.readline()
-    logging.debug(f"got data: {data}")
-    state = json.loads(data)
-    return state
 
 
 def main():
