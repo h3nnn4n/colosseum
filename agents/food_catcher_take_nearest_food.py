@@ -15,6 +15,8 @@ from utils import (
 
 
 AGENT_ID = None
+AGENT_NAME = "nearest"
+AGENT_VERSION = "0.0.1"
 
 
 def main():
@@ -138,6 +140,8 @@ def main():
 
             if AGENT_ID:
                 response["agent_id"] = AGENT_ID
+            response["agent_name"] = AGENT_NAME
+            response["agent_version"] = AGENT_VERSION
 
             logging.debug(f"sending {response}")
             send_commands(response)

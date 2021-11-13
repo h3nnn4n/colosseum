@@ -7,7 +7,10 @@ import sys
 import numpy as np
 from utils import get_internal_id, get_state, object_distance, send_commands
 
+
 AGENT_ID = None
+AGENT_NAME = "first"
+AGENT_VERSION = "0.0.1"
 
 
 def main():
@@ -132,6 +135,8 @@ def main():
 
             if AGENT_ID:
                 response["agent_id"] = AGENT_ID
+            response["agent_name"] = AGENT_NAME
+            response["agent_version"] = AGENT_VERSION
 
             logging.debug(f"sending {response}")
             send_commands(response)
