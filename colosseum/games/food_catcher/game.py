@@ -7,6 +7,7 @@ import numpy as np
 from colosseum.utils import object_distance, random_id
 
 from .actor import Actor
+from .base import Base
 from .food import Food
 
 
@@ -15,8 +16,7 @@ class World:
         self.width = 10
         self.height = 10
 
-        self.agent_bases = defaultdict(list)
-
+        self.bases = []
         self.foods = []
         self.actors = []
         self.agents = set()
@@ -41,7 +41,7 @@ class World:
         x = uniform(0, self.width)
         y = uniform(0, self.width)
 
-        self.agent_bases[agent.id].append({"position": (x, y), "id": 1})
+        self.bases.append(Base().set_owner(agent.id).set_position((x, y)))
         self.actors.append(Actor().set_owner(agent.id).set_position((x, y)))
 
         logging.info(f"agent {agent.id} registered")
@@ -68,7 +68,7 @@ class World:
         return {
             "foods": self.foods_state,
             "actors": self.actors_state,
-            "agent_bases": self.agent_bases,
+            "bases": self.bases_state,
         }
 
     @property
@@ -78,6 +78,10 @@ class World:
     @property
     def foods_state(self):
         return [food.state for food in self.foods]
+
+    @property
+    def bases_state(self):
+        return [base.state for base in self.bases]
 
     def update(self, agent_actions):
         self._update_food()
