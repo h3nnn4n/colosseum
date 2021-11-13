@@ -19,6 +19,9 @@ class Base:
     def add_food(self, food):
         self.food += food
 
+    def drain_food(self, amount):
+        self.food -= amount
+
     @property
     def state(self):
         return {

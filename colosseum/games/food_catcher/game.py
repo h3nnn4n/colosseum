@@ -118,6 +118,10 @@ class World:
                 base_id = action.get("base_id")
                 self.deposit_food(owner_id, actor_id, base_id)
 
+            if action_type == "heal":
+                base_id = action.get("base_id")
+                self.heal(owner_id, actor_id, base_id)
+
     # TODO: resolve collisions
     def move_actor(self, owner_id, actor_id, target):
         # TODO: Handle actor not existing
@@ -149,11 +153,32 @@ class World:
 
         distance = object_distance(actor, base)
         if distance > self._deposit_max_distance:
-            logging.info(f"actor {actor_id} is too far from base {base_id}: {distance}")
+            logging.info(
+                f"actor {actor_id} is too far from base {base_id} to deposit: {distance}"
+            )
             return
 
         logging.info(f"actor {actor_id} deposited {actor.food} into {base_id}")
         base.add_food(actor.take_food())
+
+    def heal(self, owner_id, actor_id, base_id):
+        actor = self._get_actor(actor_id)
+        base = self._get_base(base_id)
+
+        if not actor or not base:
+            return
+
+        distance = object_distance(actor, base)
+        if distance > self._deposit_max_distance:
+            logging.info(
+                f"actor {actor_id} is too far from base {base_id} to heal: {distance}"
+            )
+            return
+
+        missing_health = actor.missing_health
+        heal_amount = min(missing_health, base.food)
+        actor.heal(heal_amount)
+        base.drain_food(heal_amount)
 
     def _get_food(self, id):
         return next((food for food in self.foods if food.id == id), None)
