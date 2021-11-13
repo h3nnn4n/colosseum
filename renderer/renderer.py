@@ -19,10 +19,10 @@ class Renderer:
         self.font = pygame.font.Font(pygame.font.get_default_font(), 16)
 
         # FIXME: This should be read from the replay file
-        self._scale = np.array(self.size) / np.array([10, 10])
+        self._scale = np.array(self.size) / np.array([40, 40])
 
-        # Update the game state 10 times per second
-        self.tick_duration = 1.0 / 10.0
+        # Update the game state 30 times per second
+        self.tick_duration = 1.0 / 30.0
         self._target_frame_duration = 1.0 / 60.0
 
         self._frame_timer = time()
