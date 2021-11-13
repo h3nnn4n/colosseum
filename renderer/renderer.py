@@ -15,12 +15,15 @@ class Renderer:
         self.screen = pygame.display.set_mode(self.size)
         self._data = None
         self._current_tick = None
+        self.clock = pygame.time.Clock()
+        self.font = pygame.font.Font(pygame.font.get_default_font(), 16)
 
         # FIXME: This should be read from the replay file
         self._scale = np.array(self.size) / np.array([10, 10])
 
         # Update the game state 10 times per second
         self.tick_duration = 1.0 / 10.0
+        self._target_frame_duration = 1.0 / 60.0
 
         self._frame_timer = time()
         self._tick_timer = time()
@@ -49,6 +52,7 @@ class Renderer:
             if event.type == pygame.QUIT:
                 sys.exit()
 
+        self.clock.tick()
         self._advance_tick()
 
         self.screen.fill(colors["white"])
@@ -72,10 +76,17 @@ class Renderer:
             position = np.array(food["position"]) * self._scale
             pygame.draw.circle(self.screen, colors["maroon2"], position, 9, 0)
 
+        now = time()
+        diff = self._target_frame_duration - (now - self._frame_timer)
+        if diff < self._target_frame_duration and diff > 0:
+            sleep(diff)
+
+        self._text(f"fps: {self.clock.get_fps():6.2f}", (10, 10))
+        self._text(f"     {diff:.4f} (ms)", (10, 30))
+        self._frame_timer = time()
+
         pygame.display.flip()
 
-        now = time()
-        diff = now - self._frame_timer
-        if diff < (1.0 / 60.0):
-            sleep(diff)
-        self._frame_timer = time()
+    def _text(self, text, position, antialias=True, color=(220, 230, 225)):
+        text_surface = self.font.render(text, antialias, color)
+        self.screen.blit(text_surface, dest=position)
