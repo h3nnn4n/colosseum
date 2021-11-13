@@ -103,6 +103,17 @@ class World:
         for agent_action in agent_actions:
             self.process_agent_actions(agent_action)
 
+    @property
+    def scores(self):
+        data = {}
+
+        for agent_id in self.agents:
+            bases = [base for base in self.bases if base.owner_id == agent_id]
+            score = sum([base.food for base in bases])
+            data[agent_id] = score
+
+        return data
+
     def process_agent_actions(self, agent_action):
         owner_id = agent_action.get("agent_id")
         if owner_id not in self.agents:

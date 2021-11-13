@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import json
 import logging
 import sys
 
@@ -21,6 +22,10 @@ def main():
         manager.tick()
 
     manager.stop()
+
+    scores = manager.scores
+
+    print(json.dumps(scores))
 
 
 if __name__ == "__main__":

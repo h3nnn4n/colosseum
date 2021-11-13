@@ -62,7 +62,25 @@ class Manager:
     def stop(self):
         for agent in self.agents:
             agent.stop()
+
         logging.info("stopped")
+
+    @property
+    def scores(self):
+        scores = []
+
+        for agent_id, score in self.world.scores.items():
+            agent = self._get_agent(agent_id)
+            scores.append(
+                {
+                    "name": agent.name,
+                    "version": agent.version,
+                    "score": score,
+                    "agent_id": agent_id,
+                }
+            )
+
+        return scores
 
     def _save_replay(self, world_state, agent_actions):
         if not self._replay_enable:
@@ -77,3 +95,6 @@ class Manager:
         with open(self._replay_filename, "at") as f:
             f.write(json.dumps(data))
             f.write("\n")
+
+    def _get_agent(self, id):
+        return next((agent for agent in self.agents if agent.id == id), None)
