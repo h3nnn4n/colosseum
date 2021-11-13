@@ -8,6 +8,7 @@ agent_paths = [
     "./agents/dummy_agent.py",
     "./agents/food_catcher_take_first_food.py",
     "./agents/food_catcher_take_nearest_food.py",
+    "./agents/food_catcher_replicator.py",
 ]
 
 
