@@ -48,25 +48,55 @@ class Actor:
         return {"position": self.position, "id": self.id, "owner_id": self.owner_id}
 
 
+class Food:
+    def __init__(self):
+        self.position = None
+        self.id = random_id()
+
+        self.quantity_max = 50
+        self.quantity_min = 0.1
+        self.growth_rate = 0.1
+
+        self.quantity = uniform(self.quantity_min, self.quantity_max)
+
+    def set_quantity(self, quantity):
+        self.quantity = quantity
+        return self
+
+    def set_position(self, position):
+        self.position = position
+        return self
+
+    def update(self):
+        self.grow()
+
+    def grow(self):
+        self.quantity = min(self.quantity * (1.0 + self.growth_rate), self.quantity_max)
+
+    @property
+    def vanished(self):
+        return self.quantity < self.quantity_min
+
+    @property
+    def state(self):
+        return {"position": self.position, "quantity": self.quantity, "id": self.id}
+
+
 class World:
     def __init__(self):
         self.width = 10
         self.height = 10
 
         self.max_food_sources = 5
-        self.food_quantity_max = 50
-        self.food_quantity_min = 0.1
-        self.food_growth_rate = 0.1
 
-        self.food_positions = []
         self.agent_bases = defaultdict(list)
 
+        self.foods = []
         self.actors = []
         self.agents = set()
 
         self.name = "food_catcher"
 
-        self._current_food_id = 0
         self._spawn_food()
 
         logging.info("food_catcher initialized")
@@ -86,33 +116,28 @@ class World:
 
         logging.info(f"agent {agent.id} registered")
 
-    def new_food_id(self):
-        self._current_food_id += 1
-        return self._current_food_id - 1
-
     def _spawn_food(self):
-        self.food_positions = [
-            {
-                "position": (uniform(0, self.width), uniform(0, self.height)),
-                "quantity": uniform(1, self.food_quantity_max),
-                "id": self.new_food_id(),
-            }
-            for _ in range(self.max_food_sources)
+        self.foods = [
+            Food().set_position((uniform(0, self.width), uniform(0, self.height))) for _ in range(self.max_food_sources)
         ]
 
     def _update_food(self):
-        for food in self.food_positions:
-            food["quantity"] = min(food["quantity"] * (1.0 + self.food_growth_rate), self.food_quantity_max)
+        self.food = [food for food in self.foods if not food.vanished]
 
-        self.food_positions = [food for food in self.food_positions if food["quantity"] >= self.food_quantity_min]
+        for food in self.foods:
+            food.update()
 
     @property
     def state(self):
-        return {"food_positions": self.food_positions, "actors": self.actors_state, "agent_bases": self.agent_bases}
+        return {"foods": self.foods_state, "actors": self.actors_state, "agent_bases": self.agent_bases}
 
     @property
     def actors_state(self):
         return [actor.state for actor in self.actors]
+
+    @property
+    def foods_state(self):
+        return [food.state for food in self.foods]
 
     def update(self, agent_actions):
         self._update_food()
@@ -140,6 +165,7 @@ class World:
                 target = action.get("target")
                 self.move_actor(owner_id, actor_id, target)
 
+    # TODO: resolve collisions
     def move_actor(self, owner_id, actor_id, target):
         actor = next((a for a in self.actors if a.id == actor_id), None)
 

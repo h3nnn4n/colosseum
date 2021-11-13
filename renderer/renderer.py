@@ -54,7 +54,7 @@ class Renderer:
         self.screen.fill(colors["white"])
 
         world_state = self.data["world_state"]
-        foods = world_state["food_positions"]
+        foods = world_state["foods"]
         actors = world_state["actors"]
         all_bases = world_state["agent_bases"]
 
