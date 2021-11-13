@@ -24,6 +24,11 @@ class Actor:
     def add_food(self, food):
         self.food += food
 
+    def take_food(self):
+        food_taken = self.food
+        self.food = 0
+        return food_taken
+
     def move(self, target):
         target = np.array(target)
         actor_position = np.array(self.position)

@@ -25,6 +25,7 @@ class World:
 
         self._max_food_sources = 5
         self._eat_max_distance = 1
+        self._deposit_max_distance = 0.15
         self._eat_speed = 5
 
         self._spawn_food()
@@ -113,6 +114,10 @@ class World:
                 food_id = action.get("food_id")
                 self.take_food(owner_id, actor_id, food_id)
 
+            if action_type == "deposit_food":
+                base_id = action.get("base_id")
+                self.deposit_food(owner_id, actor_id, base_id)
+
     # TODO: resolve collisions
     def move_actor(self, owner_id, actor_id, target):
         # TODO: Handle actor not existing
@@ -135,8 +140,26 @@ class World:
         food_taken = food.take(self._eat_speed)
         actor.add_food(food_taken)
 
+    def deposit_food(self, owner_id, actor_id, base_id):
+        actor = self._get_actor(actor_id)
+        base = self._get_base(base_id)
+
+        if not actor or not base:
+            return
+
+        distance = object_distance(actor, base)
+        if distance > self._deposit_max_distance:
+            logging.info(f"actor {actor_id} is too far from base {base_id}: {distance}")
+            return
+
+        logging.info(f"actor {actor_id} deposited {actor.food} into {base_id}")
+        base.add_food(actor.take_food())
+
     def _get_food(self, id):
         return next((food for food in self.foods if food.id == id), None)
 
     def _get_actor(self, id):
         return next((actor for actor in self.actors if actor.id == id), None)
+
+    def _get_base(self, id):
+        return next((base for base in self.bases if base.id == id), None)

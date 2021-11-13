@@ -16,6 +16,9 @@ class Base:
         self.position = position
         return self
 
+    def add_food(self, food):
+        self.food += food
+
     @property
     def state(self):
         return {
