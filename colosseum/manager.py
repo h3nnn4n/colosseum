@@ -13,6 +13,7 @@ class Manager:
         self._replay_filename = None
 
         self._tick = 0
+        self._number_of_ticks = 1000
 
         self._set_replay_file()
 
@@ -45,8 +46,15 @@ class Manager:
 
         logging.info("ping completed")
 
+    def loop(self):
+        for _ in range(self._number_of_ticks):
+            self.tick()
+
     def tick(self):
         world_state = self.world.state
+        world_state["epoch"] = self._tick
+        world_state["max_epoch"] = self._number_of_ticks
+
         for agent in self.agents:
             agent.update_state(world_state)
 

@@ -19,10 +19,7 @@ def main():
     manager = Manager(world, agent_paths)
     manager.start()
     manager.ping()
-
-    for epoch in range(1000):
-        manager.tick()
-
+    manager.loop()
     manager.stop()
 
     scores = manager.scores
