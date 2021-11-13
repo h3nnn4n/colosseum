@@ -95,7 +95,7 @@ def move(commands, actor_id, target):
     if not isinstance(target, (list, tuple)):
         target = target.tolist()
 
-    commands["actions"].apend(
+    commands["actions"].append(
         {"action": "move", "target": target, "actor_id": actor_id}
     )
 
