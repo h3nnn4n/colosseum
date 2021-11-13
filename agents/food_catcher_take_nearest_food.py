@@ -35,7 +35,7 @@ def main():
     while True:
         try:
             state = get_state()
-            response = {}
+            commands = {}
 
             if state.get("stop"):
                 logging.info(f"stopping, reason: {state.get('stop')}")
@@ -43,13 +43,13 @@ def main():
 
             if state.get("set_agent_id"):
                 AGENT_ID = state.get("set_agent_id")
-                response["agent_name"] = AGENT_NAME
-                response["agent_version"] = AGENT_VERSION
+                commands["agent_name"] = AGENT_NAME
+                commands["agent_version"] = AGENT_VERSION
                 logging.info(f"{AGENT_ID=}")
 
             if state.get("ping"):
                 logging.info("got ping")
-                response["pong"] = "foobar"
+                commands["pong"] = "foobar"
 
             if state.get("actors"):
                 logging.debug("got world state")
@@ -90,23 +90,23 @@ def main():
                 )
                 if actor["state"] == "deposit_food":
                     if distance_to_base <= 0.1 and actor["food"] > 0:
-                        deposit_food(response, actor["id"], base["id"])
+                        deposit_food(commands, actor["id"], base["id"])
                     elif distance_to_base <= 0.1:
                         actor["state"] = "take_food"
                     else:
-                        move(response, actor["id"], base_position)
+                        move(commands, actor["id"], base_position)
 
                 if actor["state"] == "take_food":
                     if distance_to_food < 1:
-                        take_food(response, actor["id"], food["id"])
+                        take_food(commands, actor["id"], food["id"])
                     else:
-                        move(response, actor["id"], food_position)
+                        move(commands, actor["id"], food_position)
 
             if AGENT_ID:
-                response["agent_id"] = AGENT_ID
+                commands["agent_id"] = AGENT_ID
 
-            logging.debug(f"sending {response}")
-            send_commands(response)
+            logging.debug(f"sending {commands}")
+            send_commands(commands)
         except Exception as e:
             logging.exception(e)
             return
