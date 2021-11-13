@@ -52,8 +52,8 @@ The following actions are available for the agents:
     "base_id": "qux"
   }
   ```
-  To attack an actor replace `base_id`  with `actor_id`. Having both set is an
-  error and nothing happens.
+  To attack an actor replace `base_id`  with `target_actor_id`. Having both set
+  is an error and nothing happens.
 
 - `heal`: Heals an actor at a base. Each unity of food heals one unity of
   health, until max health is reached. The agent needs to be on top of the base

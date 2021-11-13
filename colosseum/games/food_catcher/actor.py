@@ -12,6 +12,7 @@ class Actor:
         self.owner_id = None
         self.speed = 1
         self.food = 0
+        self.damage = 5
         self.health = 50
         self.max_health = self.health
 

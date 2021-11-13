@@ -26,6 +26,7 @@ class World:
         self._max_food_sources = 5
         self._eat_max_distance = 1
         self._deposit_max_distance = 0.15
+        self._attack_range = 5
         self._eat_speed = 5
 
         self._spawn_food()
@@ -64,6 +65,12 @@ class World:
                 Food().set_position((uniform(0, self.width), uniform(0, self.height)))
             )
 
+    def _update_actors(self):
+        self.actors = [actor for actor in self.actors if actor.alive]
+
+    def _update_bases(self):
+        self.bases = [base for base in self.bases if base.alive]
+
     @property
     def state(self):
         return {
@@ -86,6 +93,8 @@ class World:
 
     def update(self, agent_actions):
         self._update_food()
+        self._update_bases()
+        self._update_actors()
 
         # We shuffle to use as a tiebreaker when multiple agents are trying to
         # do the same thing at the same time
@@ -106,6 +115,8 @@ class World:
             action_type = action.get("action")
             actor_id = action.get("actor_id")
 
+            # TODO: Prevent single actor from doing multiple actions in the
+            # same frame.
             if action_type == "move":
                 target = action.get("target")
                 self.move_actor(owner_id, actor_id, target)
@@ -121,6 +132,13 @@ class World:
             if action_type == "heal":
                 base_id = action.get("base_id")
                 self.heal(owner_id, actor_id, base_id)
+
+            if action_type == "attack":
+                base_id = action.get("base_id")
+                target_actor_id = action.get("target_actor_id")
+                self.attack(
+                    owner_id, actor_id, base_id=base_id, target_actor_id=target_actor_id
+                )
 
     # TODO: resolve collisions
     def move_actor(self, owner_id, actor_id, target):
@@ -179,6 +197,26 @@ class World:
         heal_amount = min(missing_health, base.food)
         actor.heal(heal_amount)
         base.drain_food(heal_amount)
+
+    def attack(self, owner_id, actor_id, base_id=None, target_actor_id=None):
+        actor = self._get_actor(actor_id)
+        if base_id and not target_actor_id:
+            target = self._get_base(base_id)
+        elif target_actor_id and not base_id:
+            target = self._get_actor(target_actor_id)
+        else:
+            # FIXME: Figure what to do?
+            pass
+
+        if not actor or not target:
+            return
+
+        distance = object_distance(actor, target)
+        if distance > self._attack_range:
+            return
+
+        damage = actor.damage
+        target.deal_damage(damage)
 
     def _get_food(self, id):
         return next((food for food in self.foods if food.id == id), None)
