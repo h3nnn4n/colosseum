@@ -2,7 +2,7 @@ import json
 import logging
 from uuid import uuid4
 
-import pexpect
+from pexpect.popen_spawn import PopenSpawn
 
 
 class Agent:
@@ -12,19 +12,28 @@ class Agent:
         self.id = str(uuid4())
 
     def start(self):
-        self._child_process = pexpect.spawn(self._agent_path)
-        self._child_process.setecho(False)
-        self._child_process.sendline(json.dumps({"set_agent_id": self.id}).encode())
+        self._child_process = PopenSpawn(self._agent_path)
+        self._child_process.sendline(json.dumps({"set_agent_id": self.id}))
+        response_str = self._child_process.readline()
+        response = json.loads(response_str)
+
+        if response.get("agent_id") != self.id:
+            logging.warning(f"agent failed to set id. got: {response}")
+
         logging.info(f"agent {self.id} started")
 
     def ping(self):
         try:
             payload = {"ping": "foobar"}
-            self._child_process.sendline(json.dumps(payload).encode())
+            self._child_process.sendline(json.dumps(payload))
             raw_data = self._child_process.readline()
-            data_str = raw_data.decode().strip()
             data = json.loads(raw_data)
-            return data.get("pong") is not None
+            valid_ping = data.get("pong") is not None
+            if not valid_ping:
+                logging.warning(
+                    f"agent {self.id} sent invalid response to ping: {data}"
+                )
+            return valid_ping
         except Exception as e:
             logging.warning(
                 f"agent {self.id} failed to ack ping: Exception {e}\n{locals()}"
@@ -33,17 +42,16 @@ class Agent:
 
     def stop(self, reason="end_of_game"):
         data = {"stop": {"reason": reason}}
-        self._child_process.sendline(json.dumps(data).encode())
+        self._child_process.sendline(json.dumps(data))
         self._child_process.close()
         logging.info(f"agent {self.id} stopped")
 
     def update_state(self, state):
-        payload = json.dumps(state).encode()
-        sent = self._child_process.sendline(payload) - 1
-        print(f"{len(payload)} {sent}")
+        payload = json.dumps(state)
+        self._child_process.sendline(payload)
 
     def get_actions(self):
-        actions_raw = self._child_process.readline().decode().strip()
+        actions_raw = self._child_process.readline()
         try:
             actions = json.loads(actions_raw)
             agent_id = actions.get("agent_id")
