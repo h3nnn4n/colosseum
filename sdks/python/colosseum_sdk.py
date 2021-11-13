@@ -3,6 +3,10 @@ import logging
 import sys
 
 
+FOOD_COST_TO_SPAWN_ACTOR = 100
+FOOD_COST_TO_MAKE_BASE = 500
+
+
 class BaseEntity:
     def __init__(self, entity):
         self._position = entity["position"]
@@ -25,6 +29,18 @@ class ActionableEntity(BaseEntity):
         self._health = data["health"]
         self._max_health = data["max_health"]
         self._owner_id = data["owner_id"]
+
+        self._next_action = None
+
+    def set_next_action(self, action, force=True):
+        if self._next_action is not None and not force:
+            raise RuntimeError("action can only be set one")
+
+        self._next_action = action
+
+    @property
+    def next_action(self):
+        return self._next_action
 
     @property
     def owner_id(self):
@@ -63,11 +79,30 @@ class Food(BaseEntity):
 
 
 class Base(ActionableEntity):
-    pass
+    @property
+    def can_spawn(self):
+        return self.food >= FOOD_COST_TO_SPAWN_ACTOR
+
+    def spawn(self):
+        self.set_next_action({"action": "spawn", "base_id": self.id})
 
 
 class Actor(ActionableEntity):
-    pass
+    def move(self, target):
+        self.set_next_action({"action": "move", "actor_id": self.id, "target": target})
+
+    def take_food(self, target):
+        self.set_next_action(
+            {"action": "take_food", "actor_id": self.id, "food_id": target}
+        )
+
+    def deposit_food(self, target):
+        self.set_next_action(
+            {"action": "deposit_food", "actor_id": self.id, "base_id": target}
+        )
+
+    def heal(self, target):
+        self.set_next_action({"action": "heal", "actor_id": self.id, "base_id": target})
 
 
 class BaseCollection:
@@ -85,12 +120,23 @@ class BaseCollection:
         filtered_records = [r for r in self._records if filter_function(r)]
         return self.__class__([]).__inject(filtered_records)
 
-    def __len__(self):
-        return len(self._records)
-
     @property
     def count(self):
         return len(self)
+
+    @property
+    def first(self):
+        if self.count > 0:
+            return self._records[0]
+
+        return None
+
+    @property
+    def actions(self):
+        return [x.next_action for x in self._records if x.next_action]
+
+    def __len__(self):
+        return len(self._records)
 
 
 class Actors(BaseCollection):
@@ -134,6 +180,10 @@ class State:
     @property
     def agent_ids(self):
         return self._agent_ids
+
+    @property
+    def actions(self):
+        return self.actors.actions + self.bases.actions
 
 
 def send_commands(data):

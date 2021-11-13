@@ -41,3 +41,11 @@ def test_bases_by_owner():
     assert state.bases.by_owner(agent_ids[0]).count == 1
     assert state.bases.by_owner(agent_ids[1]).count == 1
     assert state.bases.by_owner(agent_ids[2]).count == 1
+
+
+def test_move():
+    state = make_state(fixture_state_late)
+    state.actors.first.move((1, 1))
+    actions = state.actions
+
+    assert actions == [{"action": "move", "actor_id": "L0AZFC", "target": (1, 1)}]
