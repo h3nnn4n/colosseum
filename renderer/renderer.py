@@ -8,6 +8,29 @@ import pygame
 from pygame.colordict import THECOLORS as colors
 
 
+def load_image(name):
+    image = pygame.image.load(name).convert_alpha()
+    return image
+
+
+def get_food_sprite():
+    image = load_image("./renderer/sprites/food.png")
+    image = pygame.transform.scale(image, (20, 30))
+    return image
+
+
+def get_base_sprite():
+    image = load_image("./renderer/sprites/base.png")
+    image = pygame.transform.scale(image, (20, 20))
+    return image
+
+
+def get_actor_sprite():
+    image = load_image("./renderer/sprites/actor.png")
+    image = pygame.transform.scale(image, (20, 20))
+    return image
+
+
 class Renderer:
     def __init__(self):
         pygame.init()
@@ -17,6 +40,10 @@ class Renderer:
         self._current_tick = None
         self.clock = pygame.time.Clock()
         self.font = pygame.font.Font(pygame.font.get_default_font(), 16)
+
+        self.food_sprite = get_food_sprite()
+        self.actor_sprite = get_actor_sprite()
+        self.base_sprite = get_base_sprite()
 
         # FIXME: This should be read from the replay file
         self._scale = np.array(self.size) / np.array([40, 40])
@@ -65,15 +92,15 @@ class Renderer:
         # FIXME: Each agent should have its own color
         for base in bases:
             position = np.array(base["position"]) * self._scale
-            pygame.draw.circle(self.screen, colors["seagreen3"], position, 9, 0)
+            self._draw_base(position)
 
         for actor in actors:
             position = np.array(actor["position"]) * self._scale
-            pygame.draw.circle(self.screen, colors["turquoise3"], position, 9, 0)
+            self._draw_actor(position)
 
         for food in foods:
             position = np.array(food["position"]) * self._scale
-            pygame.draw.circle(self.screen, colors["maroon2"], position, 9, 0)
+            self._draw_food(position)
 
         now = time()
         diff = self._target_frame_duration - (now - self._frame_timer)
@@ -89,3 +116,12 @@ class Renderer:
     def _text(self, text, position, antialias=True, color=(220, 230, 225)):
         text_surface = self.font.render(text, antialias, color)
         self.screen.blit(text_surface, dest=position)
+
+    def _draw_actor(self, position):
+        self.screen.blit(self.actor_sprite, position + np.array([-10, -10]))
+
+    def _draw_base(self, position):
+        self.screen.blit(self.base_sprite, position + np.array([-10, -10]))
+
+    def _draw_food(self, position):
+        self.screen.blit(self.food_sprite, position + np.array([-10, -25]))
