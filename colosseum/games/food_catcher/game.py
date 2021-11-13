@@ -156,6 +156,11 @@ class World:
         for food in self.foods:
             food.update()
 
+        if len(self.foods) < self._max_food_sources:
+            self.foods.append(
+                Food().set_position((uniform(0, self.width), uniform(0, self.height)))
+            )
+
     @property
     def state(self):
         return {
