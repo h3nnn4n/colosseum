@@ -13,8 +13,8 @@ from .food import Food
 
 class World:
     def __init__(self):
-        self.width = 10
-        self.height = 10
+        self.width = 40
+        self.height = 40
 
         self.bases = []
         self.foods = []

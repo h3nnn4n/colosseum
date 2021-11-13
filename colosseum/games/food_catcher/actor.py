@@ -10,7 +10,7 @@ class Actor:
         self.position = None
         self.id = random_id()
         self.owner_id = None
-        self.speed = 0.5
+        self.speed = 1
         self.food = 0
 
     def set_owner(self, owner_id):
