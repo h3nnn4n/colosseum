@@ -49,3 +49,17 @@ def get_state():
     logging.debug(f"got data: {data}")
     state = json.loads(data)
     return state
+
+
+def get_nearest_food_to_actor(state, actor):
+    foods = state.get("foods")
+    closest_food = foods[0]
+    distance = object_distance(closest_food, actor)
+
+    for food in foods:
+        new_distance = object_distance(food, actor)
+        if new_distance < distance:
+            distance = new_distance
+            closest_food = food
+
+    return food
