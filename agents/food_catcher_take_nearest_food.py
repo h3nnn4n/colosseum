@@ -40,6 +40,8 @@ def main():
 
             if state.get("set_agent_id"):
                 AGENT_ID = state.get("set_agent_id")
+                response["agent_name"] = AGENT_NAME
+                response["agent_version"] = AGENT_VERSION
                 logging.info(f"{AGENT_ID=}")
 
             if state.get("ping"):
@@ -140,8 +142,6 @@ def main():
 
             if AGENT_ID:
                 response["agent_id"] = AGENT_ID
-            response["agent_name"] = AGENT_NAME
-            response["agent_version"] = AGENT_VERSION
 
             logging.debug(f"sending {response}")
             send_commands(response)
