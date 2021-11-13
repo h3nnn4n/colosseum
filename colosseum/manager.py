@@ -96,8 +96,10 @@ class Manager:
 
         data = {
             "epoch": self._tick,
+            "max_epoch": self._number_of_ticks,
             "world_state": world_state,
             "agent_actions": agent_actions,
+            "agent_ids": [agent.id for agent in self.agents],
         }
 
         with open(self._replay_filename, "at") as f:
