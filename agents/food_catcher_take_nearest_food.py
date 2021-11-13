@@ -28,7 +28,7 @@ def main():
     my_actors = {}
 
     logging.basicConfig(
-        filename=f"food_catcher_{get_internal_id()}.log", level=logging.INFO
+        filename=f"{AGENT_NAME}_{get_internal_id()}.log", level=logging.INFO
     )
 
     logging.debug("starting")
