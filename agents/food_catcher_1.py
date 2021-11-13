@@ -25,7 +25,7 @@ def get_internal_id():
 
 def main():
     logging.basicConfig(
-        filename=f"food_catcher_{get_internal_id()}.log", level=logging.DEBUG
+        filename=f"food_catcher_{get_internal_id()}.log", level=logging.INFO
     )
     agent_id = None
 
@@ -33,13 +33,14 @@ def main():
     while True:
         try:
             logging.debug("waiting for data")
-            data = sys.stdin.readline().strip()
-            logging.debug("got data")
+            data = sys.stdin.readline()
+            logging.debug(f"got data: {data}")
             state = json.loads(data)
             response = {}
 
             if state.get("stop"):
                 logging.info(f"stopping, reason: {state.get('stop')}")
+                break
 
             if state.get("set_agent_id"):
                 agent_id = state.get("set_agent_id")
@@ -90,11 +91,13 @@ def main():
             if agent_id:
                 response["agent_id"] = agent_id
 
+            logging.debug(f"sending {response}")
             send_commands(response)
         except Exception as e:
             logging.info(data)
             logging.error(e)
             return
+    logging.debug("finished")
 
 
 if __name__ == "__main__":

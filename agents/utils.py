@@ -22,5 +22,6 @@ def object_distance(a, b):
 
 
 def send_commands(data):
-    print(json.dumps(data))
+    data_encoded = json.dumps(data)
+    sys.stdout.write(data_encoded + "\n")
     sys.stdout.flush()
