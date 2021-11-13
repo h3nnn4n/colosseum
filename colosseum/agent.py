@@ -1,5 +1,6 @@
 import json
 import logging
+from signal import SIGTERM
 from uuid import uuid4
 
 from pexpect.popen_spawn import PopenSpawn
@@ -43,7 +44,7 @@ class Agent:
     def stop(self, reason="end_of_game"):
         data = {"stop": {"reason": reason}}
         self._child_process.sendline(json.dumps(data))
-        self._child_process.close()
+        self._child_process.kill(SIGTERM)
         logging.info(f"agent {self.id} stopped")
 
     def update_state(self, state):
