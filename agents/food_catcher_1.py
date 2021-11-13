@@ -6,6 +6,8 @@ import sys
 
 import numpy as np
 
+from colosseum.utils import object_distance
+
 
 def get_internal_id():
     import random
@@ -52,9 +54,23 @@ def main():
                 actor = my_actors[0]
                 current_position = np.array(actor["position"])
 
-                food_positions = state.get("foods")
-                if food_positions is not None:
-                    food_position = np.array(food_positions[0].get("position"))
+                foods = state.get("foods")
+                food = foods[0]
+                distance_to_food = object_distance(food, actor)
+                food_position = np.array(food.get("position"))
+
+                if distance_to_food < 1:
+                    response["actions"] = [
+                        {
+                            "action": "take_food",
+                            "food_id": food["id"],
+                            "actor_id": actor["id"],
+                        }
+                    ]
+                    logging.info(
+                        f"TAKE {current_position=} {food_position=} {food['quantity']}"
+                    )
+                else:
                     direction = food_position
 
                     response["actions"] = [
@@ -64,7 +80,9 @@ def main():
                             "actor_id": actor["id"],
                         }
                     ]
-                    logging.info(f"{current_position=} {food_position=} {direction}")
+                    logging.info(
+                        f"MOVE {current_position=} {food_position=} {distance_to_food}"
+                    )
 
             if agent_id:
                 response["agent_id"] = agent_id

@@ -6,7 +6,10 @@ from random import shuffle, uniform
 
 import numpy as np
 
+from colosseum.utils import clamp, object_distance
 
+
+# TODO: Move this to utils
 def random_id():
     return "".join(
         random.choices(
@@ -21,6 +24,7 @@ class Actor:
         self.id = random_id()
         self.owner_id = None
         self.speed = 0.5
+        self.food = 0
 
     def set_owner(self, owner_id):
         self.owner_id = owner_id
@@ -29,6 +33,9 @@ class Actor:
     def set_position(self, position):
         self.position = position
         return self
+
+    def add_food(self, food):
+        self.food += food
 
     def move(self, target):
         target = np.array(target)
@@ -51,7 +58,12 @@ class Actor:
 
     @property
     def state(self):
-        return {"position": self.position, "id": self.id, "owner_id": self.owner_id}
+        return {
+            "position": self.position,
+            "id": self.id,
+            "owner_id": self.owner_id,
+            "food": self.food,
+        }
 
 
 class Food:
@@ -61,7 +73,7 @@ class Food:
 
         self.quantity_max = 50
         self.quantity_min = 0.1
-        self.growth_rate = 0.1
+        self.growth_rate = 0.05
 
         self.quantity = uniform(self.quantity_min, self.quantity_max)
 
@@ -79,6 +91,14 @@ class Food:
     def grow(self):
         self.quantity = min(self.quantity * (1.0 + self.growth_rate), self.quantity_max)
 
+    def take(self, amount):
+        if amount > self.quantity:
+            self.quantity -= amount
+            return amount
+
+        self.quantity = 0
+        return self.quantity
+
     @property
     def vanished(self):
         return self.quantity < self.quantity_min
@@ -93,8 +113,6 @@ class World:
         self.width = 10
         self.height = 10
 
-        self.max_food_sources = 5
-
         self.agent_bases = defaultdict(list)
 
         self.foods = []
@@ -102,6 +120,10 @@ class World:
         self.agents = set()
 
         self.name = "food_catcher"
+
+        self._max_food_sources = 5
+        self._eat_max_distance = 1
+        self._eat_speed = 5
 
         self._spawn_food()
 
@@ -125,11 +147,11 @@ class World:
     def _spawn_food(self):
         self.foods = [
             Food().set_position((uniform(0, self.width), uniform(0, self.height)))
-            for _ in range(self.max_food_sources)
+            for _ in range(self._max_food_sources)
         ]
 
     def _update_food(self):
-        self.food = [food for food in self.foods if not food.vanished]
+        self.foods = [food for food in self.foods if not food.vanished]
 
         for food in self.foods:
             food.update()
@@ -176,9 +198,34 @@ class World:
                 target = action.get("target")
                 self.move_actor(owner_id, actor_id, target)
 
+            if action_type == "take_food":
+                food_id = action.get("food_id")
+                self.take_food(owner_id, actor_id, food_id)
+
     # TODO: resolve collisions
     def move_actor(self, owner_id, actor_id, target):
-        actor = next((a for a in self.actors if a.id == actor_id), None)
+        # TODO: Handle actor not existing
+        actor = self._get_actor(actor_id)
 
         # TODO: Ensure that the actor belongs to the owner
         actor.move(target)
+
+    def take_food(self, owner_id, actor_id, food_id):
+        actor = self._get_actor(actor_id)
+        food = self._get_food(food_id)
+
+        if not food:
+            return
+
+        distance = object_distance(actor, food)
+        if distance > self._eat_max_distance:
+            return
+
+        food_taken = food.take(self._eat_speed)
+        actor.add_food(food_taken)
+
+    def _get_food(self, id):
+        return next((food for food in self.foods if food.id == id), None)
+
+    def _get_actor(self, id):
+        return next((actor for actor in self.actors if actor.id == id), None)

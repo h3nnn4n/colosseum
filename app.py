@@ -17,7 +17,7 @@ def main():
     manager.start()
     manager.ping()
 
-    for epoch in range(10):
+    for epoch in range(100):
         manager.tick()
 
     manager.stop()
