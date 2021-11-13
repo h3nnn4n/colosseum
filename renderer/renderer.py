@@ -8,6 +8,29 @@ import pygame
 from pygame.colordict import THECOLORS as colors
 
 
+def load_image(name):
+    image = pygame.image.load(name).convert_alpha()
+    return image
+
+
+def get_food_sprite():
+    image = load_image("./renderer/sprites/food.png")
+    image = pygame.transform.scale(image, (20, 30))
+    return image
+
+
+def get_base_sprite():
+    image = load_image("./renderer/sprites/base.png")
+    image = pygame.transform.scale(image, (20, 20))
+    return image
+
+
+def get_actor_sprite():
+    image = load_image("./renderer/sprites/actor.png")
+    image = pygame.transform.scale(image, (20, 20))
+    return image
+
+
 class Renderer:
     def __init__(self):
         pygame.init()
@@ -18,19 +41,39 @@ class Renderer:
         self.clock = pygame.time.Clock()
         self.font = pygame.font.Font(pygame.font.get_default_font(), 16)
 
-        # FIXME: This should be read from the replay file
-        self._scale = np.array(self.size) / np.array([10, 10])
+        self.food_sprite = get_food_sprite()
+        self.actor_sprite = get_actor_sprite()
+        self.base_sprite = get_base_sprite()
 
-        # Update the game state 10 times per second
-        self.tick_duration = 1.0 / 10.0
+        # FIXME: This should be read from the replay file
+        self._scale = np.array(self.size) / np.array([40, 40])
+
+        # Update the game state 30 times per second
+        self.tick_duration = 1.0 / 30.0
         self._target_frame_duration = 1.0 / 60.0
 
         self._frame_timer = time()
         self._tick_timer = time()
 
+        self.color_map = {}
+
+        self.agent_colors = [
+            colors["cadetblue"],
+            colors["mediumorchid3"],
+            colors["yellow3"],
+            colors["darkolivegreen3"],
+        ]
+
     def set_data(self, data):
         self._data = data
         self._current_tick = 0
+
+        first_data = data[0]
+        bases = first_data["world_state"]["bases"]
+        agent_ids = [base["owner_id"] for base in bases]
+
+        for index, agent_id in enumerate(agent_ids):
+            self.color_map[agent_id] = self.agent_colors[index]
 
     def _advance_tick(self):
         now = time()
@@ -60,21 +103,20 @@ class Renderer:
         world_state = self.data["world_state"]
         foods = world_state["foods"]
         actors = world_state["actors"]
-        all_bases = world_state["agent_bases"]
+        bases = world_state["bases"]
 
         # FIXME: Each agent should have its own color
-        for agent_id, bases in all_bases.items():
-            for base in bases:
-                position = np.array(base["position"]) * self._scale
-                pygame.draw.circle(self.screen, colors["seagreen3"], position, 9, 0)
+        for base in bases:
+            position = np.array(base["position"]) * self._scale
+            self._draw_base(position, base["owner_id"])
 
         for actor in actors:
             position = np.array(actor["position"]) * self._scale
-            pygame.draw.circle(self.screen, colors["turquoise3"], position, 9, 0)
+            self._draw_actor(position, actor["owner_id"])
 
         for food in foods:
             position = np.array(food["position"]) * self._scale
-            pygame.draw.circle(self.screen, colors["maroon2"], position, 9, 0)
+            self._draw_food(position)
 
         now = time()
         diff = self._target_frame_duration - (now - self._frame_timer)
@@ -90,3 +132,16 @@ class Renderer:
     def _text(self, text, position, antialias=True, color=(220, 230, 225)):
         text_surface = self.font.render(text, antialias, color)
         self.screen.blit(text_surface, dest=position)
+
+    def _draw_actor(self, position, owner_id):
+        color = self.color_map[owner_id]
+        pygame.draw.circle(self.screen, color, position, 14, 0)
+        self.screen.blit(self.actor_sprite, position + np.array([-10, -10]))
+
+    def _draw_base(self, position, owner_id):
+        color = self.color_map[owner_id]
+        pygame.draw.circle(self.screen, color, position, 14, 0)
+        self.screen.blit(self.base_sprite, position + np.array([-10, -10]))
+
+    def _draw_food(self, position):
+        self.screen.blit(self.food_sprite, position + np.array([-10, -25]))

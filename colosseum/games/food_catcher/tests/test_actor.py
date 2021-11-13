@@ -21,6 +21,16 @@ def test_add_food():
     assert actor.food == 15
 
 
+def test_take_food():
+    actor = Actor()
+    assert actor.food == 0
+
+    actor.add_food(10)
+    assert actor.food == 10
+    assert actor.take_food() == 10
+    assert actor.food == 0
+
+
 def test_set_position():
     actor = Actor()
 
