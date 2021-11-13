@@ -38,7 +38,9 @@ class Agent:
         logging.info(f"agent {self.id} stopped")
 
     def update_state(self, state):
-        self._child_process.sendline(json.dumps(state).encode())
+        payload = json.dumps(state).encode()
+        sent = self._child_process.sendline(payload) - 1
+        print(f"{len(payload)} {sent}")
 
     def get_actions(self):
         actions_raw = self._child_process.readline().decode().strip()

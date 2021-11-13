@@ -47,10 +47,18 @@ class Manager:
 
     def tick(self):
         world_state = self.world.state
+        print("starting")
         for agent in self.agents:
+            print("updating world state for agent")
             agent.update_state(world_state)
 
+        print("finished world update")
+
+        # from time import sleep
+        # sleep(1)
+
         agent_actions = [agent.get_actions() for agent in self.agents]
+        print("got agent actions")
 
         self._save_replay(world_state, agent_actions)
 

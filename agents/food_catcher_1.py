@@ -26,13 +26,16 @@ def get_internal_id():
 
 def main():
     logging.basicConfig(
-        filename=f"food_catcher_{get_internal_id()}.log", level=logging.INFO
+        filename=f"food_catcher_{get_internal_id()}.log", level=logging.DEBUG
     )
     agent_id = None
 
+    logging.debug("starting")
     while True:
         try:
+            logging.debug("waiting for data")
             data = sys.stdin.readline().strip()
+            logging.debug("got data")
             state = json.loads(data)
             response = {}
 
@@ -48,6 +51,7 @@ def main():
                 response["pong"] = "foobar"
 
             if state.get("actors"):
+                print("got world state")
                 my_actors = [
                     actor for actor in state["actors"] if actor["owner_id"] == agent_id
                 ]
