@@ -31,8 +31,8 @@ The following actions are available for the agents:
   ```
 
 - `deposit_food`: Stores all the food in the actor to a base. All food is moved
-  in a single cycle. Optionally a `quantity` may be specified to keep some food
-  in the agent. The agent needs to be on top of the base to be able to depoist.
+  in a single cycle. The agent needs to be on top of the base to be able to
+  deposit. There is a tolerance of 0.1 units.
   Example: Actor `bar` deposits food to base `qux`:
   ```
   {
@@ -42,7 +42,8 @@ The following actions are available for the agents:
   }
   ```
 
-- `attack`: Short range attack against other actors and bases.
+- `attack`: Short range attack against other actors and bases. The range is of
+  4 units. While attacking the actor can't move or do any other action.
   Example: Attack base with id `qux`:
   ```
   {
@@ -56,7 +57,7 @@ The following actions are available for the agents:
 
 - `heal`: Heals an actor at a base. Each unity of food heals one unity of
   health, until max health is reached. The agent needs to be on top of the base
-  to be able to depoist.
+  to be able to deposit. There is a tolerance of 0.1 units.
   ```
   {
     "actor_id:" "bar",
