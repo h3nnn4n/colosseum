@@ -92,12 +92,13 @@ class Food:
         self.quantity = min(self.quantity * (1.0 + self.growth_rate), self.quantity_max)
 
     def take(self, amount):
-        if amount > self.quantity:
+        if amount < self.quantity:
             self.quantity -= amount
             return amount
 
+        taken = self.quantity
         self.quantity = 0
-        return self.quantity
+        return taken
 
     @property
     def vanished(self):
