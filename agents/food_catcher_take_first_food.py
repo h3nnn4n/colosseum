@@ -5,7 +5,15 @@ import logging
 import sys
 
 import numpy as np
-from utils import get_internal_id, get_state, object_distance, send_commands
+from utils import (
+    deposit_food,
+    get_internal_id,
+    get_state,
+    move,
+    object_distance,
+    send_commands,
+    take_food,
+)
 
 
 AGENT_ID = None
@@ -57,7 +65,6 @@ def main():
                     my_actors[actor["id"]].update(actor)
 
                 actor = list(my_actors.values())[0]
-                current_position = np.array(actor["position"])
 
                 foods = state.get("foods")
                 bases = [
@@ -83,57 +90,17 @@ def main():
                 )
                 if actor["state"] == "deposit_food":
                     if distance_to_base <= 0.1 and actor["food"] > 0:
-                        response["actions"] = [
-                            {
-                                "action": "deposit_food",
-                                "base_id": base["id"],
-                                "actor_id": actor["id"],
-                            }
-                        ]
-                        logging.info(
-                            f"DEPOSIT {current_position=} {actor['food']} / {base['id']} {base['food']}"
-                        )
+                        deposit_food(response, actor["id"], base["id"])
                     elif distance_to_base <= 0.1:
                         actor["state"] = "take_food"
                     else:
-                        direction = base_position
-
-                        response["actions"] = [
-                            {
-                                "action": "move",
-                                "target": direction.tolist(),
-                                "actor_id": actor["id"],
-                            }
-                        ]
-                        logging.info(
-                            f"MOVE {current_position=} {base_position=} {distance_to_base=}"
-                        )
+                        move(response, actor["id"], base_position)
 
                 if actor["state"] == "take_food":
                     if distance_to_food < 1:
-                        response["actions"] = [
-                            {
-                                "action": "take_food",
-                                "food_id": food["id"],
-                                "actor_id": actor["id"],
-                            }
-                        ]
-                        logging.info(
-                            f"TAKE {current_position=} {food_position=} {food['quantity']}"
-                        )
+                        take_food(response, actor["id"], food["id"])
                     else:
-                        direction = food_position
-
-                        response["actions"] = [
-                            {
-                                "action": "move",
-                                "target": direction.tolist(),
-                                "actor_id": actor["id"],
-                            }
-                        ]
-                        logging.info(
-                            f"MOVE {current_position=} {food_position=} {distance_to_food}"
-                        )
+                        move(response, actor["id"], food_position)
 
             if AGENT_ID:
                 response["agent_id"] = AGENT_ID
