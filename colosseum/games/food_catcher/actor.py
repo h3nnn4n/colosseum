@@ -12,6 +12,8 @@ class Actor:
         self.owner_id = None
         self.speed = 1
         self.food = 0
+        self.health = 50
+        self.max_health = self.health
 
     def set_owner(self, owner_id):
         self.owner_id = owner_id
@@ -28,6 +30,24 @@ class Actor:
         food_taken = self.food
         self.food = 0
         return food_taken
+
+    def deal_damage(self, damage):
+        self.health -= damage
+
+    def heal(self, amount):
+        self.health += amount
+
+    @property
+    def missing_health(self):
+        return self.max_health - self.health
+
+    @property
+    def alive(self):
+        return self.health > 0
+
+    @property
+    def dead(self):
+        return self.health <= 0
 
     def move(self, target):
         target = np.array(target)
@@ -55,4 +75,6 @@ class Actor:
             "id": self.id,
             "owner_id": self.owner_id,
             "food": self.food,
+            "health": self.health,
+            "max_health": self.max_health,
         }

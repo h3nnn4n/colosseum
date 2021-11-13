@@ -62,3 +62,44 @@ def test_move():
     actor.move((1, 1))
     actor.move((1, 1))
     assert actor.position == (1, 1)
+
+
+def test_health():
+    actor = Actor()
+    assert actor.health > 0
+
+
+def test_missing_health():
+    actor = Actor()
+    assert actor.missing_health == 0
+
+    actor.deal_damage(1)
+    assert actor.missing_health == 1
+
+
+def test_missing_heal():
+    actor = Actor()
+    assert actor.missing_health == 0
+
+    actor.deal_damage(10)
+    assert actor.missing_health == 10
+
+    actor.heal(5)
+    assert actor.missing_health == 5
+
+    actor.heal(5)
+    assert actor.missing_health == 0
+
+
+def test_alive():
+    actor = Actor()
+    assert actor.alive
+    actor.deal_damage(actor.health)
+    assert not actor.alive
+
+
+def test_dead():
+    actor = Actor()
+    assert not actor.dead
+    actor.deal_damage(actor.health)
+    assert actor.dead
