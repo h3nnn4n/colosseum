@@ -24,7 +24,7 @@ jobs:
     - name: Run tests
       run: |
         poetry run python app.py \
-          agents/food_catcher_1.py \
+          agents/food_catcher_take_first_food.py \
           agents/dummy_agent.py \
-          agents/food_catcher_1.py \
-          agents/food_catcher_1.py
+          agents/food_catcher_take_first_food.py \
+          agents/food_catcher_take_nearest_food.py
