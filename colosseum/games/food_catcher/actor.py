@@ -69,6 +69,9 @@ class Actor:
 
         logging.info(f"actor {self.id} {actor_position=} is already at {target=}")
 
+    def kill(self):
+        self.health = 0
+
     @property
     def state(self):
         return {

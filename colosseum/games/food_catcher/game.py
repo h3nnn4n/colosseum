@@ -28,6 +28,7 @@ class World:
         self._deposit_max_distance = 0.15
         self._attack_range = 5
         self._eat_speed = 5
+        self._make_base_cost = 500
 
         self._spawn_food()
 
@@ -43,7 +44,7 @@ class World:
         x = uniform(0, self.width)
         y = uniform(0, self.width)
 
-        self.bases.append(Base().set_owner(agent.id).set_position((x, y)))
+        self._spawn_base(agent.id, (x, y))
         self._spawn_actor(agent.id, (x, y))
 
         logging.info(f"agent {agent.id} registered")
@@ -155,6 +156,9 @@ class World:
                     owner_id, actor_id, base_id=base_id, target_actor_id=target_actor_id
                 )
 
+            if action_type == "make_base":
+                self.make_base(owner_id, actor_id)
+
     # TODO: resolve collisions
     def move_actor(self, owner_id, actor_id, target):
         # TODO: Handle actor not existing
@@ -237,11 +241,30 @@ class World:
         base = self._get_base(base_id)
         self._spawn_actor(owner_id, base.position)
 
+    def make_base(self, owner_id, actor_id):
+        actor = self._get_actor(actor_id)
+
+        if actor.health < self._make_base_cost:
+            return
+
+        actor.die()
+        food = actor.take_food()
+        base = self._spawn_base(owner_id, position=food.position)
+        base.food = food - self._make_base_cost
+
     def _spawn_actor(self, owner_id, position=None):
         if position is None:
             position = (uniform(0, self.width), uniform(0, self.width))
 
         self.actors.append(Actor().set_owner(owner_id).set_position(position))
+
+    def _spawn_base(self, owner_id, position=None):
+        if position is None:
+            position = (uniform(0, self.width), uniform(0, self.width))
+
+        base = Base().set_owner(owner_id).set_position(position)
+        self.bases.append(base)
+        return base
 
     def _get_food(self, id):
         return next((food for food in self.foods if food.id == id), None)

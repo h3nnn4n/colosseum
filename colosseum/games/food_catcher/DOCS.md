@@ -76,3 +76,15 @@ The following actions are available for the agents:
     "base_id": "qux"
   }
   ```
+
+- `make_base`: Turns an actor into a base. The actor is no long available after
+  this command is run. A new base costs 500 units of food. All extra food on
+  top of the base cost is stored in the new base. The base is created in the
+  exact position the actor is ocupying when the command is issued.
+  Example: Turn actor `bar` into a base:
+  ```
+  {
+    "action": "make_base",
+    "actor_id": "bar"
+  }
+  ```
