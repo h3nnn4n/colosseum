@@ -64,17 +64,30 @@ def get_nearest_food_to_actor(state, actor):
     return food
 
 
+def get_nearest_base_to_actor(bases, actor):
+    closest_base = list(bases)[0]
+    distance = object_distance(closest_base, actor)
+
+    for base in bases:
+        new_distance = object_distance(base, actor)
+        if new_distance < distance:
+            distance = new_distance
+            closest_base = base
+
+    return base
+
+
 def take_food(commands, actor_id, food_id):
-    commands["actions"] = [
+    commands["actions"].append(
         {"action": "take_food", "food_id": food_id, "actor_id": actor_id}
-    ]
+    )
     logging.info(f"TAKE {actor_id} from {food_id}")
 
 
 def deposit_food(commands, actor_id, base_id):
-    commands["actions"] = [
+    commands["actions"].append(
         {"action": "deposit_food", "base_id": base_id, "actor_id": actor_id}
-    ]
+    )
     logging.info(f"DEPOSIT {actor_id} from {base_id}")
 
 
@@ -82,6 +95,13 @@ def move(commands, actor_id, target):
     if not isinstance(target, (list, tuple)):
         target = target.tolist()
 
-    commands["actions"] = [{"action": "move", "target": target, "actor_id": actor_id}]
+    commands["actions"].apend(
+        {"action": "move", "target": target, "actor_id": actor_id}
+    )
 
     logging.info(f"MOVE {actor_id} -> {target}")
+
+
+def spawn(commands, base_id):
+    commands["actions"].append({"action": "spawn", "base_id": base_id})
+    logging.info(f"SPAWN {base_id}")
