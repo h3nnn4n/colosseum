@@ -41,3 +41,26 @@ The following actions are available for the agents:
     "base_id": "qux"
   }
   ```
+
+- `attack`: Short range attack against other actors and bases.
+  Example: Attack base with id `qux`:
+  ```
+  {
+    "actor_id:" "bar",
+    "action": "attack",
+    "base_id": "qux"
+  }
+  ```
+  To attack an actor replace `base_id`  with `actor_id`. Having both set is an
+  error and nothing happens.
+
+- `heal`: Heals an actor at a base. Each unity of food heals one unity of
+  health, until max health is reached. The agent needs to be on top of the base
+  to be able to depoist.
+  ```
+  {
+    "actor_id:" "bar",
+    "action": "heal",
+    "base_id": "qux"
+  }
+  ```
