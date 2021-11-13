@@ -55,9 +55,25 @@ class Renderer:
         self._frame_timer = time()
         self._tick_timer = time()
 
+        self.color_map = {}
+
+        self.agent_colors = [
+            colors["cadetblue"],
+            colors["mediumorchid3"],
+            colors["yellow3"],
+            colors["darkolivegreen3"],
+        ]
+
     def set_data(self, data):
         self._data = data
         self._current_tick = 0
+
+        first_data = data[0]
+        bases = first_data["world_state"]["bases"]
+        agent_ids = [base["owner_id"] for base in bases]
+
+        for index, agent_id in enumerate(agent_ids):
+            self.color_map[agent_id] = self.agent_colors[index]
 
     def _advance_tick(self):
         now = time()
@@ -92,11 +108,11 @@ class Renderer:
         # FIXME: Each agent should have its own color
         for base in bases:
             position = np.array(base["position"]) * self._scale
-            self._draw_base(position)
+            self._draw_base(position, base["owner_id"])
 
         for actor in actors:
             position = np.array(actor["position"]) * self._scale
-            self._draw_actor(position)
+            self._draw_actor(position, actor["owner_id"])
 
         for food in foods:
             position = np.array(food["position"]) * self._scale
@@ -117,10 +133,14 @@ class Renderer:
         text_surface = self.font.render(text, antialias, color)
         self.screen.blit(text_surface, dest=position)
 
-    def _draw_actor(self, position):
+    def _draw_actor(self, position, owner_id):
+        color = self.color_map[owner_id]
+        pygame.draw.circle(self.screen, color, position, 14, 0)
         self.screen.blit(self.actor_sprite, position + np.array([-10, -10]))
 
-    def _draw_base(self, position):
+    def _draw_base(self, position, owner_id):
+        color = self.color_map[owner_id]
+        pygame.draw.circle(self.screen, color, position, 14, 0)
         self.screen.blit(self.base_sprite, position + np.array([-10, -10]))
 
     def _draw_food(self, position):
