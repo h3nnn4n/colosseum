@@ -11,6 +11,8 @@ class Agent:
         self._child_process = None
         self._agent_path = agent_path
         self.id = str(uuid4())
+        self.name = None
+        self.version = None
 
     def start(self):
         self._child_process = PopenSpawn(self._agent_path)
@@ -20,6 +22,15 @@ class Agent:
 
         if response.get("agent_id") != self.id:
             logging.warning(f"agent failed to set id. got: {response}")
+
+        if response.get("agent_name"):
+            self.name = response.get("agent_name")
+
+        if response.get("agent_version"):
+            self.version = response.get("agent_version")
+
+        if self.name:
+            logging.info(f"agent name {self.name} {self.version}")
 
         logging.info(f"agent {self.id} started")
 
