@@ -6,7 +6,7 @@ from random import shuffle, uniform
 
 import numpy as np
 
-from colosseum.utils import clamp, object_distance
+from colosseum.utils import object_distance
 
 
 # TODO: Move this to utils

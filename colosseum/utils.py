@@ -16,13 +16,3 @@ def object_distance(a, b):
         b_pos = np.array(b["position"])
 
     return np.linalg.norm(a_pos - b_pos)
-
-
-def clamp(value, low, high):
-    if value < low:
-        return low
-
-    if value > high:
-        return high
-
-    return value
