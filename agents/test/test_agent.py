@@ -3,7 +3,7 @@ import json
 import pexpect
 import pytest
 
-agent_paths = ["./agents/agent1.py", "./agents/food_catcher_1.py"]
+agent_paths = ["./agents/dummy_agent.py", "./agents/food_catcher_1.py"]
 
 
 @pytest.mark.parametrize("agent_path", agent_paths)
