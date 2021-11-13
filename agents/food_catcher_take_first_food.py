@@ -34,7 +34,7 @@ def main():
     while True:
         try:
             state = get_state()
-            commands = {}
+            commands = {"actions": []}
 
             if state.get("stop"):
                 logging.info(f"stopping, reason: {state.get('stop')}")
