@@ -8,7 +8,11 @@ import numpy as np
 
 
 def random_id():
-    return "".join(random.choices(string.ascii_lowercase + string.ascii_uppercase + string.digits, k=6))
+    return "".join(
+        random.choices(
+            string.ascii_lowercase + string.ascii_uppercase + string.digits, k=6
+        )
+    )
 
 
 class Actor:
@@ -34,7 +38,9 @@ class Actor:
         distance_to_move = min(self.speed, distance_to_target)
 
         if distance_to_move > 1e-4:
-            actor_position_new = actor_position + (move_direction / distance_to_target * distance_to_move)
+            actor_position_new = actor_position + (
+                move_direction / distance_to_target * distance_to_move
+            )
             self.position = actor_position_new.tolist()
             logging.info(
                 f"actor {self.id} moved from {actor_position} to {actor_position_new} with target {target} speed {distance_to_move}"
@@ -118,7 +124,8 @@ class World:
 
     def _spawn_food(self):
         self.foods = [
-            Food().set_position((uniform(0, self.width), uniform(0, self.height))) for _ in range(self.max_food_sources)
+            Food().set_position((uniform(0, self.width), uniform(0, self.height)))
+            for _ in range(self.max_food_sources)
         ]
 
     def _update_food(self):
@@ -129,7 +136,11 @@ class World:
 
     @property
     def state(self):
-        return {"foods": self.foods_state, "actors": self.actors_state, "agent_bases": self.agent_bases}
+        return {
+            "foods": self.foods_state,
+            "actors": self.actors_state,
+            "agent_bases": self.agent_bases,
+        }
 
     @property
     def actors_state(self):

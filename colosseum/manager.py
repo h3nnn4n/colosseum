@@ -25,7 +25,11 @@ class Manager:
         from datetime import datetime
 
         now = datetime.now()
-        random_string = "".join(random.choices(string.ascii_lowercase + string.ascii_uppercase + string.digits, k=6))
+        random_string = "".join(
+            random.choices(
+                string.ascii_lowercase + string.ascii_uppercase + string.digits, k=6
+            )
+        )
         random_part = "_".join([now.strftime("%y%m%d_%H%M%S"), random_string])
         self._replay_filename = f"replay_{self.world.name}_{random_part}.jsonl"
 
@@ -64,7 +68,11 @@ class Manager:
         if not self._replay_enable:
             return
 
-        data = {"epoch": self._tick, "world_state": world_state, "agent_actions": agent_actions}
+        data = {
+            "epoch": self._tick,
+            "world_state": world_state,
+            "agent_actions": agent_actions,
+        }
 
         with open(self._replay_filename, "at") as f:
             f.write(json.dumps(data))

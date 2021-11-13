@@ -26,7 +26,9 @@ class Agent:
             data = json.loads(raw_data)
             return data.get("pong") is not None
         except Exception as e:
-            logging.warning(f"agent {self.id} failed to ack ping: Exception {e}\n{locals()}")
+            logging.warning(
+                f"agent {self.id} failed to ack ping: Exception {e}\n{locals()}"
+            )
             return False
 
     def stop(self, reason="end_of_game"):
