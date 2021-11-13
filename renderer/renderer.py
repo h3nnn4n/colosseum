@@ -107,8 +107,7 @@ class Renderer:
 
         # FIXME: Each agent should have its own color
         for base in bases:
-            position = np.array(base["position"]) * self._scale
-            self._draw_base(position, base["owner_id"])
+            self._draw_base(base)
 
         for actor in actors:
             position = np.array(actor["position"]) * self._scale
@@ -138,10 +137,17 @@ class Renderer:
         pygame.draw.circle(self.screen, color, position, 14, 0)
         self.screen.blit(self.actor_sprite, position + np.array([-10, -10]))
 
-    def _draw_base(self, position, owner_id):
-        color = self.color_map[owner_id]
+    def _draw_base(self, base):
+        position = np.array(base["position"]) * self._scale
+        color = self.color_map[base["owner_id"]]
         pygame.draw.circle(self.screen, color, position, 14, 0)
         self.screen.blit(self.base_sprite, position + np.array([-10, -10]))
+
+        self._text(
+            f"food: {base['food']:.1f}",
+            position + np.array([-7, -22]),
+            color=colors["brown3"],
+        )
 
     def _draw_food(self, position):
         self.screen.blit(self.food_sprite, position + np.array([-10, -25]))
