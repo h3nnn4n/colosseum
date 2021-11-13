@@ -44,7 +44,7 @@ class World:
         y = uniform(0, self.width)
 
         self.bases.append(Base().set_owner(agent.id).set_position((x, y)))
-        self.actors.append(Actor().set_owner(agent.id).set_position((x, y)))
+        self._spawn_actor(agent.id, (x, y))
 
         logging.info(f"agent {agent.id} registered")
 
@@ -144,6 +144,10 @@ class World:
                 base_id = action.get("base_id")
                 self.heal(owner_id, actor_id, base_id)
 
+            if action_type == "spawn":
+                base_id = action.get("base_id")
+                self.spawn(owner_id, base_id)
+
             if action_type == "attack":
                 base_id = action.get("base_id")
                 target_actor_id = action.get("target_actor_id")
@@ -228,6 +232,16 @@ class World:
 
         damage = actor.damage
         target.deal_damage(damage)
+
+    def spawn(self, owner_id, base_id):
+        base = self._get_base(base_id)
+        self._spawn_actor(owner_id, base.position)
+
+    def _spawn_actor(self, owner_id, position=None):
+        if position is None:
+            position = (uniform(0, self.width), uniform(0, self.width))
+
+        self.actors.append(Actor().set_owner(owner_id).set_position(position))
 
     def _get_food(self, id):
         return next((food for food in self.foods if food.id == id), None)

@@ -65,3 +65,14 @@ The following actions are available for the agents:
     "base_id": "qux"
   }
   ```
+
+- `spawn`: Spawns a new actor from a base. The actor is created right on top of
+  the base. If there is another actor on top, a collision will be triggered. A
+  new actor costs 100 units of food.
+  Example: Spawn a new actor on top of base `qux`:
+  ```
+  {
+    "action": "spawn",
+    "base_id": "qux"
+  }
+  ```
