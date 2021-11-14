@@ -86,6 +86,7 @@ class Manager:
                     "version": agent.version,
                     "score": score,
                     "agent_id": agent_id,
+                    "agent_path": agent.agent_path,
                 }
             )
 
