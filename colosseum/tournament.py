@@ -70,14 +70,19 @@ class Participant:
 def round_robin(participants, n_rounds=1, n_participants_per_round=2):
     games = []
 
-    for agent_bracket in itertools.combinations(participants, n_participants_per_round):
-        print(f'participants: {" vs ".join([a.pretty_name for a in agent_bracket])}')
-        game = Game(agent_bracket)
+    for n_round in range(n_rounds):
+        for agent_bracket in itertools.combinations(
+            participants, n_participants_per_round
+        ):
+            print(
+                f'participants: {" vs ".join([a.pretty_name for a in agent_bracket])}'
+            )
+            game = Game(agent_bracket)
 
-        world = World()
-        game.result = match(world, [a.agent_path for a in agent_bracket])
-        print(game.pretty_results)
-        print()
+            world = World()
+            game.result = match(world, [a.agent_path for a in agent_bracket])
+            print(game.pretty_results)
+            print()
 
     return games
 
