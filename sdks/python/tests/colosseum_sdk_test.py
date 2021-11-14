@@ -89,3 +89,22 @@ def test_distance_to():
     state = make_state(fixture_state_late)
 
     assert state.actors.first.distance_to(state.bases.first) == 9.890839498372266
+
+
+def test_foods_sort_by_distance_to():
+    state = make_state(fixture_state_late)
+
+    by_distance = state.foods.sort_by_distance_to((0, 0))
+    closest = by_distance[0]
+    farthest = by_distance[-1]
+
+    assert closest.distance_to((0, 0)) < farthest.distance_to((0, 0))
+
+
+def test_foods_closest_and_farthest():
+    state = make_state(fixture_state_late)
+
+    closest = state.foods.closest_to((0, 0))
+    farthest = state.foods.farthest_from((0, 0))
+
+    assert closest.distance_to((0, 0)) < farthest.distance_to((0, 0))

@@ -20,14 +20,16 @@ def distance_between(a, b):
     assert a is not None
     assert b is not None
 
-    if hasattr(a, "position"):
-        a_pos = np.array(a.position)
-    else:
-        a_pos = np.array(a["position"])
-
-    if hasattr(b, "position"):
-        b_pos = np.array(b.position)
-    else:
-        b_pos = np.array(b["position"])
+    a_pos = np.array(get_position(a))
+    b_pos = np.array(get_position(b))
 
     return np.linalg.norm(a_pos - b_pos)
+
+
+def get_position(entity):
+    if isinstance(entity, (tuple, list)):
+        return entity
+    elif hasattr(entity, "position"):
+        return entity.position
+    elif entity.get("position"):
+        return entity.get("position")

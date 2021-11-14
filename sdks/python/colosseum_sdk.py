@@ -2,7 +2,7 @@ import json
 import logging
 import sys
 
-from .utils import distance_between, get_internal_id
+from .utils import distance_between, get_internal_id, get_position
 
 
 FOOD_COST_TO_SPAWN_ACTOR = 100
@@ -140,6 +140,20 @@ class BaseCollection:
     def by_owner(self, owner_id):
         return self.filter(lambda x: x.owner_id == owner_id)
 
+    def sort_by_distance_to(self, entity):
+        records = sorted(self._records, key=lambda x: distance_between(x, entity))
+        return self.__class__([], self._agent_id).__inject(records)
+
+    def closest_to(self, entity):
+        if self.empty:
+            return None
+        return self.sort_by_distance_to(entity)[0]
+
+    def farthest_from(self, entity):
+        if self.empty:
+            return None
+        return self.sort_by_distance_to(entity)[-1]
+
     @property
     def mine(self):
         return self.by_owner(self._agent_id)
@@ -147,6 +161,10 @@ class BaseCollection:
     @property
     def count(self):
         return len(self)
+
+    @property
+    def empty(self):
+        return self.count == 0
 
     @property
     def first(self):
@@ -161,6 +179,12 @@ class BaseCollection:
 
     def __len__(self):
         return len(self._records)
+
+    def __getitem__(self, key):
+        return self._records[key]
+
+    def __iter__(self):
+        return (x for x in self._records)
 
 
 class Actors(BaseCollection):
