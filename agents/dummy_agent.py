@@ -6,6 +6,9 @@ import sys
 from utils import send_commands
 
 
+AGENT_NAME = "dummy"
+
+
 def main():
     agent_id = None
     while True:
@@ -18,6 +21,7 @@ def main():
 
         if state.get("set_agent_id"):
             agent_id = state.get("set_agent_id")
+            response["agent_name"] = AGENT_NAME
 
         if state.get("ping"):
             response["pong"] = "boofar"
