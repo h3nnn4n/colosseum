@@ -191,6 +191,15 @@ class Actor(ActionableEntity):
 
     def move(self, target):
         """
+        Moves towards a `target` direction. When the direction is reached the
+        actor no longer moves, unless a new target is issued.
+
+        Parameters
+        ----------
+        target
+            Can be either a `tuple` or `list` with a pair of coordinates, a
+            `dict` that has a key named `position` or an object which has a
+            `position` property.
         """
         target = get_position(target)
 
@@ -510,7 +519,8 @@ class BaseCollection:
         -------
         object
             Returns the first object from the collection, if any, othewise
-            `None` is returned.        """
+            `None` is returned.
+        """
         if self.count > 0:
             return self._records[0]
 
