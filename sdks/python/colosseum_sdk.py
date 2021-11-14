@@ -2,6 +2,8 @@ import json
 import logging
 import sys
 
+from .utils import get_internal_id
+
 
 FOOD_COST_TO_SPAWN_ACTOR = 100
 FOOD_COST_TO_MAKE_BASE = 500
@@ -160,10 +162,10 @@ class Foods(BaseCollection):
 class State:
     def __init__(self, state):
         self._state = state
-        self._actors = Actors(state["world_state"]["actors"])
-        self._bases = Bases(state["world_state"]["bases"])
-        self._foods = Foods(state["world_state"]["foods"])
-        self._agent_ids = state["agent_ids"]
+        self._actors = Actors(state.get("world_state", {}).get("actors", []))
+        self._bases = Bases(state.get("world_state", {}).get("bases", []))
+        self._foods = Foods(state.get("world_state", {}).get("foods", []))
+        self._agent_ids = state.get("agent_ids", [])
 
     @property
     def actors(self):
@@ -186,14 +188,85 @@ class State:
         return self.actors.actions + self.bases.actions
 
 
+class Agent:
+    def __init__(self, agent_name, agent_version="0.1.0"):
+        self.agent_name = agent_name
+        self.agent_version = agent_version
+        self.agent_id = None
+        self.state = None
+        self.run = True
+        self.stop_reason = None
+
+        self._raw_state = None
+        self._next_response = {}
+
+        logging.basicConfig(
+            filename=f"{self.agent_name}_{get_internal_id()}.log", level=logging.INFO
+        )
+
+    def common_handlers(self):
+        self.handle_ping()
+        self.handle_stop()
+        self.handle_agent_id()
+
+    def handle_ping(self):
+        if self._raw_state.get("ping"):
+            self._next_response["pong"] = "foobar"
+            logging.debug("got ping")
+
+    def handle_stop(self):
+        stop = self._raw_state.get("stop")
+
+        if not stop:
+            return
+
+        self.run = False
+        self.stop_reason = stop
+        logging.debug(f"got stop reason: {stop}")
+
+    def handle_agent_id(self):
+        agent_id = self._raw_state.get("set_agent_id")
+
+        if not agent_id:
+            return
+
+        self.agent_id = agent_id
+        self._next_response["agent_name"] = self.agent_name
+        self._next_response["agent_version"] = self.agent_version
+        logging.debug(f"got agent id: {agent_id}")
+
+    def read_state(self):
+        logging.debug("waiting state update")
+        self._next_response = {}
+        self.state, self._raw_state = get_state()
+        logging.debug("got state update")
+
+    def send_commands(self):
+        # If the simulation tells us to stop, we dont talk back. This can
+        # deadlock and cause the agent to deadlock, which is an autolose
+        if not self.run:
+            return
+
+        payload = {}
+        payload["actions"] = self.state.actions
+
+        if self.agent_id:
+            payload["agent_id"] = self.agent_id
+
+        payload.update(self._next_response)
+
+        send_commands(payload)
+
+
 def send_commands(data):
+    logging.debug(data)
     data_encoded = json.dumps(data)
     sys.stdout.write(data_encoded + "\n")
     sys.stdout.flush()
 
 
 def get_state():
-    data = sys.stdin.readline()
-    state_data = json.loads(data)
+    state_raw = sys.stdin.readline()
+    state_data = json.loads(state_raw)
     state = State(state_data)
-    return state
+    return state, state_data
