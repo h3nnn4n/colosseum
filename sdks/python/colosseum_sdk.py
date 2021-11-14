@@ -103,7 +103,14 @@ class Actor(ActionableEntity):
 
         self.set_next_action({"action": "move", "actor_id": self.id, "target": target})
 
-    def take_food(self, target):
+    def take(self, target):
+        if isinstance(target, (str)):
+            pass
+        elif hasattr(target, "id"):
+            target = target.id
+        elif target.get("id"):
+            target = target.get("id")
+
         self.set_next_action(
             {"action": "take_food", "actor_id": self.id, "food_id": target}
         )
