@@ -1,6 +1,6 @@
 import json
 
-from ..colosseum_sdk import State
+from ..colosseum_sdk import Actor, Base, Food, State
 from .fixtures import fixture_state_late
 
 
@@ -15,14 +15,29 @@ def test_actors():
     assert len(state.actors) > 0
 
 
+def test_first_actor():
+    state = make_state(fixture_state_late)
+    assert isinstance(state.actors.first, Actor)
+
+
 def test_bases():
     state = make_state(fixture_state_late)
     assert len(state.bases) > 0
 
 
+def test_first_base():
+    state = make_state(fixture_state_late)
+    assert isinstance(state.bases.first, Base)
+
+
 def test_foods():
     state = make_state(fixture_state_late)
     assert len(state.foods) > 0
+
+
+def test_first_food():
+    state = make_state(fixture_state_late)
+    assert isinstance(state.foods.first, Food)
 
 
 def test_actors_by_owner():
