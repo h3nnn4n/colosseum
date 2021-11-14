@@ -89,7 +89,7 @@ class Manager:
                 }
             )
 
-        return scores
+        return sorted(scores, key=lambda x: x["score"], reverse=True)
 
     def _save_replay(self, world_state, agent_actions):
         if not self._replay_enable:
