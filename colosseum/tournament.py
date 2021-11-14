@@ -12,34 +12,81 @@ from .match import match
 INITIAL_ELO = 1200
 
 
-class Game:
-    def __init__(self, *args):
-        self.players = args
-        self.result = None
+class TournamentResult:
+    def __init__(self, participants, games):
+        self._games = games
+        self._participants = participants
 
     @property
-    def n_players(self):
-        return len(self.players)
+    def games(self):
+        return self._games
+
+    @property
+    def participants(self):
+        return self._participants
 
     @property
     def rankings(self):
-        return sorted(self.result, key=lambda x: x["score"], reverse=True)
+        ranked_participans = sorted(
+            self.participants, key=lambda x: x.score, reverse=True
+        )
+        return {
+            rank: participant for rank, participant in enumerate(ranked_participans)
+        }
+
+
+class Game:
+    def __init__(self, *args):
+        self._players = args
+        self._result = None
+        self._result_by_player = {}
+
+    def set_results(self, result):
+        self._result = result
+
+        if self.n_players != 2:
+            raise RuntimeError("only pairwise matches are supported at this point")
+
+        if self.has_winner:
+            winner = self._get_player_by_agent_path(self.rankings[0]["agent_path"])
+            loser = self._get_player_by_agent_path(self.rankings[0]["agent_path"])
+            winner.win()
+            loser.lose()
+
+        if self.is_draw:
+            for player in self._players:
+                player.draw()
 
     @property
-    def draw(self):
-        scores = self.rankings.values()
-        return scores[0] == scores[1]
+    def n_players(self):
+        return len(self._players)
+
+    @property
+    def rankings(self):
+        return sorted(self._result, key=lambda x: x["score"], reverse=True)
+
+    @property
+    def is_draw(self):
+        return self.rankings[0]["score"] == self.rankings[1]["score"]
 
     @property
     def has_winner(self):
-        scores = self.rankings.values()
-        return scores[0] > scores[1]
+        return self.rankings[0]["score"] > self.rankings[1]["score"]
+
+    @property
+    def winner(self):
+        return self._get_player_by_agent_path(self.rankings[0]["agent_path"])
 
     @property
     def pretty_results(self):
         return "\n".join(
             f'{ranking["name"]} {ranking["score"]:.2f}' for ranking in self.rankings
         )
+
+    def _get_player_by_agent_path(self, agent_path):
+        for player in self._players:
+            if player.agent_path == agent_path:
+                return player
 
 
 class Participant:
@@ -56,7 +103,7 @@ class Participant:
         self.score += 1
 
     def lose(self):
-        self.lose += 1
+        self.loses += 1
 
     def draws(self):
         self.draws += 0
@@ -77,22 +124,26 @@ def round_robin(participants, n_rounds=1, n_participants_per_round=2):
             print(
                 f'participants: {" vs ".join([a.pretty_name for a in agent_bracket])}'
             )
-            game = Game(agent_bracket)
+            game = Game(*list(agent_bracket))
 
             world = World()
-            game.result = match(world, [a.agent_path for a in agent_bracket])
+            game.set_results(match(world, [a.agent_path for a in agent_bracket]))
             print(game.pretty_results)
             print()
 
-    return games
+            games.append(game)
+
+    return TournamentResult(participants, games)
 
 
 def tournament(agent_paths, mode):
     participants = [Participant(agent_path) for agent_path in agent_paths]
 
     if mode == "ROUND_ROBIN":
-        return round_robin(participants)
+        results = round_robin(participants)
     if mode == "DOUBLE_ROUND_ROBIN":
-        return round_robin(participants, n_rounds=2)
+        results = round_robin(participants, n_rounds=2)
     if mode == "TRIPLE_ROUND_ROBIN":
-        return round_robin(participants, n_rounds=3)
+        results = round_robin(participants, n_rounds=3)
+
+    return results
