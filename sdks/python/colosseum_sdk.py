@@ -2,7 +2,7 @@ import json
 import logging
 import sys
 
-from .utils import get_internal_id
+from .utils import distance_between, get_internal_id
 
 
 FOOD_COST_TO_SPAWN_ACTOR = 100
@@ -21,6 +21,9 @@ class BaseEntity:
     @property
     def id(self):
         return self._id
+
+    def distance_to(self, entity):
+        return distance_between(self, entity)
 
 
 class ActionableEntity(BaseEntity):

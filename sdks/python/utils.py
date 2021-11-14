@@ -2,6 +2,8 @@ import random
 import string
 from datetime import datetime
 
+import numpy as np
+
 
 def get_internal_id():
     now = datetime.now()
@@ -12,3 +14,20 @@ def get_internal_id():
         )
     )
     return "_".join([now.strftime("%y%m%d_%H%M%S"), random_string])
+
+
+def distance_between(a, b):
+    assert a is not None
+    assert b is not None
+
+    if hasattr(a, "position"):
+        a_pos = np.array(a.position)
+    else:
+        a_pos = np.array(a["position"])
+
+    if hasattr(b, "position"):
+        b_pos = np.array(b.position)
+    else:
+        b_pos = np.array(b["position"])
+
+    return np.linalg.norm(a_pos - b_pos)

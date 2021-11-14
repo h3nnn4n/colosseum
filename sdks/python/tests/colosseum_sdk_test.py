@@ -69,3 +69,9 @@ def test_move():
     actions = state.actions
 
     assert actions == [{"action": "move", "actor_id": "L0AZFC", "target": (1, 1)}]
+
+
+def test_distance_to():
+    state = make_state(fixture_state_late)
+
+    assert state.actors.first.distance_to(state.bases.first) == 9.890839498372266
