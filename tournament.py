@@ -12,7 +12,7 @@ def main():
 
     for ranking, participant in result.rankings.items():
         print(
-            f"{ranking:2d}: {participant.score:3.1f} {participant.elo:7.2f} {participant.pretty_name:<40}"
+            f"{ranking:2d}: {participant.score:5.1f} {participant.elo:4d} {participant.pretty_name:<40}"
         )
 
 
