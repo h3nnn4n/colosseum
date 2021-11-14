@@ -75,6 +75,9 @@ class World:
 
     @property
     def state(self):
+        self._update_bases()
+        self._update_actors()
+
         return {
             "foods": self.foods_state,
             "actors": self.actors_state,
@@ -95,8 +98,6 @@ class World:
 
     def update(self, agent_actions):
         self._update_food()
-        self._update_bases()
-        self._update_actors()
 
         # We shuffle to use as a tiebreaker when multiple agents are trying to
         # do the same thing at the same time
@@ -162,8 +163,10 @@ class World:
 
     # TODO: resolve collisions
     def move_actor(self, owner_id, actor_id, target):
-        # TODO: Handle actor not existing
         actor = self._get_actor(actor_id)
+
+        if not actor:
+            return
 
         # TODO: Ensure that the actor belongs to the owner
         actor.move(target)
@@ -172,7 +175,7 @@ class World:
         actor = self._get_actor(actor_id)
         food = self._get_food(food_id)
 
-        if not food:
+        if not food or not actor:
             return
 
         distance = object_distance(actor, food)
