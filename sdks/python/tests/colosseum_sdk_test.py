@@ -51,13 +51,13 @@ def test_first_food():
     assert isinstance(state.foods.first, Food)
 
 
-def test_actors_by_owner():
+def test_actors_owner_is():
     state = make_state(fixture_state_late)
     agent_ids = state.agent_ids
 
-    assert state.actors.by_owner(agent_ids[0]).count == 1
-    assert state.actors.by_owner(agent_ids[1]).count == 1
-    assert state.actors.by_owner(agent_ids[2]).count == 5
+    assert state.actors.owner_is(agent_ids[0]).count == 1
+    assert state.actors.owner_is(agent_ids[1]).count == 1
+    assert state.actors.owner_is(agent_ids[2]).count == 5
 
 
 def test_actors_mine():
@@ -66,6 +66,14 @@ def test_actors_mine():
 
     assert state.actors.count == 7
     assert state.actors.mine.count == 5
+
+
+def test_actors_enemy():
+    agent_id = get_agent_ids(fixture_state_late)[2]
+    state = make_state(fixture_state_late, agent_id)
+
+    assert state.actors.count == 7
+    assert state.actors.enemy.count == 2
 
 
 def test_actors_get_by_id():
@@ -97,13 +105,13 @@ def test_actors_id_not_in():
     assert state.actors.mine.id_not_in([actor.id]).count == 4
 
 
-def test_bases_by_owner():
+def test_bases_owner_is():
     state = make_state(fixture_state_late)
     agent_ids = state.agent_ids
 
-    assert state.bases.by_owner(agent_ids[0]).count == 1
-    assert state.bases.by_owner(agent_ids[1]).count == 1
-    assert state.bases.by_owner(agent_ids[2]).count == 1
+    assert state.bases.owner_is(agent_ids[0]).count == 1
+    assert state.bases.owner_is(agent_ids[1]).count == 1
+    assert state.bases.owner_is(agent_ids[2]).count == 1
 
 
 def test_move():

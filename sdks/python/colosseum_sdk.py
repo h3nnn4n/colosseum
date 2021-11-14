@@ -143,8 +143,11 @@ class BaseCollection:
     def id_not_in(self, collection):
         return self.filter(lambda x: x.id not in collection)
 
-    def by_owner(self, owner_id):
+    def owner_is(self, owner_id):
         return self.filter(lambda x: x.owner_id == owner_id)
+
+    def owner_is_not(self, owner_id):
+        return self.filter(lambda x: x.owner_id != owner_id)
 
     def sort_by_distance_to(self, entity):
         records = sorted(self._records, key=lambda x: distance_between(x, entity))
@@ -161,8 +164,12 @@ class BaseCollection:
         return self.sort_by_distance_to(entity)[-1]
 
     @property
+    def enemy(self):
+        return self.owner_is_not(self._agent_id)
+
+    @property
     def mine(self):
-        return self.by_owner(self._agent_id)
+        return self.owner_is(self._agent_id)
 
     @property
     def count(self):
