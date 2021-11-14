@@ -1,3 +1,10 @@
+"""
+Colosseum SDK
+=============
+
+Python 3 SDK for colloseum, to allow quick development of agents without
+worrying about implementation details.
+"""
 import json
 import logging
 import sys
@@ -10,6 +17,10 @@ FOOD_COST_TO_MAKE_BASE = 500
 
 
 class BaseEntity:
+    """
+    All entity (objects in the game) inherit from this. It contains an ID and a position
+    """
+
     def __init__(self, entity):
         self._position = entity["position"]
         self._id = entity["id"]
@@ -23,6 +34,11 @@ class BaseEntity:
         return self._id
 
     def distance_to(self, entity):
+        """
+        Returns the (euclidian) distance between this and another entity. The
+        `entity` param can be a tuple or list of X coordinated, a dict that has
+        a key named `position` or a python object with a `position` property.
+        """
         return distance_between(self, entity)
 
 
@@ -351,6 +367,9 @@ def send_commands(data):
 
 
 def get_state():
+    """
+    Reads a line from stdin, parses it from json and returns the result.
+    """
     state_raw = sys.stdin.readline()
     state_data = json.loads(state_raw)
     return state_data
