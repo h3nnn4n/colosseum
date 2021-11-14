@@ -68,6 +68,35 @@ def test_actors_mine():
     assert state.actors.mine.count == 5
 
 
+def test_actors_get_by_id():
+    agent_id = get_agent_ids(fixture_state_late)[2]
+    state = make_state(fixture_state_late, agent_id)
+
+    actor = state.actors.mine.first
+
+    assert state.actors.get_by_id(actor.id) == actor
+
+
+def test_actors_id_in():
+    agent_id = get_agent_ids(fixture_state_late)[2]
+    state = make_state(fixture_state_late, agent_id)
+
+    actor = state.actors.mine.first
+
+    assert state.actors.mine.count == 5
+    assert state.actors.mine.id_in([actor.id]).count == 1
+
+
+def test_actors_id_not_in():
+    agent_id = get_agent_ids(fixture_state_late)[2]
+    state = make_state(fixture_state_late, agent_id)
+
+    actor = state.actors.mine.first
+
+    assert state.actors.mine.count == 5
+    assert state.actors.mine.id_not_in([actor.id]).count == 4
+
+
 def test_bases_by_owner():
     state = make_state(fixture_state_late)
     agent_ids = state.agent_ids

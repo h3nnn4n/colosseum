@@ -132,6 +132,17 @@ class BaseCollection:
         filtered_records = [r for r in self._records if filter_function(r)]
         return self.__class__([], self._agent_id).__inject(filtered_records)
 
+    def get_by_id(self, id):
+        for r in self._records:
+            if r.id == id:
+                return r
+
+    def id_in(self, collection):
+        return self.filter(lambda x: x.id in collection)
+
+    def id_not_in(self, collection):
+        return self.filter(lambda x: x.id not in collection)
+
     def by_owner(self, owner_id):
         return self.filter(lambda x: x.owner_id == owner_id)
 

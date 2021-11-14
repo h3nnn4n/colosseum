@@ -12,9 +12,6 @@ class Exterminator(Agent):
     def __init__(self):
         super(Exterminator, self).__init__(agent_name=AGENT_NAME)
 
-    def post_state_update(self):
-        pass
-
 
 def main():
     exterminator = Exterminator()
