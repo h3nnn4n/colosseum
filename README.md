@@ -30,6 +30,18 @@ and have fun.
 - Seasons
 - Downloadable replays
 
+# Running locally
+
+- Setup `poetry`
+- Run `poetry install`
+- `poetry run python tournament.py agents/foo agent/bar agent/qux` runs a
+  tournament with the given agents. The arguments must be a path to the agent
+  executable file.
+- `poetry run python skirmish.py agents/foo agent/bar` to run a skirmish with
+  the given agents.
+- `poetry run python renderer.py replay_file.jsonl` renders the replay of a
+  match (either from a skirmish or a tournament).
+
 # LICENSE
 
 All files in this repository are released under [MIT](LICENSE) license, unless
