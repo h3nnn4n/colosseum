@@ -98,22 +98,12 @@ class Base(ActionableEntity):
 
 class Actor(ActionableEntity):
     def move(self, target):
-        if isinstance(target, (tuple, list)):
-            pass
-        elif hasattr(target, "position"):
-            target = target.position
-        elif target.get("position"):
-            target = target.get("position")
+        target = get_position(target)
 
         self.set_next_action({"action": "move", "actor_id": self.id, "target": target})
 
     def take(self, target):
-        if isinstance(target, (str)):
-            pass
-        elif hasattr(target, "id"):
-            target = target.id
-        elif target.get("id"):
-            target = target.get("id")
+        target = get_id(target)
 
         self.set_next_action(
             {"action": "take_food", "actor_id": self.id, "food_id": target}
