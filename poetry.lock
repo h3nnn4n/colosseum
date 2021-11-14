@@ -257,6 +257,14 @@ optional = false
 python-versions = "*"
 
 [[package]]
+name = "simple-elo"
+version = "0.1.1"
+description = "Library implementing simple functions to implement the Elo system"
+category = "main"
+optional = false
+python-versions = ">=3.7,<4.0"
+
+[[package]]
 name = "toml"
 version = "0.10.2"
 description = "Python Library for Tom's Obvious, Minimal Language"
@@ -283,7 +291,7 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "3.10"
-content-hash = "c68118d8adce4c091a194ba5026dc81a3516d815c487b6a44372dfebd59fc172"
+content-hash = "a8faa1e7d5057886ae2a010a66650af9eafea1b2de9fb1b853f2d9a40fbd13d2"
 
 [metadata.files]
 atomicwrites = [
@@ -512,6 +520,10 @@ regex = [
     {file = "regex-2021.11.10-cp39-cp39-win32.whl", hash = "sha256:3b5df18db1fccd66de15aa59c41e4f853b5df7550723d26aa6cb7f40e5d9da5a"},
     {file = "regex-2021.11.10-cp39-cp39-win_amd64.whl", hash = "sha256:83ee89483672b11f8952b158640d0c0ff02dc43d9cb1b70c1564b49abe92ce29"},
     {file = "regex-2021.11.10.tar.gz", hash = "sha256:f341ee2df0999bfdf7a95e448075effe0db212a59387de1a70690e4acb03d4c6"},
+]
+simple-elo = [
+    {file = "simple-elo-0.1.1.tar.gz", hash = "sha256:817f60a5efafd930746f03fec04be01243a093427f405d690145363bc021c58b"},
+    {file = "simple_elo-0.1.1-py3-none-any.whl", hash = "sha256:fee8da75eb2a741fcea3c1c8fee71be731c52575236720bc1c248c5f2347c350"},
 ]
 toml = [
     {file = "toml-0.10.2-py2.py3-none-any.whl", hash = "sha256:806143ae5bfb6a3c6e736a764057db0e6a0e05e338b5630894a5f779cabb4f9b"},

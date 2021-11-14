@@ -10,6 +10,7 @@ python = "3.10"
 numpy = "^1.21.4"
 pexpect = "^4.8.0"
 pygame = "^2.1.0"
+simple-elo = "^0.1.1"
 
 [tool.poetry.dev-dependencies]
 black = "^21.10b0"

@@ -4,6 +4,8 @@ import itertools
 from collections import defaultdict
 from pathlib import Path
 
+from simple_elo import compute_updated_ratings
+
 from colosseum.games.food_catcher.game import World
 
 from .match import match
@@ -27,8 +29,15 @@ class TournamentResult:
 
     @property
     def rankings(self):
+        return self._rankings_by("score")
+
+    @property
+    def elo_rankings(self):
+        return self._rankings_by("elo")
+
+    def _rankings_by(self, key):
         ranked_participans = sorted(
-            self.participants, key=lambda x: x.score, reverse=True
+            self.participants, key=lambda x: getattr(x, key), reverse=True
         )
         return {
             rank: participant for rank, participant in enumerate(ranked_participans)
@@ -49,13 +58,25 @@ class Game:
 
         if self.has_winner:
             winner = self._get_player_by_agent_path(self.rankings[0]["agent_path"])
-            loser = self._get_player_by_agent_path(self.rankings[0]["agent_path"])
+            loser = self._get_player_by_agent_path(self.rankings[1]["agent_path"])
             winner.win()
             loser.lose()
+
+            self._update_elo(winner, loser, 1)
 
         if self.is_draw:
             for player in self._players:
                 player.draw()
+
+            self._update_elo(*self._players, 0.5)
+
+    def _update_elo(self, player1, player2, result):
+        elos = {player1.pretty_name: player1.elo, player2.pretty_name: player2.elo}
+        match_result = {(player1.pretty_name, player2.pretty_name): result}
+        updated_elos = compute_updated_ratings(elos, match_result)
+
+        player1._update_elo(updated_elos[player1.pretty_name])
+        player2._update_elo(updated_elos[player2.pretty_name])
 
     @property
     def n_players(self):
@@ -96,7 +117,7 @@ class Participant:
         self.loses = 0
         self.draws = 0
         self.score = 0
-        self.elo = INITIAL_ELO
+        self._elo = INITIAL_ELO
 
     def win(self):
         self.wins += 1
@@ -108,6 +129,13 @@ class Participant:
     def draws(self):
         self.draws += 0
         self.score += 0.5
+
+    def _update_elo(self, elo):
+        self._elo = elo
+
+    @property
+    def elo(self):
+        return self._elo
 
     @property
     def pretty_name(self):
