@@ -30,7 +30,7 @@ class Exterminator(Agent):
 
         for actor in idle_actors:
             what = self.what_to_spawn_next()
-            logging.info(f"addled a {what}")
+            logging.info(f"added a {what}")
             if what == "killer":
                 self.killers.add(actor.id)
             if what == "gatherer":
