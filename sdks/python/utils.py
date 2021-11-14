@@ -33,3 +33,12 @@ def get_position(entity):
         return entity.position
     elif entity.get("position"):
         return entity.get("position")
+
+
+def get_id(entity):
+    if isinstance(entity, (str)):
+        return entity
+    elif hasattr(entity, "id"):
+        return entity.id
+    elif entity.get("id"):
+        return entity.get("id")

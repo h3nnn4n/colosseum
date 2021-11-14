@@ -2,7 +2,7 @@ import json
 import logging
 import sys
 
-from .utils import distance_between, get_internal_id, get_position
+from .utils import distance_between, get_id, get_internal_id, get_position
 
 
 FOOD_COST_TO_SPAWN_ACTOR = 100
@@ -50,6 +50,10 @@ class ActionableEntity(BaseEntity):
     @property
     def owner_id(self):
         return self._owner_id
+
+    @property
+    def food(self):
+        return self._food
 
     @property
     def health(self):
@@ -116,6 +120,7 @@ class Actor(ActionableEntity):
         )
 
     def deposit_food(self, target):
+        target = get_id(target)
         self.set_next_action(
             {"action": "deposit_food", "actor_id": self.id, "base_id": target}
         )
