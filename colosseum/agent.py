@@ -77,3 +77,7 @@ class Agent:
         except Exception as e:
             print(e)
             print(actions_raw)
+
+    @property
+    def agent_path(self):
+        return self._agent_path
