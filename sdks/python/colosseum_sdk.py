@@ -22,6 +22,15 @@ class BaseEntity:
     """
 
     def __init__(self, entity):
+        """
+        Initializes an entity from a dict, typically parsed from a json blob from colosseum.
+
+        Parameters
+        ---------
+        entity
+            A dict describing the entity. Must contain at least a `position`
+            and an `id` key to be valid.
+        """
         self._position = entity["position"]
         self._id = entity["id"]
 
