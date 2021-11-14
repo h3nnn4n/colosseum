@@ -5,9 +5,14 @@ from .fixtures import fixture_state_late
 
 
 def make_state(fixture):
-    state_data = json.loads(fixture)
-    state = State(state_data)
+    world_state = json.loads(fixture)
+    state = State(world_state["world_state"])
     return state
+
+
+def test_empty():
+    state = make_state(fixture_state_late)
+    assert not state.empty
 
 
 def test_actors():

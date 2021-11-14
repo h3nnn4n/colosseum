@@ -54,6 +54,7 @@ class Manager:
         world_state = self.world.state
         world_state["epoch"] = self._tick
         world_state["max_epoch"] = self._number_of_ticks
+        world_state["agent_ids"] = [agent.id for agent in self.agents]
 
         for agent in self.agents:
             agent.update_state(world_state)

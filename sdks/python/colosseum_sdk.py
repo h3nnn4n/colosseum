@@ -169,9 +169,9 @@ class Foods(BaseCollection):
 class State:
     def __init__(self, state):
         self._state = state
-        self._actors = Actors(state.get("world_state", {}).get("actors", []))
-        self._bases = Bases(state.get("world_state", {}).get("bases", []))
-        self._foods = Foods(state.get("world_state", {}).get("foods", []))
+        self._actors = Actors(state.get("actors", []))
+        self._bases = Bases(state.get("bases", []))
+        self._foods = Foods(state.get("foods", []))
         self._agent_ids = state.get("agent_ids", [])
 
     @property
@@ -193,6 +193,10 @@ class State:
     @property
     def actions(self):
         return self.actors.actions + self.bases.actions
+
+    @property
+    def empty(self):
+        return self._state.get("actors") is None
 
 
 class Agent:
@@ -247,6 +251,14 @@ class Agent:
         self._next_response = {}
         self.state, self._raw_state = get_state()
         logging.debug("got state update")
+        self.common_handlers()
+
+        while self.state.empty:
+            logging.debug("found empty")
+            logging.debug(self._raw_state)
+            self.send_commands()
+            self.state, self._raw_state = get_state()
+            self.common_handlers()
 
     def send_commands(self):
         # If the simulation tells us to stop, we dont talk back. This can
@@ -266,7 +278,7 @@ class Agent:
 
 
 def send_commands(data):
-    logging.debug(data)
+    logging.debug(f"commands sent: {data}")
     data_encoded = json.dumps(data)
     sys.stdout.write(data_encoded + "\n")
     sys.stdout.flush()
