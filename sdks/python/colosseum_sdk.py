@@ -125,19 +125,24 @@ class Actor(ActionableEntity):
 
 
 class BaseCollection:
-    def __init__(self, records):
+    def __init__(self, records, agent_id):
         self._records = records
+        self._agent_id = agent_id
 
     def __inject(self, records):
         self._records.extend(records)
         return self
 
+    def filter(self, filter_function):
+        filtered_records = [r for r in self._records if filter_function(r)]
+        return self.__class__([], self._agent_id).__inject(filtered_records)
+
     def by_owner(self, owner_id):
         return self.filter(lambda x: x.owner_id == owner_id)
 
-    def filter(self, filter_function):
-        filtered_records = [r for r in self._records if filter_function(r)]
-        return self.__class__([]).__inject(filtered_records)
+    @property
+    def mine(self):
+        return self.by_owner(self._agent_id)
 
     @property
     def count(self):
@@ -159,29 +164,29 @@ class BaseCollection:
 
 
 class Actors(BaseCollection):
-    def __init__(self, actors):
+    def __init__(self, actors, agent_id):
         records = [Actor(actor) for actor in actors]
-        super(Actors, self).__init__(records)
+        super(Actors, self).__init__(records, agent_id)
 
 
 class Bases(BaseCollection):
-    def __init__(self, bases):
+    def __init__(self, bases, agent_id):
         records = [Base(base) for base in bases]
-        super(Bases, self).__init__(records)
+        super(Bases, self).__init__(records, agent_id)
 
 
 class Foods(BaseCollection):
-    def __init__(self, foods):
+    def __init__(self, foods, agent_id):
         records = [Food(food) for food in foods]
-        super(Foods, self).__init__(records)
+        super(Foods, self).__init__(records, agent_id)
 
 
 class State:
-    def __init__(self, state):
+    def __init__(self, state, owner_id):
         self._state = state
-        self._actors = Actors(state.get("actors", []))
-        self._bases = Bases(state.get("bases", []))
-        self._foods = Foods(state.get("foods", []))
+        self._actors = Actors(state.get("actors", []), owner_id)
+        self._bases = Bases(state.get("bases", []), owner_id)
+        self._foods = Foods(state.get("foods", []), owner_id)
         self._agent_ids = state.get("agent_ids", [])
 
     @property
@@ -259,7 +264,8 @@ class Agent:
     def read_state(self):
         logging.debug("waiting state update")
         self._next_response = {}
-        self.state, self._raw_state = get_state()
+        self._raw_state = get_state()
+        self._update_state(self._raw_state)
         logging.debug("got state update")
         self.common_handlers()
 
@@ -267,8 +273,11 @@ class Agent:
             logging.debug("found empty")
             logging.debug(self._raw_state)
             self.send_commands()
-            self.state, self._raw_state = get_state()
+            self._raw_state = get_state()
+            self._update_state(self._raw_state)
             self.common_handlers()
+
+        self.post_state_update()
 
     def send_commands(self):
         # If the simulation tells us to stop, we dont talk back. This can
@@ -286,6 +295,9 @@ class Agent:
 
         send_commands(payload)
 
+    def _update_state(self, raw_state):
+        self.state = State(raw_state, self.agent_id)
+
 
 def send_commands(data):
     logging.debug(f"commands sent: {data}")
@@ -297,5 +309,4 @@ def send_commands(data):
 def get_state():
     state_raw = sys.stdin.readline()
     state_data = json.loads(state_raw)
-    state = State(state_data)
-    return state, state_data
+    return state_data

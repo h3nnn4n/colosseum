@@ -4,10 +4,16 @@ from ..colosseum_sdk import Actor, Base, Food, State
 from .fixtures import fixture_state_late
 
 
-def make_state(fixture):
+def make_state(fixture, agent_id=None):
     world_state = json.loads(fixture)
-    state = State(world_state["world_state"])
+    state = State(world_state["world_state"], agent_id)
     return state
+
+
+def get_agent_ids(fixture):
+    world_state = json.loads(fixture)
+    state = State(world_state["world_state"], None)
+    return state.agent_ids
 
 
 def test_empty():
@@ -52,6 +58,14 @@ def test_actors_by_owner():
     assert state.actors.by_owner(agent_ids[0]).count == 1
     assert state.actors.by_owner(agent_ids[1]).count == 1
     assert state.actors.by_owner(agent_ids[2]).count == 5
+
+
+def test_actors_mine():
+    agent_id = get_agent_ids(fixture_state_late)[2]
+    state = make_state(fixture_state_late, agent_id)
+
+    assert state.actors.count == 7
+    assert state.actors.mine.count == 5
 
 
 def test_bases_by_owner():
