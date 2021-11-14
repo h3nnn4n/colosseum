@@ -152,11 +152,8 @@ class World:
                 self.spawn(owner_id, base_id)
 
             if action_type == "attack":
-                base_id = action.get("base_id")
-                target_actor_id = action.get("target_actor_id")
-                self.attack(
-                    owner_id, actor_id, base_id=base_id, target_actor_id=target_actor_id
-                )
+                target = action.get("target")
+                self.attack(owner_id, actor_id, target)
 
             if action_type == "make_base":
                 self.make_base(owner_id, actor_id)
@@ -221,15 +218,9 @@ class World:
         actor.heal(heal_amount)
         base.drain_food(heal_amount)
 
-    def attack(self, owner_id, actor_id, base_id=None, target_actor_id=None):
+    def attack(self, owner_id, actor_id, target_id):
         actor = self._get_actor(actor_id)
-        if base_id and not target_actor_id:
-            target = self._get_base(base_id)
-        elif target_actor_id and not base_id:
-            target = self._get_actor(target_actor_id)
-        else:
-            # FIXME: Figure what to do?
-            pass
+        target = self._get_base(target_id) or self._get_actor(target_id)
 
         if not actor or not target:
             return

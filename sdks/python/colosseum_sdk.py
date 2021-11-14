@@ -97,6 +97,13 @@ class Base(ActionableEntity):
 
 
 class Actor(ActionableEntity):
+    def attack(self, target):
+        target = get_id(target)
+
+        self.set_next_action(
+            {"action": "attack", "actor_id": self.id, "target": target}
+        )
+
     def move(self, target):
         target = get_position(target)
 
