@@ -65,43 +65,46 @@ def main():
 
                     my_actors[actor["id"]].update(actor)
 
-                actor = list(my_actors.values())[0]
+                actor = next((x for x in my_actors.values()), None)
 
                 foods = state.get("foods")
                 bases = [
                     base for base in state.get("bases") if base["owner_id"] == AGENT_ID
                 ]
-                food = foods[0]
-                base = bases[0]
 
-                distance_to_food = object_distance(actor, food)
-                distance_to_base = object_distance(actor, base)
-                food_position = np.array(food.get("position"))
-                base_position = np.array(base.get("position"))
+                if foods and bases and actor:
+                    food = foods[0]
+                    base = bases[0]
+                    distance_to_food = object_distance(actor, food)
+                    food_position = np.array(food.get("position"))
 
-                if (
-                    actor["state"] == "take_food"
-                    and actor["food"] > 100
-                    and distance_to_food > 1
-                ):
-                    actor["state"] = "deposit_food"
+                    if base:
+                        distance_to_base = object_distance(actor, base)
+                        base_position = np.array(base.get("position"))
 
-                logging.info(
-                    f"actor {actor['id']} has state {actor['state']} food {actor['food']}"
-                )
-                if actor["state"] == "deposit_food":
-                    if distance_to_base <= 0.1 and actor["food"] > 0:
-                        actions.append(deposit_food(actor["id"], base["id"]))
-                    elif distance_to_base <= 0.1:
-                        actor["state"] = "take_food"
-                    else:
-                        actions.append(move(actor["id"], base_position))
+                    if (
+                        actor["state"] == "take_food"
+                        and actor["food"] > 100
+                        and distance_to_food > 1
+                    ):
+                        actor["state"] = "deposit_food"
 
-                if actor["state"] == "take_food":
-                    if distance_to_food < 1:
-                        actions.append(take_food(actor["id"], food["id"]))
-                    else:
-                        actions.append(move(actor["id"], food_position))
+                    logging.info(
+                        f"actor {actor['id']} has state {actor['state']} food {actor['food']}"
+                    )
+                    if actor["state"] == "deposit_food":
+                        if distance_to_base <= 0.1 and actor["food"] > 0:
+                            actions.append(deposit_food(actor["id"], base["id"]))
+                        elif distance_to_base <= 0.1:
+                            actor["state"] = "take_food"
+                        else:
+                            actions.append(move(actor["id"], base_position))
+
+                    if actor["state"] == "take_food":
+                        if distance_to_food < 1:
+                            actions.append(take_food(actor["id"], food["id"]))
+                        else:
+                            actions.append(move(actor["id"], food_position))
 
             if AGENT_ID:
                 response["agent_id"] = AGENT_ID
