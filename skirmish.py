@@ -5,24 +5,17 @@ import logging
 import sys
 
 from colosseum.games.food_catcher.game import World
-from colosseum.manager import Manager
+from colosseum.match import match
 from colosseum.utils import get_internal_id
 
 
 def main():
     agent_paths = sys.argv[1:]
 
-    logging.basicConfig(filename=f"game_{get_internal_id()}.log", level=logging.INFO)
+    logging.basicConfig(filename=f"match_{get_internal_id()}.log", level=logging.INFO)
 
     world = World()
-
-    manager = Manager(world, agent_paths)
-    manager.start()
-    manager.ping()
-    manager.loop()
-    manager.stop()
-
-    scores = manager.scores
+    scores = match(world, agent_paths)
 
     print(json.dumps(scores))
 
