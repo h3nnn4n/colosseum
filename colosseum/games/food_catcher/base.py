@@ -49,4 +49,6 @@ class Base:
             "id": self.id,
             "owner_id": self.owner_id,
             "food": self.food,
+            "health": self.health,
+            "max_health": self.max_health,
         }
