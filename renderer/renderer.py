@@ -14,19 +14,19 @@ def load_image(name):
 
 
 def get_food_sprite():
-    image = load_image("./renderer/sprites/food.png")
+    image = load_image("./sprites/food.png")
     image = pygame.transform.scale(image, (20, 30))
     return image
 
 
 def get_base_sprite():
-    image = load_image("./renderer/sprites/base.png")
+    image = load_image("./sprites/base.png")
     image = pygame.transform.scale(image, (20, 20))
     return image
 
 
 def get_actor_sprite():
-    image = load_image("./renderer/sprites/actor.png")
+    image = load_image("./sprites/actor.png")
     image = pygame.transform.scale(image, (20, 20))
     return image
 

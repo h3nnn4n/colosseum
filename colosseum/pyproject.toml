@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "colosseum"
+version = "0.1.0"
+description = "An AI arena, where agents fight each other"
+authors = ["h3nnn4n <colosseum@h3nnn4n.me>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "3.10"
+simple-elo = "^0.1.1"
+numpy = "^1.21.4"
+pexpect = "^4.8.0"
+
+[tool.poetry.dev-dependencies]
+pytest = "^6.2.5"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

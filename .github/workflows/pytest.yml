@@ -4,6 +4,10 @@ on: push
 
 jobs:
   pytest:
+    strategy:
+      matrix:
+        folders: [colosseum/, agents/, sdks/python/]
+
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -19,7 +23,11 @@ jobs:
         source $HOME/.poetry/env
 
     - name: Install project deps
-      run: poetry install
+      run: |
+        cd ${{ matrix.folders }}
+        poetry install
 
     - name: Run tests
-      run: poetry run pytest
+      run: |
+        cd ${{ matrix.folders }}
+        poetry run pytest
