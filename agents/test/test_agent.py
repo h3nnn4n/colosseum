@@ -5,11 +5,11 @@ import pytest
 
 
 agent_paths = [
-    "./agents/dummy_agent.py",
-    "./agents/food_catcher_take_first_food.py",
-    "./agents/food_catcher_take_nearest_food.py",
-    "./agents/food_catcher_replicator.py",
-    "./agents/food_catcher_exterminator.py",
+    "./dummy_agent.py",
+    "./food_catcher_take_first_food.py",
+    "./food_catcher_take_nearest_food.py",
+    "./food_catcher_replicator.py",
+    "./food_catcher_exterminator.py",
 ]
 
 
