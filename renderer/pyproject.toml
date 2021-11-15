@@ -2,7 +2,7 @@
 name = "renderer"
 version = "0.1.0"
 description = "A renderer for colosseum games"
-authors = ["h3nnn4n <uber.renan@gmail.com>"]
+authors = ["h3nnn4n <colosseum@h3nnn4n.me>"]
 license = "MIT"
 
 [tool.poetry.dependencies]

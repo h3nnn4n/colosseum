@@ -2,7 +2,7 @@
 name = "colosseum"
 version = "0.1.0"
 description = "An AI arena, where agents fight each other"
-authors = ["h3nnn4n <uber.renan@gmail.com>"]
+authors = ["h3nnn4n <colosseum@h3nnn4n.me>"]
 license = "MIT"
 
 [tool.poetry.dependencies]
