@@ -19,13 +19,16 @@ jobs:
         source $HOME/.poetry/env
 
     - name: Install project deps
-      run: poetry install
-
-    - name: Run tests
       run: |
-        poetry run python skirmish.py \
-          agents/dummy_agent.py \
-          agents/food_catcher_exterminator.py \
-          agents/food_catcher_replicator.py \
-          agents/food_catcher_take_first_food.py \
-          agents/food_catcher_take_nearest_food.py
+        cd colosseum
+        poetry install
+
+    - name: Run smoke test
+      run: |
+        cd colosseum
+        poetry run python ../skirmish.py \
+          ../agents/dummy_agent.py \
+          ../agents/food_catcher_exterminator.py \
+          ../agents/food_catcher_replicator.py \
+          ../agents/food_catcher_take_first_food.py \
+          ../agents/food_catcher_take_nearest_food.py
