@@ -1,8 +1,15 @@
+import itertools
 import json
 import os
+import urllib
+from pathlib import Path
 
 import requests
 from dotenv import load_dotenv
+
+from colosseum.games.food_catcher.game import World
+
+from .match import match
 
 
 load_dotenv()
@@ -10,29 +17,89 @@ load_dotenv()
 
 API_URL = os.environ.get("API_URL")
 API_TOKEN = os.environ.get("API_TOKEN")
+AGENT_FOLDER = "agents_tmp"
 
 
 class Participant:
-    def __init__(self, data):
-        self.wins = 0
-        self.loses = 0
-        self.draws = 0
-        self.score = 0
-        self.elo = 0
+    def __init__(self, id):
+        # FIXME: Doing an (rest) api call during init might not be a good idea
+        data = get_participant(id)
+        self.id = id
+        self.name = data["name"]
+        self._ran = False
+        self._agent_path = None
+        self._download_url = data["file"]
 
-    def win(self):
-        self.wins += 1
-        self.score += 1
+        self.wins = data["wins"]
+        self.loses = data["loses"]
+        self.draws = data["draws"]
+        self.score = data["score"]
+        self.elo = data["elo"]
+        self.agent_path
 
-    def lose(self):
-        self.loses += 1
+    @property
+    def agent_path(self):
+        if self._ran:
+            return self._agent_path
 
-    def draws(self):
-        self.draws += 0
-        self.score += 0.5
+        self._ran = True
+        Path(os.path.join(AGENT_FOLDER, self.name)).mkdir(parents=True, exist_ok=True)
 
-    def _update_elo(self, elo):
-        self.elo = elo
+        original_name = urllib.parse.urlparse(self._download_url).path.split("/")[-1]
+        self._agent_path = os.path.join(AGENT_FOLDER, self.name, original_name)
+
+        print(f"downloading agent into {self._agent_path}")
+        urllib.request.urlretrieve(self._download_url, self._agent_path)
+
+
+class Game:
+    def __init__(self, *args):
+        self.players = args
+        self.result = None
+        self.result_by_player = {}
+
+    @property
+    def n_players(self):
+        return len(self.players)
+
+    @property
+    def rankings(self):
+        return sorted(self._result, key=lambda x: x["score"], reverse=True)
+
+    @property
+    def is_draw(self):
+        return self.rankings[0]["score"] == self.rankings[1]["score"]
+
+    @property
+    def has_winner(self):
+        return self.rankings[0]["score"] > self.rankings[1]["score"]
+
+    @property
+    def winner(self):
+        return self._get_player_by_agent_path(self.rankings[0]["agent_path"])
+
+
+class Tournament:
+    def __init__(self, id):
+        data = get_tournament(id)
+        self.id = id
+        self.mode = "ROUND_ROBIN"
+        self.participant_ids = data["participants"]
+        self.participants = [
+            Participant(participant_id) for participant_id in self.participant_ids
+        ]
+
+    def run(self):
+        n_rounds = 1
+        n_participants_per_round = 2
+
+        for n_round in range(n_rounds):
+            for agent_bracket in itertools.combinations(
+                self.participants, n_participants_per_round
+            ):
+                world = World()
+                game = Game(*list(agent_bracket))
+                game.result(match(world, [a.agent_path for a in agent_bracket]))
 
 
 def get_tournament(tournament_id):
@@ -53,18 +120,6 @@ def get_participant(participant_id):
     return json.loads(response.text)
 
 
-def make_participant(participant_id):
-    data = get_participant(participant_id)
-    return Participant(data)
-
-
 def online_tournament(tournament_id):
-    tournament = get_tournament(tournament_id)
-    participant_ids = tournament["participants"]
-    participants = [
-        make_participant(participant_id) for participant_id in participant_ids
-    ]
-    __import__("pprint").pprint(tournament)
-
-    for p in participants:
-        __import__("pprint").pprint(p)
+    tournament = Tournament(tournament_id)
+    tournament.run()
