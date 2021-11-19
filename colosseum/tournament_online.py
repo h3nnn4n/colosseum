@@ -1,6 +1,7 @@
 import itertools
 import json
 import os
+import shutil
 import urllib
 from pathlib import Path
 
@@ -43,10 +44,14 @@ class Participant:
             return self._agent_path
 
         self._ran = True
-        Path(os.path.join(AGENT_FOLDER, self.name)).mkdir(parents=True, exist_ok=True)
+        base_path = os.path.join(AGENT_FOLDER, self.name)
+        if os.path.exists(base_path):
+            shutil.rmtree(base_path)
+
+        Path(base_path).mkdir(parents=True, exist_ok=True)
 
         original_name = urllib.parse.urlparse(self._download_url).path.split("/")[-1]
-        self._agent_path = os.path.join(AGENT_FOLDER, self.name, original_name)
+        self._agent_path = os.path.join(base_path, original_name)
 
         print(f"downloading agent into {self._agent_path}")
         urllib.request.urlretrieve(self._download_url, self._agent_path)
