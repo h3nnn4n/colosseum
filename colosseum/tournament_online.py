@@ -77,9 +77,39 @@ class Participant:
 
 class Game:
     def __init__(self, *args):
-        self.players = args
-        self.result = None
-        self.result_by_player = {}
+        self._players = args
+        self._result = None
+        self._result_by_player = {}
+
+    def set_results(self, result):
+        self._result = result
+
+        if self.n_players != 2:
+            raise RuntimeError("only pairwise matches are supported at this point")
+
+        if self.has_winner:
+            winner = self._get_player_by_agent_path(self.rankings[0]["agent_path"])
+            loser = self._get_player_by_agent_path(self.rankings[1]["agent_path"])
+            self._register_match([winner, loser], 1)
+
+        if self.is_draw:
+            self._register_match(self._players, 0.5)
+
+    def _register_match(self, participants, result):
+        data = {
+            "participants": [p.id for p in participants],
+            "result": result,
+            "ran": True,
+        }
+        requests.post(
+            API_URL + "matches/",
+            data=data,
+            headers={"authorization": f"token {API_TOKEN}"},
+        )
+
+    @property
+    def players(self):
+        return self._players
 
     @property
     def n_players(self):
@@ -101,6 +131,11 @@ class Game:
     def winner(self):
         return self._get_player_by_agent_path(self.rankings[0]["agent_path"])
 
+    def _get_player_by_agent_path(self, agent_path):
+        for player in self._players:
+            if player.agent_path == agent_path:
+                return player
+
 
 class Tournament:
     def __init__(self, id):
@@ -113,6 +148,7 @@ class Tournament:
         ]
 
     def run(self):
+        print("\nstarting tournament\n")
         n_rounds = 1
         n_participants_per_round = 2
 
@@ -120,9 +156,10 @@ class Tournament:
             for agent_bracket in itertools.combinations(
                 self.participants, n_participants_per_round
             ):
+                print(f"running game with {list([a.name for a in agent_bracket])}")
                 world = World()
                 game = Game(*list(agent_bracket))
-                game.result(match(world, [a.agent_path for a in agent_bracket]))
+                game.set_results(match(world, [a.agent_path for a in agent_bracket]))
 
 
 def get_tournament(tournament_id):
