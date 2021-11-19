@@ -10,6 +10,8 @@ python = "3.10"
 simple-elo = "^0.1.1"
 numpy = "^1.21.4"
 pexpect = "^4.8.0"
+requests = "^2.26.0"
+python-dotenv = "^0.19.2"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.5"
