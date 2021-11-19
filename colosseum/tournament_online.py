@@ -163,18 +163,18 @@ class Tournament:
 
 
 def get_tournament(tournament_id):
-    print("fetching tournament")
+    print(f"fetching tournament {tournament_id}")
     response = requests.get(
-        API_URL + f"tournaments/{tournament_id}",
+        API_URL + f"tournaments/{tournament_id}/",
         headers={"authorization": f"token {API_TOKEN}"},
     )
     return json.loads(response.text)
 
 
 def get_participant(participant_id):
-    print(f"fetching agent {participant_id}")
+    print(f"fetching agent {participant_id}/")
     response = requests.get(
-        API_URL + f"agents/{participant_id}",
+        API_URL + f"agents/{participant_id}/",
         headers={"authorization": f"token {API_TOKEN}"},
     )
     return json.loads(response.text)
