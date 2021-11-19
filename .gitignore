@@ -2,3 +2,5 @@ __pycache__
 
 *.log
 *.jsonl
+
+.DS_Store
