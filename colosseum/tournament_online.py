@@ -2,6 +2,7 @@ import itertools
 import json
 import os
 import shutil
+import tarfile
 import urllib
 from pathlib import Path
 
@@ -51,10 +52,27 @@ class Participant:
         Path(base_path).mkdir(parents=True, exist_ok=True)
 
         original_name = urllib.parse.urlparse(self._download_url).path.split("/")[-1]
-        self._agent_path = os.path.join(base_path, original_name)
+        agent_file = os.path.join(base_path, original_name)
 
-        print(f"downloading agent into {self._agent_path}")
-        urllib.request.urlretrieve(self._download_url, self._agent_path)
+        print(f"downloading agent into {agent_file}")
+        urllib.request.urlretrieve(self._download_url, agent_file)
+
+        # FIXME: This could logic could be better structured
+        # FIXME: Detect file format
+        # FIXME: Autodetect entrypoint
+        file = tarfile.open(agent_file)
+        file.extractall(base_path)
+        file.close()
+
+        # FIXME: We need to support other agent types
+        for dirpath, subdirs, files in os.walk(base_path):
+            for file in files:
+                if file == "agent.py":
+                    self._agent_path = os.path.join(dirpath, file)
+                    print(f"found entrypoint at {self._agent_path}")
+                    return
+
+        print(f"entrypoint not found for {self.name} / {self.id}")
 
 
 class Game:
