@@ -96,16 +96,21 @@ class Game:
             self._register_match(self._players, 0.5)
 
     def _register_match(self, participants, result):
-        data = {
+        payload = {
             "participants": [p.id for p in participants],
             "result": result,
             "ran": True,
         }
-        requests.post(
+        response = requests.post(
             API_URL + "matches/",
-            data=data,
+            json=payload,
             headers={"authorization": f"token {API_TOKEN}"},
         )
+
+        if response.status_code > 400:
+            print(
+                f"got error {response.status_code} when trying to register match: {response.body}"
+            )
 
     @property
     def players(self):
