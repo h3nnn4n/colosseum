@@ -98,7 +98,13 @@ class Game:
 
     def _register_match(self, participants, result):
         if self._match:
-            payload = {"result": result, "ran": True}
+            payload = {
+                "result": result,
+                "ran": True,
+                "participants": [p.id for p in participants],
+                "player1": participants[0].id,
+                "player2": participants[1].id,
+            }
             response = requests.patch(
                 API_URL + f"matches/{self._match['id']}/",
                 json=payload,
