@@ -31,6 +31,16 @@ def test_first_actor():
     assert isinstance(state.actors.first, Actor)
 
 
+def test_last_actor():
+    state = make_state(fixture_state_late)
+    assert isinstance(state.actors.last, Actor)
+
+
+def test_random_actor():
+    state = make_state(fixture_state_late)
+    assert isinstance(state.actors.random, Actor)
+
+
 def test_bases():
     state = make_state(fixture_state_late)
     assert len(state.bases) > 0

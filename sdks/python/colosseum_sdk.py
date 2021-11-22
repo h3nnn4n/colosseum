@@ -8,6 +8,7 @@ worrying about implementation details.
 import json
 import logging
 import sys
+from random import choice
 
 from .utils import distance_between, get_id, get_internal_id, get_position
 
@@ -523,6 +524,40 @@ class BaseCollection:
         """
         if self.count > 0:
             return self._records[0]
+
+        return None
+
+    @property
+    def last(self):
+        """
+        Returns the last object of a collection, if any. Last is definied as
+        the in the json blob used to communicate the world state to the Agent.
+        The order isn't guaranteed. The result of this method may change between
+        different simulation epochs.
+
+        Returns
+        -------
+        object
+            Returns the last object from the collection, if any, othewise
+            `None` is returned.
+        """
+        if self.count > 0:
+            return self._records[0]
+
+        return None
+
+    @property
+    def random(self):
+        """
+        Returns a random object from a collection, or None if it is empty.
+        Returns
+        -------
+        object
+            Returns a random object from a collection. If the collection is
+            empty, `None` is returned.
+        """
+        if self.count > 0:
+            return choice(self._records)
 
         return None
 
