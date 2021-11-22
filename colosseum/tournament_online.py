@@ -4,6 +4,7 @@ import os
 import shutil
 import tarfile
 import urllib
+import uuid
 from pathlib import Path
 
 import requests
@@ -19,7 +20,7 @@ load_dotenv()
 
 API_URL = os.environ.get("API_URL")
 API_TOKEN = os.environ.get("API_TOKEN")
-AGENT_FOLDER = "agents_tmp"
+AGENT_FOLDER = f"agents_tmp_{uuid.uuid4()}"
 
 
 class Participant:
