@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import itertools
 import sys
 from time import sleep, time
 
@@ -101,6 +102,11 @@ class Renderer:
         self.screen.fill(colors["white"])
 
         world_state = self.data["world_state"]
+        actions = list(
+            itertools.chain.from_iterable(
+                [x["actions"] for x in self.data["agent_actions"]]
+            )
+        )
         foods = world_state["foods"]
         actors = world_state["actors"]
         bases = world_state["bases"]
@@ -112,6 +118,26 @@ class Renderer:
         for actor in actors:
             position = np.array(actor["position"]) * self._scale
             self._draw_actor(position, actor["owner_id"])
+
+            for action in actions:
+                if action.get("actor_id") == actor["id"]:
+                    if action["action"] == "move":
+                        pygame.draw.line(
+                            self.screen,
+                            colors["gray"],
+                            np.array(actor["position"]) * self._scale,
+                            np.array(action["target"]) * self._scale,
+                            2,
+                        )
+                    if action["action"] == "attack":
+                        pygame.draw.line(
+                            self.screen,
+                            colors["red"],
+                            np.array(actor["position"]) * self._scale,
+                            np.array(self._get_object_position(action["target"]))
+                            * self._scale,
+                            4,
+                        )
 
         for food in foods:
             position = np.array(food["position"]) * self._scale
@@ -127,6 +153,17 @@ class Renderer:
         self._frame_timer = time()
 
         pygame.display.flip()
+
+    def _get_object_position(self, object_id):
+        objects = [
+            self.data["world_state"]["foods"],
+            self.data["world_state"]["actors"],
+            self.data["world_state"]["bases"],
+        ]
+
+        for obj in itertools.chain.from_iterable(objects):
+            if obj["id"] == object_id:
+                return obj["position"]
 
     def _text(self, text, position, antialias=True, color=(220, 230, 225)):
         text_surface = self.font.render(text, antialias, color)
