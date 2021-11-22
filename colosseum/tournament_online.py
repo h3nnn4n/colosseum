@@ -76,10 +76,11 @@ class Participant:
 
 
 class Game:
-    def __init__(self, *args):
+    def __init__(self, *args, match=None):
         self._players = args
         self._result = None
         self._result_by_player = {}
+        self._match = match
 
     def set_results(self, result):
         self._result = result
@@ -96,6 +97,19 @@ class Game:
             self._register_match(self._players, 0.5)
 
     def _register_match(self, participants, result):
+        if self._match:
+            payload = {"result": result, "ran": True}
+            response = requests.patch(
+                API_URL + f"matches/{self._match['id']}/",
+                json=payload,
+                headers={"authorization": f"token {API_TOKEN}"},
+            )
+            if response.status_code > 400:
+                print(
+                    f"got error {response.status_code} when trying to update match: {response.body}"
+                )
+            return
+
         payload = {
             "participants": [p.id for p in participants],
             "result": result,
@@ -167,6 +181,46 @@ class Tournament:
                 game.set_results(match(world, [a.agent_path for a in agent_bracket]))
 
 
+class MatchRunner:
+    def __init__(self):
+        pass
+
+    @classmethod
+    def run_next_match(cls):
+        next_match = get_next_match()
+        if not next_match.get("id"):
+            # This is usually a failure on the producer side. We just do nothing
+            return
+
+        match_data = get_match(next_match["id"])
+
+        participant_ids = match_data["participants"]
+        participants = [
+            Participant(participant_id) for participant_id in participant_ids
+        ]
+
+        world = World()
+        game = Game(*participants, match=match_data)
+        game.set_results(match(world, [a.agent_path for a in participants]))
+
+
+def get_next_match():
+    print("fetching next match")
+    response = requests.get(
+        API_URL + "next_match/", headers={"authorization": f"token {API_TOKEN}"}
+    )
+    return json.loads(response.text)
+
+
+def get_match(match_id):
+    print(f"fetching match {match_id}")
+    response = requests.get(
+        API_URL + f"matches/{match_id}/",
+        headers={"authorization": f"token {API_TOKEN}"},
+    )
+    return json.loads(response.text)
+
+
 def get_tournament(tournament_id):
     print(f"fetching tournament {tournament_id}")
     response = requests.get(
@@ -185,6 +239,10 @@ def get_participant(participant_id):
     return json.loads(response.text)
 
 
-def online_tournament(tournament_id):
-    tournament = Tournament(tournament_id)
-    tournament.run()
+def online_tournament(tournament_id=None):
+    if tournament_id:
+        tournament = Tournament(tournament_id)
+        tournament.run()
+    else:
+        while True:
+            MatchRunner.run_next_match()

@@ -6,5 +6,8 @@ from colosseum.tournament_online import online_tournament
 
 
 if __name__ == "__main__":
-    tournament_id = sys.argv[1]
-    online_tournament(tournament_id)
+    if len(sys.argv) > 1:
+        tournament_id = sys.argv[1]
+        online_tournament(tournament_id)
+    else:
+        online_tournament()
