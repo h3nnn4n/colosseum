@@ -23,7 +23,7 @@ class World:
 
         self.name = "food_catcher"
 
-        self._max_food_sources = 5
+        self._max_food_sources = 10
         self._eat_max_distance = 1
         self._deposit_max_distance = 0.15
         self._actor_radius = 0.45
