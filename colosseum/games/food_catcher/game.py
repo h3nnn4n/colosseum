@@ -32,6 +32,9 @@ class World:
         self._spawn_actor_cost = 100
         self._make_base_cost = 500
 
+        self._base_spawn_slots = []
+        self._set_base_spawn_slots()
+
         self._spawn_food()
 
         logging.info("food_catcher initialized")
@@ -43,8 +46,7 @@ class World:
 
         self.agents.add(agent.id)
 
-        x = uniform(0, self.width)
-        y = uniform(0, self.width)
+        x, y = self._get_base_spawn_slot()
 
         self._spawn_base(agent.id, (x, y))
         self._spawn_actor(agent.id, (x, y))
@@ -298,3 +300,17 @@ class World:
 
     def _get_base(self, id):
         return next((base for base in self.bases if base.id == id), None)
+
+    def _set_base_spawn_slots(self):
+        offset = 0.15
+        self._base_spawn_slots = [
+            [self.width * offset, self.height * offset],
+            [self.width - self.width * offset, self.height * offset],
+            [self.width * offset, self.height - self.height * offset],
+            [self.width - self.width * offset, self.height - self.height * offset],
+        ]
+
+    def _get_base_spawn_slot(self):
+        shuffle(self._base_spawn_slots)
+        position = self._base_spawn_slots.pop(0)
+        return position
