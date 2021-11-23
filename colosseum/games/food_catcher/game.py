@@ -54,10 +54,13 @@ class World:
         logging.info(f"agent {agent.id} registered")
 
     def _spawn_food(self):
-        self.foods = [
-            Food().set_position((uniform(0, self.width), uniform(0, self.height)))
-            for _ in range(self._max_food_sources)
-        ]
+        while len(self.foods) < self._max_food_sources:
+            x, y = (uniform(0, self.width), uniform(0, self.height))
+
+            self.foods.append(Food().set_position((x, y)))
+            self.foods.append(Food().set_position((self.width - x, y)))
+            self.foods.append(Food().set_position((x, self.height - y)))
+            self.foods.append(Food().set_position((self.width - x, self.height - y)))
 
     def _update_food(self):
         self.foods = [food for food in self.foods if not food.vanished]
@@ -65,10 +68,7 @@ class World:
         for food in self.foods:
             food.update()
 
-        if len(self.foods) < self._max_food_sources:
-            self.foods.append(
-                Food().set_position((uniform(0, self.width), uniform(0, self.height)))
-            )
+        self._spawn_food()
 
     def _update_actors(self):
         for i in range(len(self.actors)):
