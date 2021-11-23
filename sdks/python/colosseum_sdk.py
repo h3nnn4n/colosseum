@@ -746,6 +746,7 @@ class State:
         self._actors._update(new_state.get("actors", []))
         self._bases._update(new_state.get("bases", []))
         self._foods._update(new_state.get("foods", []))
+        self._state = new_state
 
 
 class Agent:
@@ -909,9 +910,10 @@ class Agent:
         same object instances. New entities are automatically created,
         and the ones that died are automatically removed.
         """
-        if not self.state:
+        if self.state:
+            self.state._update(raw_state)
+        else:
             self.state = State(raw_state, self.agent_id)
-        self.state._update(raw_state)
 
 
 def send_commands(data):

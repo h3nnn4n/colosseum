@@ -263,3 +263,15 @@ def test_update_keep_tag():
     assert state.foods.count == 1
     assert state.foods.first.id == "foobar"
     assert state.foods.first.tag == "foo"
+
+
+def test_update_empty():
+    agent_id = get_agent_ids(fixture_state_late)[2]
+    state = State({}, agent_id)
+
+    assert state.empty
+
+    new_state = {"actors": []}
+    state._update(new_state)
+
+    assert not state.empty
