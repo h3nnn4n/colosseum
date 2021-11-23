@@ -155,3 +155,87 @@ def test_foods_closest_and_farthest():
     farthest = state.foods.farthest_from((0, 0))
 
     assert closest.distance_to((0, 0)) < farthest.distance_to((0, 0))
+
+
+def test_update_delete_records():
+    state = make_state(fixture_state_late)
+
+    assert state.actors.count == 7
+    assert state.bases.count == 3
+    assert state.foods.count == 5
+
+    new_state = {"foods": [], "actors": [], "bases": []}
+
+    state._update(new_state)
+
+    assert state.actors.count == 0
+    assert state.bases.count == 0
+    assert state.foods.count == 0
+
+
+def test_update_create_food():
+    state = make_state(fixture_state_late)
+
+    assert state.foods.count == 5
+
+    new_state = {"foods": [{"id": "foobar", "position": [1, 2], "quantity": 50}]}
+
+    state._update(new_state)
+
+    assert state.foods.count == 1
+    assert state.foods.first.id == "foobar"
+    assert state.foods.first.position == [1, 2]
+
+
+def test_update_create_base():
+    return
+    state = make_state(fixture_state_late)
+
+    assert state.bases.count == 3
+
+    new_state = {"bases": [{"id": "spamegg", "position": [0, 1]}]}
+
+    state._update(new_state)
+
+    assert state.bases.count == 1
+    assert state.bases.first.id == "spamegg"
+    assert state.bases.first.position == [0, 1]
+
+
+def test_update_create_actor():
+    return
+    state = make_state(fixture_state_late)
+
+    assert state.actors.count == 7
+
+    new_state = {"actors": [{"id": "quxqax", "position": [2, 3]}]}
+
+    state._update(new_state)
+
+    assert state.actors.count == 1
+    assert state.actors.first.id == "quxqax"
+    assert state.actors.first.position == [2, 3]
+
+
+def test_update_food():
+    state = make_state(fixture_state_late)
+
+    assert state.foods.count == 5
+
+    new_state = {"foods": [{"id": "foobar", "position": [1, 2], "quantity": 50}]}
+
+    state._update(new_state)
+
+    assert state.foods.count == 1
+    assert state.foods.first.id == "foobar"
+    assert state.foods.first.quantity == 50
+    assert state.foods.first.position == [1, 2]
+
+    new_state = {"foods": [{"id": "foobar", "position": [2, 3], "quantity": 40}]}
+
+    state._update(new_state)
+
+    assert state.foods.count == 1
+    assert state.foods.first.id == "foobar"
+    assert state.foods.first.quantity == 40
+    assert state.foods.first.position == [2, 3]

@@ -61,6 +61,13 @@ class BaseEntity:
         """
         return distance_between(self, entity)
 
+    def _update(self, new_state):
+        for k, v in new_state.items():
+            if hasattr(self, f"_{k}"):
+                setattr(self, f"_{k}", v)
+            else:
+                setattr(self, k, v)
+
 
 class ActionableEntity(BaseEntity):
     def __init__(self, data):
@@ -278,6 +285,22 @@ class BaseCollection:
         self._records.extend(records)
         return self
 
+    def _update(self, new_state):
+        logging.debug(f"{new_state=}")
+        new_state_ids = set(x["id"] for x in new_state)
+
+        # Delete entities that doesn't exist anymore
+        self._records = [r for r in self._records if r.id in new_state_ids]
+
+        # Update existing entities and create new ones
+        for new_record_state in new_state:
+            record = self.get_by_id(new_record_state["id"])
+            if record:
+                record._update(new_record_state)
+            else:
+                new_record = self._base_record(new_record_state)
+                self._records.append(new_record)
+
     def filter(self, filter_function):
         """
         Parameters
@@ -296,6 +319,16 @@ class BaseCollection:
         """
         filtered_records = [r for r in self._records if filter_function(r)]
         return self.__class__([], self._agent_id).__inject(filtered_records)
+
+    @property
+    def ids(self):
+        """
+        Returns
+        -------
+        list[string]
+            Returns a list of ids from the records present in the collection.
+        """
+        return [x.id for x in self._records]
 
     def get_by_id(self, id):
         """
@@ -584,6 +617,7 @@ class Actors(BaseCollection):
     """
 
     def __init__(self, actors, agent_id):
+        self._base_record = Actor
         records = [Actor(actor) for actor in actors]
         super(Actors, self).__init__(records, agent_id)
 
@@ -594,6 +628,7 @@ class Bases(BaseCollection):
     """
 
     def __init__(self, bases, agent_id):
+        self._base_record = Base
         records = [Base(base) for base in bases]
         super(Bases, self).__init__(records, agent_id)
 
@@ -604,6 +639,7 @@ class Foods(BaseCollection):
     """
 
     def __init__(self, foods, agent_id):
+        self._base_record = Food
         records = [Food(food) for food in foods]
         super(Foods, self).__init__(records, agent_id)
 
@@ -698,6 +734,16 @@ class State:
             Returns `True` if :class:`State` has no data.
         """
         return self._state.get("actors") is None
+
+    def _update(self, new_state):
+        """
+        Apply changes from a new state on top of the existing entity
+        collections. Existing instances are kept, dead ones are removed and new
+        ones are created automatically.
+        """
+        self._actors._update(new_state.get("actors", []))
+        self._bases._update(new_state.get("bases", []))
+        self._foods._update(new_state.get("foods", []))
 
 
 class Agent:
@@ -856,7 +902,14 @@ class Agent:
         pass
 
     def _update_state(self, raw_state):
-        self.state = State(raw_state, self.agent_id)
+        """
+        Takes a new state and update the previous one, keeping the
+        same object instances. New entities are automatically created,
+        and the ones that died are automatically removed.
+        """
+        if not self.state:
+            self.state = State(raw_state, self.agent_id)
+        self.state._update(raw_state)
 
 
 def send_commands(data):
