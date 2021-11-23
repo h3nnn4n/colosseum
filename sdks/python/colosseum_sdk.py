@@ -653,8 +653,8 @@ class State:
     Encapsulates the world state. Can be used to issue commands to controlable
     entities, filter entities, etc. The state is writable, but only actions set
     by calling the action methods have an efect in the simulation. The
-    :class:`State` should be considered ephemeral, as it is destroyed and
-    reconstructed at every simulation epoch.
+    :class:`State` and its children entities (food, actors and bases) are
+    persisted across epochs and can have custom data set on them.
     """
 
     def __init__(self, state, owner_id):
