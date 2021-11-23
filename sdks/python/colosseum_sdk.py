@@ -287,7 +287,9 @@ class BaseCollection:
         self._records.extend(records)
         return self
 
-    def _update(self, new_state):
+    def _update(self, new_state, agent_id):
+        self._agent_id = agent_id
+
         logging.debug(f"{new_state=}")
         new_state_ids = set(x["id"] for x in new_state)
 
@@ -737,15 +739,15 @@ class State:
         """
         return self._state.get("actors") is None
 
-    def _update(self, new_state):
+    def _update(self, new_state, agent_id):
         """
         Apply changes from a new state on top of the existing entity
         collections. Existing instances are kept, dead ones are removed and new
         ones are created automatically.
         """
-        self._actors._update(new_state.get("actors", []))
-        self._bases._update(new_state.get("bases", []))
-        self._foods._update(new_state.get("foods", []))
+        self._actors._update(new_state.get("actors", []), agent_id)
+        self._bases._update(new_state.get("bases", []), agent_id)
+        self._foods._update(new_state.get("foods", []), agent_id)
         self._state = new_state
 
 
@@ -911,7 +913,7 @@ class Agent:
         and the ones that died are automatically removed.
         """
         if self.state:
-            self.state._update(raw_state)
+            self.state._update(raw_state, self.agent_id)
         else:
             self.state = State(raw_state, self.agent_id)
 
