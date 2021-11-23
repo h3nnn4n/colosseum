@@ -188,31 +188,57 @@ def test_update_create_food():
 
 
 def test_update_create_base():
-    return
-    state = make_state(fixture_state_late)
+    agent_id = get_agent_ids(fixture_state_late)[2]
+    state = make_state(fixture_state_late, agent_id)
 
     assert state.bases.count == 3
+    assert state.bases.mine.count == 1
 
-    new_state = {"bases": [{"id": "spamegg", "position": [0, 1]}]}
+    new_state = {
+        "bases": [
+            {
+                "id": "spamegg",
+                "position": [0, 1],
+                "food": 0,
+                "health": 50,
+                "max_health": 50,
+                "owner_id": agent_id,
+            }
+        ]
+    }
 
     state._update(new_state)
 
     assert state.bases.count == 1
+    assert state.bases.mine.count == 1
     assert state.bases.first.id == "spamegg"
     assert state.bases.first.position == [0, 1]
 
 
 def test_update_create_actor():
-    return
-    state = make_state(fixture_state_late)
+    agent_id = get_agent_ids(fixture_state_late)[2]
+    state = make_state(fixture_state_late, agent_id)
 
     assert state.actors.count == 7
+    assert state.actors.mine.count == 5
 
-    new_state = {"actors": [{"id": "quxqax", "position": [2, 3]}]}
+    new_state = {
+        "actors": [
+            {
+                "id": "quxqax",
+                "position": [2, 3],
+                "food": 0,
+                "health": 50,
+                "max_health": 50,
+                "owner_id": agent_id,
+            }
+        ]
+    }
 
     state._update(new_state)
 
     assert state.actors.count == 1
+    assert state.actors.mine.count == 1
     assert state.actors.first.id == "quxqax"
     assert state.actors.first.position == [2, 3]
 
