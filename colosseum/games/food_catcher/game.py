@@ -26,6 +26,7 @@ class World:
         self._max_food_sources = 5
         self._eat_max_distance = 1
         self._deposit_max_distance = 0.15
+        self._actor_radius = 0.45
         self._attack_range = 5
         self._eat_speed = 5
         self._spawn_actor_cost = 100
@@ -68,6 +69,15 @@ class World:
             )
 
     def _update_actors(self):
+        for i in range(len(self.actors)):
+            for j in range(i + 1, len(self.actors)):
+                actor1 = self.actors[i]
+                actor2 = self.actors[j]
+                distance = object_distance(actor1, actor2)
+                if distance < self._actor_radius * 2:
+                    actor1.kill()
+                    actor2.kill()
+
         self.actors = [actor for actor in self.actors if actor.alive]
 
     def _update_bases(self):
