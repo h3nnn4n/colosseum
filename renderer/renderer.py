@@ -35,7 +35,7 @@ def get_actor_sprite():
 class Renderer:
     def __init__(self):
         pygame.init()
-        self.size = 800, 600
+        self.size = 600 * 1.5, 600 * 1.5
         self.screen = pygame.display.set_mode(self.size)
         self._data = None
         self._current_tick = None
