@@ -37,6 +37,8 @@ class BaseEntity:
         """
         self._position = entity["position"]
         self._id = entity["id"]
+        self.data = {}
+        self.tag = None
 
     @property
     def position(self):

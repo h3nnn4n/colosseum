@@ -239,3 +239,27 @@ def test_update_food():
     assert state.foods.first.id == "foobar"
     assert state.foods.first.quantity == 40
     assert state.foods.first.position == [2, 3]
+
+
+def test_update_keep_tag():
+    state = make_state(fixture_state_late)
+
+    assert state.foods.count == 5
+
+    new_state = {"foods": [{"id": "foobar", "position": [1, 2], "quantity": 50}]}
+
+    state._update(new_state)
+
+    state.foods.first.tag = "foo"
+
+    assert state.foods.count == 1
+    assert state.foods.first.id == "foobar"
+    assert state.foods.first.tag == "foo"
+
+    new_state = {"foods": [{"id": "foobar", "position": [2, 3], "quantity": 40}]}
+
+    state._update(new_state)
+
+    assert state.foods.count == 1
+    assert state.foods.first.id == "foobar"
+    assert state.foods.first.tag == "foo"
