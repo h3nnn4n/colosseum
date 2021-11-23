@@ -70,13 +70,23 @@ class World:
 
     def _update_actors(self):
         for i in range(len(self.actors)):
+            actor1 = self.actors[i]
+            if actor1.dead:
+                continue
+
             for j in range(i + 1, len(self.actors)):
-                actor1 = self.actors[i]
                 actor2 = self.actors[j]
+                if actor2.dead:
+                    continue
+
                 distance = object_distance(actor1, actor2)
                 if distance < self._actor_radius * 2:
-                    actor1.kill()
-                    actor2.kill()
+                    if actor1.food < actor2.food:
+                        actor1.add_food(actor2.take_food())
+                        actor2.kill()
+                    else:
+                        actor2.add_food(actor1.take_food())
+                        actor1.kill()
 
         self.actors = [actor for actor in self.actors if actor.alive]
 
