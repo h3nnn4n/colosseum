@@ -24,7 +24,7 @@ class World:
         self.actors = []
         self.agents = set()
 
-        self.name = "food_catcher"
+        self.name = self.config.game_name
 
         self._max_food_sources = self.config.max_food_sources
         self._take_food_max_distance = self.config.take_food_max_distance

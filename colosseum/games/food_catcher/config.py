@@ -1,5 +1,6 @@
 class Config:
     # Game Settings
+    game_name = "food_catcher"
     grid_width = 40
     grid_height = 40
     max_food_sources = 10
