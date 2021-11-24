@@ -80,11 +80,13 @@ class Game:
     def __init__(self, *args, match=None):
         self._players = args
         self._result = None
+        self._replay_file = None
         self._result_by_player = {}
         self._match = match
 
     def set_results(self, result):
-        self._result = result
+        self._result = result["scores"]
+        self._replay_file = result["replay_file"]
 
         if self.n_players != 2:
             raise RuntimeError("only pairwise matches are supported at this point")

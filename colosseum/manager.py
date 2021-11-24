@@ -77,6 +77,10 @@ class Manager:
         logging.info("stopped")
 
     @property
+    def results(self):
+        return {"scores": self.scores, "replay_file": self._replay_filename}
+
+    @property
     def scores(self):
         scores = []
 
