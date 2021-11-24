@@ -29,6 +29,8 @@ jobs:
         poetry run python ../skirmish.py \
           ../agents/dummy_agent.py \
           ../agents/food_catcher_exterminator.py \
-          ../agents/food_catcher_replicator.py \
+          ../agents/food_catcher_replicator.py
+        poetry run python ../skirmish.py \
+          ../agents/dummy_agent.py \
           ../agents/food_catcher_take_first_food.py \
           ../agents/food_catcher_take_nearest_food.py
