@@ -51,7 +51,7 @@ class Game:
         self._result_by_player = {}
 
     def set_results(self, result):
-        self._result = result
+        self._result = result["scores"]
 
         if self.n_players != 2:
             raise RuntimeError("only pairwise matches are supported at this point")

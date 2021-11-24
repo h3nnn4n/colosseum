@@ -52,6 +52,11 @@ class Agent:
             )
             return False
 
+    def set_config(self, config):
+        payload = {"config": config}
+        self._child_process.sendline(json.dumps(payload))
+        self._child_process.readline()
+
     def stop(self, reason="end_of_game"):
         data = {"stop": {"reason": reason}}
         self._child_process.sendline(json.dumps(data))

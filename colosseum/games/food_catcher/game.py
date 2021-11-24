@@ -8,29 +8,33 @@ from colosseum.utils import object_distance, random_id
 
 from .actor import Actor
 from .base import Base
+from .config import Config
 from .food import Food
 
 
 class World:
     def __init__(self):
-        self.width = 40
-        self.height = 40
+        self._config = Config
+
+        self.width = self._config.grid_width
+        self.height = self._config.grid_height
 
         self.bases = []
         self.foods = []
         self.actors = []
         self.agents = set()
 
-        self.name = "food_catcher"
+        self.name = self._config.game_name
 
-        self._max_food_sources = 10
-        self._eat_max_distance = 1
-        self._deposit_max_distance = 0.15
-        self._actor_radius = 0.45
-        self._attack_range = 5
-        self._eat_speed = 5
-        self._spawn_actor_cost = 100
-        self._make_base_cost = 500
+        self._max_food_sources = self._config.max_food_sources
+        self._take_food_max_distance = self._config.take_food_max_distance
+        self._deposit_food_max_distance = self._config.deposit_food_max_distance
+        self._actor_radius = self._config.actor_radius
+        self._attack_range = self._config.attack_range
+        self._take_food_speed = self._config.take_food_speed
+        self._spawn_actor_cost = self._config.spawn_actor_cost
+        self._make_base_cost = self._config.make_base_cost
+        self._base_spawn_border_offset = self._config.base_spawn_border_offset
 
         self._base_spawn_slots = []
         self._set_base_spawn_slots()
@@ -104,6 +108,14 @@ class World:
             "foods": self.foods_state,
             "actors": self.actors_state,
             "bases": self.bases_state,
+        }
+
+    @property
+    def config(self):
+        return {
+            k: v
+            for k, v in dict(self._config.__dict__).items()
+            if not k.startswith("_")
         }
 
     @property
@@ -198,10 +210,10 @@ class World:
             return
 
         distance = object_distance(actor, food)
-        if distance > self._eat_max_distance:
+        if distance > self._take_food_max_distance:
             return
 
-        food_taken = food.take(self._eat_speed)
+        food_taken = food.take(self._take_food_speed)
         actor.add_food(food_taken)
 
     def deposit_food(self, owner_id, actor_id, base_id):
@@ -212,7 +224,7 @@ class World:
             return
 
         distance = object_distance(actor, base)
-        if distance > self._deposit_max_distance:
+        if distance > self._deposit_food_max_distance:
             logging.info(
                 f"actor {actor_id} is too far from base {base_id} to deposit: {distance}"
             )
@@ -229,7 +241,7 @@ class World:
             return
 
         distance = object_distance(actor, base)
-        if distance > self._deposit_max_distance:
+        if distance > self._deposit_food_max_distance:
             logging.info(
                 f"actor {actor_id} is too far from base {base_id} to heal: {distance}"
             )
@@ -302,7 +314,7 @@ class World:
         return next((base for base in self.bases if base.id == id), None)
 
     def _set_base_spawn_slots(self):
-        offset = 0.15
+        offset = self._base_spawn_border_offset
         self._base_spawn_slots = [
             [self.width * offset, self.height * offset],
             [self.width - self.width * offset, self.height * offset],

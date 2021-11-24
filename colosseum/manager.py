@@ -38,6 +38,8 @@ class Manager:
         for agent in self.agents:
             agent.start()
             self.world.register_agent(agent)
+            agent.ping()
+            agent.set_config(self.world.config)
         logging.info("started")
 
     def ping(self):
@@ -73,6 +75,10 @@ class Manager:
             agent.stop()
 
         logging.info("stopped")
+
+    @property
+    def results(self):
+        return {"scores": self.scores, "replay_file": self._replay_filename}
 
     @property
     def scores(self):

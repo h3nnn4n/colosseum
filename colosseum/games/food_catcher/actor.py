@@ -4,17 +4,21 @@ import numpy as np
 
 from colosseum.utils import object_distance, random_id
 
+from .config import Config
+
 
 class Actor:
     def __init__(self):
         self.position = None
         self.id = random_id()
         self.owner_id = None
-        self.speed = 1
         self.food = 0
-        self.damage = 5
-        self.health = 50
-        self.max_health = self.health
+
+        self.config = Config
+        self.speed = self.config.actor_speed
+        self.damage = self.config.actor_damage
+        self.health = self.config.actor_max_health
+        self.max_health = self.config.actor_max_health
 
     def set_owner(self, owner_id):
         self.owner_id = owner_id

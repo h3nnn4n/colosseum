@@ -80,11 +80,13 @@ class Game:
     def __init__(self, *args, match=None):
         self._players = args
         self._result = None
+        self._replay_file = None
         self._result_by_player = {}
         self._match = match
 
     def set_results(self, result):
-        self._result = result
+        self._result = result["scores"]
+        self._replay_file = result["replay_file"]
 
         if self.n_players != 2:
             raise RuntimeError("only pairwise matches are supported at this point")
@@ -115,6 +117,7 @@ class Game:
                 print(
                     f"got error {response.status_code} when trying to update match: {response.body}"
                 )
+            upload_match_replay(self._match["id"], self._replay_file)
             return
 
         payload = {
@@ -132,6 +135,8 @@ class Game:
             print(
                 f"got error {response.status_code} when trying to register match: {response.body}"
             )
+        else:
+            upload_match_replay(response.json()["id"], self._replay_file)
 
     @property
     def players(self):
@@ -226,6 +231,19 @@ def get_match(match_id):
         headers={"authorization": f"token {API_TOKEN}"},
     )
     return json.loads(response.text)
+
+
+def upload_match_replay(match_id, replay_filename):
+    print(f"uploading match replay {match_id} {replay_filename}")
+    response = requests.post(
+        API_URL + f"matches/{match_id}/upload_replay/",
+        headers={"authorization": f"token {API_TOKEN}"},
+        files={"file": open(replay_filename).read()},
+    )
+    if response.status_code > 400:
+        print(
+            f"got error {response.status_code} while trying to upload replay: {response.body}"
+        )
 
 
 def get_tournament(tournament_id):
