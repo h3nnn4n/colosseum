@@ -1,4 +1,5 @@
 class Config:
+    # Game Settings
     grid_width = 40
     grid_height = 40
     max_food_sources = 10
@@ -10,3 +11,8 @@ class Config:
     spawn_actor_cost = 100
     make_base_cost = 500
     base_spawn_border_offset = 0.15
+
+    # Actor Settings
+    actor_speed = 1
+    actor_damage = 5
+    actor_max_health = 50
