@@ -14,27 +14,27 @@ from .food import Food
 
 class World:
     def __init__(self):
-        self.config = Config
+        self._config = Config
 
-        self.width = self.config.grid_width
-        self.height = self.config.grid_height
+        self.width = self._config.grid_width
+        self.height = self._config.grid_height
 
         self.bases = []
         self.foods = []
         self.actors = []
         self.agents = set()
 
-        self.name = self.config.game_name
+        self.name = self._config.game_name
 
-        self._max_food_sources = self.config.max_food_sources
-        self._take_food_max_distance = self.config.take_food_max_distance
-        self._deposit_food_max_distance = self.config.deposit_food_max_distance
-        self._actor_radius = self.config.actor_radius
-        self._attack_range = self.config.attack_range
-        self._take_food_speed = self.config.take_food_speed
-        self._spawn_actor_cost = self.config.spawn_actor_cost
-        self._make_base_cost = self.config.make_base_cost
-        self._base_spawn_border_offset = self.config.base_spawn_border_offset
+        self._max_food_sources = self._config.max_food_sources
+        self._take_food_max_distance = self._config.take_food_max_distance
+        self._deposit_food_max_distance = self._config.deposit_food_max_distance
+        self._actor_radius = self._config.actor_radius
+        self._attack_range = self._config.attack_range
+        self._take_food_speed = self._config.take_food_speed
+        self._spawn_actor_cost = self._config.spawn_actor_cost
+        self._make_base_cost = self._config.make_base_cost
+        self._base_spawn_border_offset = self._config.base_spawn_border_offset
 
         self._base_spawn_slots = []
         self._set_base_spawn_slots()
@@ -108,6 +108,14 @@ class World:
             "foods": self.foods_state,
             "actors": self.actors_state,
             "bases": self.bases_state,
+        }
+
+    @property
+    def config(self):
+        return {
+            k: v
+            for k, v in dict(self._config.__dict__).items()
+            if not k.startswith("_")
         }
 
     @property

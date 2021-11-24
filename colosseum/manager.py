@@ -38,6 +38,8 @@ class Manager:
         for agent in self.agents:
             agent.start()
             self.world.register_agent(agent)
+            agent.ping()
+            agent.set_config(self.world.config)
         logging.info("started")
 
     def ping(self):
