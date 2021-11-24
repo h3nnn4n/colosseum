@@ -24,11 +24,11 @@ class World:
         self.name = "food_catcher"
 
         self._max_food_sources = 10
-        self._eat_max_distance = 1
+        self._take_food_max_distance = 1
         self._deposit_max_distance = 0.15
         self._actor_radius = 0.45
         self._attack_range = 5
-        self._eat_speed = 5
+        self._take_food_speed = 5
         self._spawn_actor_cost = 100
         self._make_base_cost = 500
 
@@ -198,10 +198,10 @@ class World:
             return
 
         distance = object_distance(actor, food)
-        if distance > self._eat_max_distance:
+        if distance > self._take_food_max_distance:
             return
 
-        food_taken = food.take(self._eat_speed)
+        food_taken = food.take(self._take_food_speed)
         actor.add_food(food_taken)
 
     def deposit_food(self, owner_id, actor_id, base_id):
