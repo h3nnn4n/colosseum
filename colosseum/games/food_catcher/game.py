@@ -14,8 +14,10 @@ from .food import Food
 
 class World:
     def __init__(self):
-        self.width = 40
-        self.height = 40
+        self.config = Config
+
+        self.width = self.config.grid_width
+        self.height = self.config.grid_height
 
         self.bases = []
         self.foods = []
@@ -23,8 +25,6 @@ class World:
         self.agents = set()
 
         self.name = "food_catcher"
-
-        self.config = Config
 
         self._max_food_sources = self.config.max_food_sources
         self._take_food_max_distance = self.config.take_food_max_distance

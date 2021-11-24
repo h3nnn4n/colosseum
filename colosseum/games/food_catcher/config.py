@@ -1,4 +1,6 @@
 class Config:
+    grid_width = 40
+    grid_height = 40
     max_food_sources = 10
     take_food_max_distance = 1
     deposit_food_max_distance = 0.15
