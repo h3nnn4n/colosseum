@@ -103,6 +103,7 @@ class Manager:
             return
 
         data = {
+            "game_config": self.world.config,
             "epoch": self._tick,
             "max_epoch": self._number_of_ticks,
             "world_state": world_state,
