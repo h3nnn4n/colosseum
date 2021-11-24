@@ -117,6 +117,7 @@ class Game:
                 print(
                     f"got error {response.status_code} when trying to update match: {response.body}"
                 )
+            upload_match_replay(self._match["id"], self._replay_file)
             return
 
         payload = {
@@ -134,6 +135,8 @@ class Game:
             print(
                 f"got error {response.status_code} when trying to register match: {response.body}"
             )
+        else:
+            upload_match_replay(response.json()["id"], self._replay_file)
 
     @property
     def players(self):
@@ -228,6 +231,15 @@ def get_match(match_id):
         headers={"authorization": f"token {API_TOKEN}"},
     )
     return json.loads(response.text)
+
+
+def upload_match_replay(match_id, replay_filename):
+    print(f"uploading match replay {match_id} {replay_filename}")
+    requests.post(
+        API_URL + f"matches/{match_id}/upload_replay/",
+        headers={"authorization": f"token {API_TOKEN}"},
+        files={"file": open(replay_filename).read()},
+    )
 
 
 def get_tournament(tournament_id):
