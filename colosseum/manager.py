@@ -12,7 +12,7 @@ class Manager:
         self._replay_enable = True
         self._replay_filename = None
 
-        self._tick = 0
+        self._tick = 1
         self._number_of_ticks = 1000
 
         self._set_replay_file()
