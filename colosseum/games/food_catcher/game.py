@@ -34,6 +34,7 @@ class World:
         self._take_food_speed = self.config.take_food_speed
         self._spawn_actor_cost = self.config.spawn_actor_cost
         self._make_base_cost = self.config.make_base_cost
+        self._base_spawn_border_offset = self.config.base_spawn_border_offset
 
         self._base_spawn_slots = []
         self._set_base_spawn_slots()
@@ -305,7 +306,7 @@ class World:
         return next((base for base in self.bases if base.id == id), None)
 
     def _set_base_spawn_slots(self):
-        offset = 0.15
+        offset = self._base_spawn_border_offset
         self._base_spawn_slots = [
             [self.width * offset, self.height * offset],
             [self.width - self.width * offset, self.height * offset],

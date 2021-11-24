@@ -9,3 +9,4 @@ class Config:
     take_food_speed = 5
     spawn_actor_cost = 100
     make_base_cost = 500
+    base_spawn_border_offset = 0.15
