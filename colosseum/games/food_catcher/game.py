@@ -8,6 +8,7 @@ from colosseum.utils import object_distance, random_id
 
 from .actor import Actor
 from .base import Base
+from .config import Config
 from .food import Food
 
 
@@ -23,14 +24,16 @@ class World:
 
         self.name = "food_catcher"
 
-        self._max_food_sources = 10
-        self._take_food_max_distance = 1
-        self._deposit_max_distance = 0.15
-        self._actor_radius = 0.45
-        self._attack_range = 5
-        self._take_food_speed = 5
-        self._spawn_actor_cost = 100
-        self._make_base_cost = 500
+        self.config = Config
+
+        self._max_food_sources = self.config.max_food_sources
+        self._take_food_max_distance = self.config.take_food_max_distance
+        self._deposit_food_max_distance = self.config.deposit_food_max_distance
+        self._actor_radius = self.config.actor_radius
+        self._attack_range = self.config.attack_range
+        self._take_food_speed = self.config.take_food_speed
+        self._spawn_actor_cost = self.config.spawn_actor_cost
+        self._make_base_cost = self.config.make_base_cost
 
         self._base_spawn_slots = []
         self._set_base_spawn_slots()
@@ -212,7 +215,7 @@ class World:
             return
 
         distance = object_distance(actor, base)
-        if distance > self._deposit_max_distance:
+        if distance > self._deposit_food_max_distance:
             logging.info(
                 f"actor {actor_id} is too far from base {base_id} to deposit: {distance}"
             )
@@ -229,7 +232,7 @@ class World:
             return
 
         distance = object_distance(actor, base)
-        if distance > self._deposit_max_distance:
+        if distance > self._deposit_food_max_distance:
             logging.info(
                 f"actor {actor_id} is too far from base {base_id} to heal: {distance}"
             )
