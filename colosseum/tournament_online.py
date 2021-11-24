@@ -244,6 +244,8 @@ def upload_match_replay(match_id, replay_filename):
         print(
             f"got error {response.status_code} while trying to upload replay: {response.body}"
         )
+    else:
+        os.remove(replay_filename)
 
 
 def get_tournament(tournament_id):
