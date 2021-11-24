@@ -1,3 +1,4 @@
+import itertools
 import logging
 from collections import defaultdict
 from random import shuffle, uniform
@@ -22,6 +23,7 @@ class World:
         self.bases = []
         self.foods = []
         self.actors = []
+        self.dead_entities = []
         self.agents = set()
 
         self.name = self._config.game_name
@@ -99,8 +101,14 @@ class World:
     def _update_bases(self):
         self.bases = [base for base in self.bases if base.alive]
 
+    def _update_dead_entities(self):
+        for entity in itertools.chain.from_iterable([self.actors, self.bases]):
+            if entity.dead:
+                self.dead_entities.append(entity)
+
     @property
     def state(self):
+        self._update_dead_entities()
         self._update_bases()
         self._update_actors()
 
@@ -108,6 +116,7 @@ class World:
             "foods": self.foods_state,
             "actors": self.actors_state,
             "bases": self.bases_state,
+            "dead_entities": self.dead_entities_state,
         }
 
     @property
@@ -129,6 +138,10 @@ class World:
     @property
     def bases_state(self):
         return [base.state for base in self.bases]
+
+    @property
+    def dead_entities_state(self):
+        return [entity.state for entity in self.dead_entities]
 
     def update(self, agent_actions):
         self._update_food()
