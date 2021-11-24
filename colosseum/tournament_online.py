@@ -235,11 +235,15 @@ def get_match(match_id):
 
 def upload_match_replay(match_id, replay_filename):
     print(f"uploading match replay {match_id} {replay_filename}")
-    requests.post(
+    response = requests.post(
         API_URL + f"matches/{match_id}/upload_replay/",
         headers={"authorization": f"token {API_TOKEN}"},
         files={"file": open(replay_filename).read()},
     )
+    if response.status_code > 400:
+        print(
+            f"got error {response.status_code} while trying to upload replay: {response.body}"
+        )
 
 
 def get_tournament(tournament_id):
