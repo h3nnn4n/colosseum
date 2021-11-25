@@ -29,6 +29,7 @@ class Participant:
         data = get_participant(id)
         self.id = id
         self.name = data["name"]
+        self._file_hash = data["file_hash"]
         self._ran = False
         self._agent_path = None
         self._download_url = data["file"]
@@ -46,24 +47,24 @@ class Participant:
             return self._agent_path
 
         self._ran = True
-        base_path = os.path.join(AGENT_FOLDER, self.name)
-        if os.path.exists(base_path):
-            shutil.rmtree(base_path)
+        base_path = os.path.join(AGENT_FOLDER, self.name, self._file_hash)
+        if not os.path.exists(base_path):
+            Path(base_path).mkdir(parents=True, exist_ok=True)
 
-        Path(base_path).mkdir(parents=True, exist_ok=True)
+            original_name = urllib.parse.urlparse(self._download_url).path.split("/")[
+                -1
+            ]
+            agent_file = os.path.join(base_path, original_name)
 
-        original_name = urllib.parse.urlparse(self._download_url).path.split("/")[-1]
-        agent_file = os.path.join(base_path, original_name)
+            print(f"downloading agent into {agent_file}")
+            urllib.request.urlretrieve(self._download_url, agent_file)
 
-        print(f"downloading agent into {agent_file}")
-        urllib.request.urlretrieve(self._download_url, agent_file)
-
-        # FIXME: This could logic could be better structured
-        # FIXME: Detect file format
-        # FIXME: Autodetect entrypoint
-        file = tarfile.open(agent_file)
-        file.extractall(base_path)
-        file.close()
+            # FIXME: This could logic could be better structured
+            # FIXME: Detect file format
+            # FIXME: Autodetect entrypoint
+            file = tarfile.open(agent_file)
+            file.extractall(base_path)
+            file.close()
 
         # FIXME: We need to support other agent types
         for dirpath, subdirs, files in os.walk(base_path):
