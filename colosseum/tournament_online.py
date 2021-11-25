@@ -60,23 +60,24 @@ class Participant:
             print(f"downloading agent into {agent_file}")
             urllib.request.urlretrieve(self._download_url, agent_file)
 
-            # FIXME: This could logic could be better structured
             # FIXME: Detect file format
-            # FIXME: Autodetect entrypoint
             file = tarfile.open(agent_file)
             file.extractall(base_path)
             file.close()
 
-        # FIXME: We need to support other agent types
-        for dirpath, subdirs, files in os.walk(base_path):
-            for file in files:
-                if file == "agent.py":
-                    self._agent_path = os.path.join(dirpath, file)
-                    self._agent_path = self._agent_path.replace(" ", "_")
-                    print(f"found entrypoint at {self._agent_path}")
-                    return
+        if not self._agent_path:
+            for dirpath, subdirs, files in os.walk(base_path):
+                for file in files:
+                    # FIXME: We need to support other agent types
+                    if file == "agent.py":
+                        self._agent_path = os.path.join(dirpath, file)
+                        self._agent_path = self._agent_path.replace(" ", "_")
+                        print(f"found entrypoint at {self._agent_path}")
 
-        print(f"entrypoint not found for {self.name} / {self.id}")
+        if not self._agent_path:
+            print(f"entrypoint not found for {self.name} / {self.id}")
+        else:
+            print(f"using cached agent path: {self._agent_path}")
 
 
 class Game:
