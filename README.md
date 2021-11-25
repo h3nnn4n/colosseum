@@ -19,16 +19,26 @@ and have fun.
 - Sample game
 - Replay Renderer
 - Headless mode
+- Website to interact with the automated tournament system
+  - Register and upload new agents
+  - Persistent elo ratings
+  - Downloadable replays
+- Automated runner to run tournament matches
 
 ## Planned
 
 - Swiss tournament format
 - Bracket tournament format
-- Website to register and upload bots
-- Automated runner to download agents and play a match with them
-- Persistent elo ratings
 - Seasons
-- Downloadable replays
+
+## Enviroment
+
+The project is spread across multiple repositories:
+- [Automated Tournaments](https://github.com/h3nnn4n/colosseum)
+- [Sample Agents](https://github.com/h3nnn4n/colosseum_agents)
+- [Renderer](https://github.com/h3nnn4n/colosseum_renderer)
+- [Agent SDK](https://github.com/h3nnn4n/colosseum_sdk)
+- [Website Source](https://github.com/h3nnn4n/colosseum_website)
 
 # Running locally
 
@@ -39,8 +49,6 @@ and have fun.
   executable file.
 - `poetry run python skirmish.py agents/foo agent/bar` to run a skirmish with
   the given agents.
-- `poetry run python renderer.py replay_file.jsonl` renders the replay of a
-  match (either from a skirmish or a tournament).
 
 # LICENSE
 
