@@ -48,6 +48,7 @@ class Participant:
 
         self._ran = True
         base_path = os.path.join(AGENT_FOLDER, self.name, self._file_hash)
+        base_path = base_path.replace(" ", "_")
         if not os.path.exists(base_path):
             Path(base_path).mkdir(parents=True, exist_ok=True)
 
@@ -71,6 +72,7 @@ class Participant:
             for file in files:
                 if file == "agent.py":
                     self._agent_path = os.path.join(dirpath, file)
+                    self._agent_path = self._agent_path.replace(" ", "_")
                     print(f"found entrypoint at {self._agent_path}")
                     return
 
