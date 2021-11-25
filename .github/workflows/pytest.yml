@@ -4,10 +4,6 @@ on: push
 
 jobs:
   pytest:
-    strategy:
-      matrix:
-        folders: [colosseum/, agents/, sdks/python/]
-
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -24,10 +20,8 @@ jobs:
 
     - name: Install project deps
       run: |
-        cd ${{ matrix.folders }}
         poetry install
 
     - name: Run tests
       run: |
-        cd ${{ matrix.folders }}
         poetry run pytest
