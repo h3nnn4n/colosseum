@@ -1,9 +1,30 @@
 [tool.poetry]
 name = "colosseum-arena"
-version = "1.0.0"
+version = "0.1.1"
 description = "An AI arena, where agents fight each other"
 authors = ["h3nnn4n <colosseum@h3nnn4n.me>"]
 license = "MIT"
+readme = "README.md"
+repository = "https://github.com/h3nnn4n/colosseum/"
+homepage = "https://www.colosseum.website/"
+keywords = ["automated-tournaments", "multi-agents"]
+
+packages = [
+    { include = "colosseum" }
+]
+
+classifiers = [
+    "Programming Language :: Python :: 3.10",
+    "License :: OSI Approved :: MIT License",
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers"
+]
+
+
+[tool.poetry.urls]
+"Bug Tracker" = "https://github.com/h3nnn4n/colosseum/issues"
+"Website" = "https://www.colosseum.website"
+
 
 [tool.poetry.dependencies]
 python = "3.10"
@@ -13,11 +34,13 @@ pexpect = "^4.8.0"
 requests = "^2.26.0"
 python-dotenv = "^0.19.2"
 
+
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.5"
 ipdb = "^0.13.9"
 twine = "^3.6.0"
 build = "^0.7.0"
+
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
