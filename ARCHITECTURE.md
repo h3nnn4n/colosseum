@@ -1,6 +1,6 @@
-# Archtecture
+# Architecture
 
-This is the planned archtecture. Where we want to go, not were we are.
+This is the planned architecture. Where we want to go, not were we are.
 
 ## Website
 

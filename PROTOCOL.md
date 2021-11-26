@@ -11,14 +11,14 @@ crashed.
 
 ## Agent ID
 
-All agents are going to receive an `agent-id` which will be used to indentify
+All agents are going to receive an `agent-id` which will be used to identify
 itself and other agents in the world. This happens before the simulation
 starts.  A payload containing `set_agent_id` means that the agent must store
-the value of this key internally and use it in all futher communications, by
+the value of this key internally and use it in all further communications, by
 adding a key named `agent_id` and using the value from `set_agent_id` as the
 value. Failure to comply will result in the payload being ignored.
 
-The key usually will be an uuid, but under some circunstances it may be a human
+The key usually will be an uuid, but under some circumstances it may be a human
 readable string, such as `foo bar` or `protomegalovirus`, limited to 255
 characters long.
 
@@ -47,7 +47,7 @@ game basis.
 
 The `agent_id` must always be the agent id given
 to the agent before the world simulation starts. Invalid values will be
-ignored.  Attemping to spoof and using another agent id will be automatically
+ignored.  Attempting to spoof and using another agent id will be automatically
 flagged as cheating and the agent will be disqualified.
 
 ## End of game instruction
@@ -55,5 +55,5 @@ flagged as cheating and the agent will be disqualified.
 When the simulation ends the agent will receive a key named `stop` in the
 payload.  The value will be an object with a key `reason`, the values can be
 will be the reason, which may be `end_of_game` or `cheating_detected`.
-Aditional keys may be provided on an per game basis, and will be documented
+Additional keys may be provided on an per game basis, and will be documented
 separatelly.
