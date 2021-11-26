@@ -196,8 +196,9 @@ class Tournament:
             ):
                 print(f"running game with {list([a.name for a in agent_bracket])}")
                 world = World()
+                agent_paths = [a.agent_path for a in agent_bracket]
                 game = Game(*list(agent_bracket))
-                game.set_results(match(world, [a.agent_path for a in agent_bracket]))
+                game.set_results(match(world, agent_paths=agent_paths))
 
 
 class MatchRunner:
