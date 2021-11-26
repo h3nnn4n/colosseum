@@ -5,9 +5,7 @@ from .agent import Agent
 
 
 class Manager:
-    def __init__(self, world, agent_paths):
-        self._agent_paths = agent_paths
-        self.agents = [Agent(agent_path) for agent_path in agent_paths]
+    def __init__(self, world, agent_paths=None, agents=None):
         self.world = world
         self._replay_enable = True
         self._replay_filename = None
@@ -18,6 +16,11 @@ class Manager:
         self._stop = False
 
         self._set_replay_file()
+
+        if agents:
+            self.agents = agents
+        else:
+            self.agents = [Agent(agent_path) for agent_path in agent_paths]
 
     def _set_replay_file(self):
         if not self._replay_enable:

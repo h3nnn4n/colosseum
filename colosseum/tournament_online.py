@@ -12,6 +12,7 @@ from dotenv import load_dotenv
 
 from colosseum.games.food_catcher.game import World
 
+from .agent import Agent
 from .match import match
 
 
@@ -217,9 +218,11 @@ class MatchRunner:
             Participant(participant_id) for participant_id in participant_ids
         ]
 
+        agents = [Agent(p.agent_path, id=p.id) for p in participants]
+
         world = World()
         game = Game(*participants, match=match_data)
-        game.set_results(match(world, [a.agent_path for a in participants]))
+        game.set_results(match(world, agents=agents))
 
 
 def get_next_match():
