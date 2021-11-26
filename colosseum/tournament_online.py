@@ -85,11 +85,13 @@ class Game:
     def __init__(self, *args, match=None):
         self._players = args
         self._result = None
+        self._raw_result = None
         self._replay_file = None
         self._result_by_player = {}
         self._match = match
 
     def set_results(self, result):
+        self._raw_result = result
         self._result = result["scores"]
         self._replay_file = result["replay_file"]
 
@@ -107,7 +109,7 @@ class Game:
     def _register_match(self, participants, result):
         if self._match:
             payload = {
-                "_result": self._result,
+                "errors": self._error_payload(self._raw_result),
                 "result": result,
                 "ran": True,
                 "participants": [p.id for p in participants],
@@ -128,7 +130,7 @@ class Game:
 
         payload = {
             "participants": [p.id for p in participants],
-            "_result": self._result,
+            "errors": self._error_payload(self._raw_result),
             "result": result,
             "ran": True,
         }
@@ -173,6 +175,12 @@ class Game:
         for player in self._players:
             if player.agent_path == agent_path:
                 return player
+
+    def _error_payload(self, raw_results):
+        payload = {}
+        for score in raw_results["scores"]:
+            payload[score["agent_id"]] = {"error": score.get("tainted", False)}
+        return payload
 
 
 class Tournament:
