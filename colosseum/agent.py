@@ -14,25 +14,37 @@ class Agent:
         self.name = None
         self.version = None
 
+        self._agent_started = None
+        self._successful_ping = None
+
     def start(self):
-        self._child_process = PopenSpawn(self._agent_path)
-        self._child_process.sendline(json.dumps({"set_agent_id": self.id}))
-        response_str = self._child_process.readline()
-        response = json.loads(response_str)
+        try:
+            self._child_process = PopenSpawn(self._agent_path)
+            start_payload = json.dumps({"set_agent_id": self.id})
+            self._child_process.sendline(start_payload)
+            response_str = self._child_process.readline()
+            response = json.loads(response_str)
 
-        if response.get("agent_id") != self.id:
-            logging.warning(f"agent failed to set id. got: {response}")
+            if response.get("agent_id") != self.id:
+                logging.warning(f"agent failed to set id. got: {response}")
 
-        if response.get("agent_name"):
-            self.name = response.get("agent_name")
+            if response.get("agent_name"):
+                self.name = response.get("agent_name")
 
-        if response.get("agent_version"):
-            self.version = response.get("agent_version")
+            if response.get("agent_version"):
+                self.version = response.get("agent_version")
 
-        if self.name:
-            logging.info(f"agent name {self.name} {self.version}")
+            if self.name:
+                logging.info(f"agent name {self.name} {self.version}")
 
-        logging.info(f"agent {self.id} started")
+            logging.info(f"agent {self.id} started")
+            self._agent_started = True
+        except Exception as e:
+            self._agent_started = False
+            logging.warn(
+                f"agent {self.id} failed to start with error: {e}"
+                f"payload sent: {start_payload}   payload_received: {response_str}"
+            )
 
     def ping(self):
         try:
@@ -45,8 +57,10 @@ class Agent:
                 logging.warning(
                     f"agent {self.id} sent invalid response to ping: {data}"
                 )
+            self._successful_ping = valid_ping
             return valid_ping
         except Exception as e:
+            self._successful_ping = False
             logging.warning(
                 f"agent {self.id} failed to ack ping: Exception {e}\n{locals()}"
             )
