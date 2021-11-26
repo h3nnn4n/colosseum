@@ -40,6 +40,7 @@ pytest = "^6.2.5"
 ipdb = "^0.13.9"
 twine = "^3.6.0"
 build = "^0.7.0"
+codespell = "^2.1.0"
 
 
 [build-system]
