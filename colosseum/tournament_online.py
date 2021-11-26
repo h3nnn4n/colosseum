@@ -12,6 +12,7 @@ from dotenv import load_dotenv
 
 from colosseum.games.food_catcher.game import World
 
+from .agent import Agent
 from .match import match
 
 
@@ -195,8 +196,9 @@ class Tournament:
             ):
                 print(f"running game with {list([a.name for a in agent_bracket])}")
                 world = World()
+                agent_paths = [a.agent_path for a in agent_bracket]
                 game = Game(*list(agent_bracket))
-                game.set_results(match(world, [a.agent_path for a in agent_bracket]))
+                game.set_results(match(world, agent_paths=agent_paths))
 
 
 class MatchRunner:
@@ -217,9 +219,11 @@ class MatchRunner:
             Participant(participant_id) for participant_id in participant_ids
         ]
 
+        agents = [Agent(p.agent_path, id=p.id) for p in participants]
+
         world = World()
         game = Game(*participants, match=match_data)
-        game.set_results(match(world, [a.agent_path for a in participants]))
+        game.set_results(match(world, agents=agents))
 
 
 def get_next_match():

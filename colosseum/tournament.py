@@ -126,7 +126,7 @@ class Participant:
     def lose(self):
         self.loses += 1
 
-    def draws(self):
+    def draw(self):
         self.draws += 0
         self.score += 0.5
 
@@ -153,9 +153,10 @@ def round_robin(participants, n_rounds=1, n_participants_per_round=2):
                 f'participants: {" vs ".join([a.pretty_name for a in agent_bracket])}'
             )
             game = Game(*list(agent_bracket))
+            agent_paths = [a.agent_path for a in agent_bracket]
 
             world = World()
-            game.set_results(match(world, [a.agent_path for a in agent_bracket]))
+            game.set_results(match(world, agent_paths=agent_paths))
             print(game.pretty_results)
             print()
 

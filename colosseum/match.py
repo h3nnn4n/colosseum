@@ -1,8 +1,8 @@
 from colosseum.manager import Manager
 
 
-def match(world, agent_paths):
-    manager = Manager(world, agent_paths)
+def match(world, **kwargs):
+    manager = Manager(world, **kwargs)
     manager.start()
     manager.loop()
     manager.stop()

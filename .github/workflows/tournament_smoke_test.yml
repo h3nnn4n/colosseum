@@ -1,4 +1,4 @@
-name: Agent smoke test
+name: Tournament smoke test
 
 on: push
 
@@ -21,17 +21,14 @@ jobs:
     - name: Install project deps
       run: |
         poetry install
+        python3 -m pip install colosseum_sdk
 
     - name: Run smoke test
       run: |
         git clone https://github.com/h3nnn4n/colosseum_agents
-        poetry run python skirmish.py \
-          colosseum_agents/rusher/agent.py \
-          colosseum_agents/exterminator/agent.py \
+        poetry run python tournament.py \
           colosseum_agents/dummy/agent.py \
-          colosseum_agents/first/agent.py
-        poetry run python skirmish.py \
-          colosseum_agents/nearest/agent.py \
+          colosseum_agents/exterminator/agent.py \
           colosseum_agents/first/agent.py \
-          colosseum_agents/first/agent.py \
-          colosseum_agents/dummy/agent.py
+          colosseum_agents/nearest/agent.py
+          colosseum_agents/rusher/agent.py

@@ -15,7 +15,7 @@ def main():
     logging.basicConfig(filename=f"match_{get_internal_id()}.log", level=logging.INFO)
 
     world = World()
-    scores = match(world, agent_paths)
+    scores = match(world, agent_paths=agent_paths)
 
     print(json.dumps(scores))
 

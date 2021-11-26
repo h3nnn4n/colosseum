@@ -7,10 +7,10 @@ from pexpect.popen_spawn import PopenSpawn
 
 
 class Agent:
-    def __init__(self, agent_path):
+    def __init__(self, agent_path, id=None):
         self._child_process = None
         self._agent_path = agent_path
-        self.id = str(uuid4())
+        self.id = id or str(uuid4())
         self.name = None
         self.version = None
 
