@@ -15,6 +15,8 @@ class Manager:
         self._tick = 1
         self._number_of_ticks = 1000
 
+        self._stop = False
+
         self._set_replay_file()
 
     def _set_replay_file(self):
@@ -40,17 +42,21 @@ class Manager:
             self.world.register_agent(agent)
             agent.ping()
             agent.set_config(self.world.config)
+
+        self._check_for_tainted_agents()
         logging.info("started")
 
     def ping(self):
         for agent in self.agents:
             agent.ping()
 
+        self._check_for_tainted_agents()
         logging.info("ping completed")
 
     def loop(self):
         for _ in range(self._number_of_ticks):
             self.tick()
+            self._check_for_tainted_agents()
 
     def tick(self):
         world_state = self.world.state
@@ -93,10 +99,25 @@ class Manager:
                     "score": score,
                     "agent_id": agent_id,
                     "agent_path": agent.agent_path,
+                    "tainted": agent.tainted,
                 }
             )
 
         return sorted(scores, key=lambda x: x["score"], reverse=True)
+
+    @property
+    def has_tainted_agent(self):
+        return len(self.tainted_agents) > 0
+
+    @property
+    def tainted_agents(self):
+        return [agent for agent in self.agents if agent.tainted]
+
+    def _check_for_tainted_agents(self):
+        if not self.has_tainted_agent:
+            return
+
+        self._stop = True
 
     def _save_replay(self, world_state, agent_actions):
         if not self._replay_enable:
