@@ -1,0 +1,33 @@
+name: Tournament smoke test
+
+on: push
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - uses: actions/setup-python@v2
+      with:
+        python-version: "3.10.0"
+
+    - name: Install poetry
+      run: |
+        python -m pip install poetry
+        curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -
+        source $HOME/.poetry/env
+
+    - name: Install project deps
+      run: |
+        poetry install
+
+    - name: Run smoke test
+      run: |
+        git clone https://github.com/h3nnn4n/colosseum_agents
+        poetry run python tournament.py \
+          colosseum_agents/dummy/agent.py \
+          colosseum_agents/exterminator/agent.py \
+          colosseum_agents/first/agent.py \
+          colosseum_agents/nearest/agent.py
+          colosseum_agents/rusher/agent.py
