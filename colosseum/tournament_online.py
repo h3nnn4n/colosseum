@@ -106,6 +106,7 @@ class Game:
     def _register_match(self, participants, result):
         if self._match:
             payload = {
+                "_result": self._result,
                 "result": result,
                 "ran": True,
                 "participants": [p.id for p in participants],
@@ -126,6 +127,7 @@ class Game:
 
         payload = {
             "participants": [p.id for p in participants],
+            "_result": self._result,
             "result": result,
             "ran": True,
         }
