@@ -31,7 +31,7 @@ and have fun.
 - Bracket tournament format
 - Seasons
 
-## Enviroment
+## Environment
 
 The project is spread across multiple repositories:
 - [Automated Tournaments](https://github.com/h3nnn4n/colosseum)
