@@ -20,7 +20,7 @@ load_dotenv()
 
 API_URL = os.environ.get("API_URL")
 API_TOKEN = os.environ.get("API_TOKEN")
-AGENT_FOLDER = f"agents_tmp_{uuid.uuid4()}"
+AGENT_FOLDER = "agents_tmp"
 
 
 class Participant:
