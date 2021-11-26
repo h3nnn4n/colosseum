@@ -126,7 +126,7 @@ class Participant:
     def lose(self):
         self.loses += 1
 
-    def draws(self):
+    def draw(self):
         self.draws += 0
         self.score += 0.5
 
