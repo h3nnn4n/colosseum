@@ -19,7 +19,14 @@ def create_automated_tournaments():
     )
 
 
+def create_pending_matches():
+    requests.post(
+        API_URL + "next_match/", headers={"authorization": f"token {API_TOKEN}"}
+    )
+
+
 def main():
     while True:
+        create_pending_matches()
         create_automated_tournaments()
         sleep(5)
