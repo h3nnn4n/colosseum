@@ -56,7 +56,8 @@ class Manager:
     def loop(self):
         for _ in range(self._number_of_ticks):
             self.tick()
-            self._check_for_tainted_agents()
+            if self._check_for_tainted_agents():
+                break
 
     def tick(self):
         world_state = self.world.state
@@ -115,9 +116,10 @@ class Manager:
 
     def _check_for_tainted_agents(self):
         if not self.has_tainted_agent:
-            return
+            return False
 
         self._stop = True
+        return True
 
     def _save_replay(self, world_state, agent_actions):
         if not self._replay_enable:
