@@ -5,6 +5,7 @@ import shutil
 import tarfile
 import urllib
 import uuid
+from enum import Enum
 from pathlib import Path
 
 import requests
@@ -24,6 +25,11 @@ API_TOKEN = os.environ.get("API_TOKEN")
 AGENT_FOLDER = "agents_tmp"
 
 
+class EntryType(Enum):
+    DOCKER = 1
+    RAW_PYTHON = 2
+
+
 class Participant:
     def __init__(self, id):
         # FIXME: Doing an (rest) api call during init might not be a good idea
@@ -33,6 +39,7 @@ class Participant:
         self._file_hash = data["file_hash"]
         self._ran = False
         self._agent_path = None
+        self._entrypoint_type = None
         self._download_url = data["file"]
 
         self.wins = data["wins"]
@@ -68,12 +75,22 @@ class Participant:
 
         if not self._agent_path:
             for dirpath, subdirs, files in os.walk(base_path):
+                if self._agent_path is not None:
+                    break
+
                 for file in files:
-                    # FIXME: We need to support other agent types
-                    if file == "agent.py":
+                    if file == "Dockerfile":
+                        self._entrypoint_type = EntryType.DOCKER
                         self._agent_path = os.path.join(dirpath, file)
                         self._agent_path = self._agent_path.replace(" ", "_")
-                        print(f"found entrypoint at {self._agent_path}")
+                        print(f"found DOCKER entrypoint at {self._agent_path}")
+                        break
+                    elif file == "agent.py":
+                        self._entrypoint_type = EntryType.RAW_PYTHON
+                        self._agent_path = os.path.join(dirpath, file)
+                        self._agent_path = self._agent_path.replace(" ", "_")
+                        print(f"found PYTHON entrypoint at {self._agent_path}")
+                        break
 
         if not self._agent_path:
             print(f"entrypoint not found for {self.name} / {self.id}")
