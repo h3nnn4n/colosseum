@@ -306,5 +306,4 @@ def online_tournament(tournament_id=None):
         tournament = Tournament(tournament_id)
         tournament.run()
     else:
-        while True:
-            MatchRunner.run_next_match()
+        MatchRunner.run_next_match()

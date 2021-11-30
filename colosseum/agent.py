@@ -1,9 +1,20 @@
+import atexit
 import json
 import logging
+import os
+import shlex
+import shutil
+import subprocess
+import sys
 from signal import SIGTERM
+from tempfile import mkdtemp
 from uuid import uuid4
 
+import pexpect
 from pexpect.popen_spawn import PopenSpawn
+
+
+logging.basicConfig(level=logging.INFO)
 
 
 class Agent:
@@ -12,6 +23,7 @@ class Agent:
         self._agent_path = agent_path
         self.id = id or str(uuid4())
         self.name = None
+        self._machine_name = None
         self.version = None
 
         self._agent_started = None
@@ -22,7 +34,7 @@ class Agent:
         self._max_errors_allowed = 10
 
     def start(self):
-        self._child_process = PopenSpawn(self._agent_path)
+        self._child_process = self._boot_agent()
 
         try:
             payload = json.dumps({"set_agent_id": self.id})
@@ -240,3 +252,90 @@ class Agent:
             return True
 
         return False
+
+    def _boot_agent(self):
+        # FIXME: In the future we might want to just support docker
+        # based agents to not have to maintain two versions
+        if "Dockerfile" not in self._agent_path:
+            logging.info("Using old agent boot")
+            return PopenSpawn(self._agent_path)
+
+        logging.info("Using docker boot")
+        # self._build_image()
+        # return self._run_image()
+        agent_path = self._agent_path.replace("Dockerfile", "")
+        runner = spawnu(self.id, agent_path)
+        __import__("ipdb").set_trace(context=11)
+        runner.sendline("{}")
+        # logging.info(runner.readline())
+        runner.sendline("{}")
+        logging.info(runner.readline())
+        logging.info(runner.readline())
+        logging.info(runner.readline())
+        __import__("ipdb").set_trace(context=11)
+        return runner
+
+    def _build_image(self):
+        agent_path = self._agent_path.replace("Dockerfile", "")
+        raw_command = f"docker build -t {self.id} {agent_path}"
+        logging.info(f"{raw_command=}")
+        cmd = shlex.split(raw_command)
+        logging.info(f"{cmd=}")
+        subprocess.run(cmd)
+
+    def _run_image(self):
+        raw_command = (
+            f"docker run --rm=true --interactive=true --tty=true --detach {self.id}"
+        )
+        logging.info(f"{raw_command=}")
+        cmd = shlex.split(raw_command)
+        logging.info(f"{cmd=}")
+        runner = PopenSpawn(cmd)
+        return runner
+
+
+def spawnu(tag, dockerfile):
+    build_container(tag, dockerfile)
+    container_id = run(tag)
+    logging.info(f"agent {tag} running on container {container_id}")
+    atexit.register(kill, container_id)
+
+    raw_command = f"docker attach {container_id}"
+    cmd = shlex.split(raw_command)
+    logging.info(f"{cmd=}")
+    # runner = PopenSpawn(cmd)
+    # runner = pexpect.spawn(cmd)
+    runner = pexpect.spawnu("docker", ["attach", container_id], logfile=sys.stderr)
+    runner.setecho(False)
+    print(runner.waitnoecho())
+
+    # runner = pexpect.spawnu("docker", ["attach", container_id], logfile=sys.stderr)
+
+    # runner.docker_container_id = container_id
+    return runner
+
+
+def run(tag):
+    proc = subprocess.Popen(
+        [
+            "docker",
+            "run",
+            "--rm=true",
+            "--tty=true",
+            "--interactive=true",
+            "--detach",
+            tag,
+        ],
+        stdout=subprocess.PIPE,
+    )
+    return proc.stdout.readline().decode()[:-1]
+
+
+def kill(container_id):
+    subprocess.call(["docker", "kill", container_id], stdout=subprocess.PIPE)
+
+
+def build_container(tag, dockerfile):
+    if subprocess.call(["docker", "build", "--tag={}".format(tag), dockerfile]) != 0:
+        raise Exception("Couldn't build container")
+    return

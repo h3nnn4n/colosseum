@@ -41,6 +41,7 @@ ipdb = "^0.13.9"
 twine = "^3.6.0"
 build = "^0.7.0"
 codespell = "^2.1.0"
+pudb = "^2021.2.2"
 
 
 [build-system]
