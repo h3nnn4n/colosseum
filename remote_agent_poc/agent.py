@@ -1,3 +1,5 @@
+#!/usr/bin/env python3.10
+
 import random
 import sys
 
@@ -49,7 +51,7 @@ def main():
         candidate_number = int(data_in)
 
         result = is_Prime(candidate_number)
-        data_out = str(result)
+        data_out = str(result) + "\n"
 
         sys.stdout.write(data_out)
         sys.stdout.flush()
