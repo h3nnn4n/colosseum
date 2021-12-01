@@ -4,6 +4,7 @@ import logging
 import os
 import shlex
 import shutil
+import socket
 import subprocess
 import sys
 from signal import SIGTERM
@@ -15,6 +16,9 @@ from pexpect.popen_spawn import PopenSpawn
 
 
 logging.basicConfig(level=logging.INFO)
+
+
+SERVER_ADDRESS = ("localhost", 50042)
 
 
 class Agent:
@@ -254,88 +258,59 @@ class Agent:
         return False
 
     def _boot_agent(self):
-        # FIXME: In the future we might want to just support docker
-        # based agents to not have to maintain two versions
-        if "Dockerfile" not in self._agent_path:
-            logging.info("Using old agent boot")
-            return PopenSpawn(self._agent_path)
-
         logging.info("Using docker boot")
-        # self._build_image()
-        # return self._run_image()
-        agent_path = self._agent_path.replace("Dockerfile", "")
-        runner = spawnu(self.id, agent_path)
-        # __import__("ipdb").set_trace(context=11)
-        runner.sendline("{}")
-        logging.info(runner.readline())
-        logging.info(runner.readline())
-        runner.sendline("{}")
-        logging.info(runner.readline())
-        logging.info(runner.readline())
-        # __import__("ipdb").set_trace(context=11)
-        return runner
 
-    def _build_image(self):
         agent_path = self._agent_path.replace("Dockerfile", "")
-        raw_command = f"docker build -t {self.id} {agent_path}"
-        logging.info(f"{raw_command=}")
-        cmd = shlex.split(raw_command)
-        logging.info(f"{cmd=}")
-        subprocess.run(cmd)
+        tag = self.id
 
-    def _run_image(self):
-        raw_command = (
-            f"docker run --rm=true --interactive=true --tty=true --detach {self.id}"
+        self.build_container(tag, agent_path)
+
+        self._server_start()
+
+        container_id = self.start_container(tag)
+        atexit.register(self.kill_container, container_id)
+
+        self._server_connect()
+
+        logging.info(f"agent {tag} running on container {container_id}")
+
+    def _server_start(self):
+        logging.info("starting server")
+        self._server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self._server.bind(SERVER_ADDRESS)
+        self._server.listen()
+        logging.info("server started")
+
+    def _server_connect(self):
+        logging.info("waiting for connection")
+        self._clientsocket, self._clientaddress = self._server.accept()
+        logging.info("connected")
+
+    def start_container(self, tag):
+        logging.info(f"starting container with {tag=}")
+        proc = subprocess.Popen(
+            [
+                "docker",
+                "run",
+                "--rm=true",
+                "--tty=true",
+                "--interactive=true",
+                "--detach",
+                tag,
+            ],
+            stdout=subprocess.PIPE,
         )
-        logging.info(f"{raw_command=}")
-        cmd = shlex.split(raw_command)
-        logging.info(f"{cmd=}")
-        runner = PopenSpawn(cmd)
-        return runner
+        return proc.stdout.readline().decode()[:-1]
 
+    def kill_container(self, container_id):
+        logging.info(f"killing container with {container_id=}")
+        subprocess.call(["docker", "kill", container_id], stdout=subprocess.PIPE)
 
-def spawnu(tag, dockerfile):
-    build_container(tag, dockerfile)
-    container_id = run(tag)
-    logging.info(f"agent {tag} running on container {container_id}")
-    atexit.register(kill, container_id)
-
-    raw_command = f"docker attach {container_id}"
-    cmd = shlex.split(raw_command)
-    logging.info(f"{cmd=}")
-    # runner = PopenSpawn(cmd)
-    # runner = pexpect.spawn(cmd)
-    runner = pexpect.spawnu("docker", ["attach", container_id], logfile=sys.stderr)
-    runner.setecho(False)
-    print(runner.waitnoecho())
-
-    # runner = pexpect.spawnu("docker", ["attach", container_id], logfile=sys.stderr)
-
-    # runner.docker_container_id = container_id
-    return runner
-
-
-def run(tag):
-    proc = subprocess.Popen(
-        [
-            "docker",
-            "run",
-            "--rm=true",
-            "--tty=true",
-            "--interactive=true",
-            "--detach",
-            tag,
-        ],
-        stdout=subprocess.PIPE,
-    )
-    return proc.stdout.readline().decode()[:-1]
-
-
-def kill(container_id):
-    subprocess.call(["docker", "kill", container_id], stdout=subprocess.PIPE)
-
-
-def build_container(tag, dockerfile):
-    if subprocess.call(["docker", "build", "--tag={}".format(tag), dockerfile]) != 0:
-        raise Exception("Couldn't build container")
-    return
+    def build_container(self, tag, dockerfile):
+        logging.info(f"building container with {tag=}")
+        if (
+            subprocess.call(["docker", "build", "--tag={}".format(tag), dockerfile])
+            != 0
+        ):
+            raise Exception("Couldn't build container")
+        return
