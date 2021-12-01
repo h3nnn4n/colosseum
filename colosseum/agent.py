@@ -265,14 +265,14 @@ class Agent:
         # return self._run_image()
         agent_path = self._agent_path.replace("Dockerfile", "")
         runner = spawnu(self.id, agent_path)
-        __import__("ipdb").set_trace(context=11)
-        runner.sendline("{}")
-        # logging.info(runner.readline())
+        # __import__("ipdb").set_trace(context=11)
         runner.sendline("{}")
         logging.info(runner.readline())
         logging.info(runner.readline())
+        runner.sendline("{}")
         logging.info(runner.readline())
-        __import__("ipdb").set_trace(context=11)
+        logging.info(runner.readline())
+        # __import__("ipdb").set_trace(context=11)
         return runner
 
     def _build_image(self):
