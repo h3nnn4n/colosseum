@@ -16,10 +16,23 @@ def send(socket, msg):
         totalsent = totalsent + sent
 
 
+def reader(socket, read_size=64):
+    buffer = ""
+    while True:
+        new_data = socket.recv(read_size).decode()
+        buffer += new_data
+
+        if config.separator in buffer:
+            data, _, buffer = buffer.partition(config.separator)
+            yield data
+
+
 def client_thread(sock):
     n = 2
+    send(sock, str(n))
 
-    while True:
+    for result in reader(sock):
+        print(result)
         n += 1
         send(sock, str(n))
 

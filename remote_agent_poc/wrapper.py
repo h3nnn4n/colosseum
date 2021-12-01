@@ -7,6 +7,18 @@ from pexpect.popen_spawn import PopenSpawn
 wrapee_path = "./agent.py"
 
 
+def send(socket, msg):
+    msg += config.separator
+    msg = msg.encode()
+    msglen = len(msg)
+    totalsent = 0
+    while totalsent < msglen:
+        sent = socket.send(msg[totalsent:])
+        if sent == 0:
+            raise RuntimeError("socket connection broken")
+        totalsent = totalsent + sent
+
+
 def reader(socket, read_size=4):
     buffer = ""
     while True:
@@ -37,7 +49,9 @@ def main():
 
     while True:
         for data in reader(sock):
-            print(data)
+            result = exchange_message(wrapped, data)
+            print(f"{data} {result}")
+            send(sock, result)
 
 
 if __name__ == "__main__":
