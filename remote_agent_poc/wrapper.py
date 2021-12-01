@@ -1,16 +1,26 @@
 import socket
 
+import config
 from pexpect.popen_spawn import PopenSpawn
 
 
 wrapee_path = "./agent.py"
 
 
+def reader(socket, read_size=4):
+    buffer = ""
+    while True:
+        new_data = socket.recv(read_size).decode()
+        buffer += new_data
+
+        if config.separator in buffer:
+            data, _, buffer = buffer.partition(config.separator)
+            yield data
+
+
 def exchange_message(child_process, data_in):
-    # print(f"sending {data_in.strip()}")
     child_process.sendline(data_in)
     data_out = child_process.readline().decode().strip()
-    # print(f"got {data_out}")
     return data_out
 
 
@@ -22,8 +32,12 @@ def main():
     assert exchange_message(wrapped, str(5)) == "True"
     assert exchange_message(wrapped, str(6)) == "False"
 
-    # server_address = ("localhost", 10000)
-    # s = socket.connect(server_address)
+    sock = socket.socket()
+    sock.connect(config.server_address)
+
+    while True:
+        for data in reader(sock):
+            print(data)
 
 
 if __name__ == "__main__":
