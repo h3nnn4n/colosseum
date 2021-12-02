@@ -7,6 +7,7 @@ import shutil
 import socket
 import subprocess
 import sys
+import tempfile
 from signal import SIGTERM
 from tempfile import mkdtemp
 from uuid import uuid4
@@ -15,10 +16,13 @@ import pexpect
 from pexpect.popen_spawn import PopenSpawn
 
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 
 
-SERVER_ADDRESS = ("localhost", 50042)
+# FIXME: This probably needs to be random to allow multiple agents to run at
+# the same time without issues
+SERVER_ADDRESS = os.path.join(tempfile.mkdtemp(), "colosseum.sock")
+SEPARATOR = ">>foobar<<"
 
 
 class Agent:
@@ -275,8 +279,8 @@ class Agent:
         logging.info(f"agent {tag} running on container {container_id}")
 
     def _server_start(self):
-        logging.info("starting server")
-        self._server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        logging.info(f"starting server on {SERVER_ADDRESS}")
+        self._server = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         self._server.bind(SERVER_ADDRESS)
         self._server.listen()
         logging.info("server started")
@@ -288,18 +292,14 @@ class Agent:
 
     def start_container(self, tag):
         logging.info(f"starting container with {tag=}")
-        proc = subprocess.Popen(
-            [
-                "docker",
-                "run",
-                "--rm=true",
-                "--tty=true",
-                "--interactive=true",
-                "--detach",
-                tag,
-            ],
-            stdout=subprocess.PIPE,
+        cmd = (
+            "docker run --rm=true --tty=true --interactive=true --detach "
+            + f'--env SEPARATOR="{SEPARATOR}" '
+            + f"--volume {SERVER_ADDRESS}:/var/colosseum.socket "
+            + tag
         )
+        logging.debug(f"starting server with {cmd}")
+        proc = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE)
         return proc.stdout.readline().decode()[:-1]
 
     def kill_container(self, container_id):
@@ -308,9 +308,8 @@ class Agent:
 
     def build_container(self, tag, dockerfile):
         logging.info(f"building container with {tag=}")
-        if (
-            subprocess.call(["docker", "build", "--tag={}".format(tag), dockerfile])
-            != 0
-        ):
+        cmd = f"docker build --tag={tag} {dockerfile}"
+        logging.debug(f"building container with {cmd}")
+        if subprocess.call(shlex.split(cmd)) != 0:
             raise Exception("Couldn't build container")
         return
