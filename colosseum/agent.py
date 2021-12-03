@@ -19,12 +19,6 @@ from pexpect.popen_spawn import PopenSpawn
 logging.basicConfig(level=logging.DEBUG)
 
 
-# FIXME: This probably needs to be random to allow multiple agents to run at
-# the same time without issues
-SERVER_ADDRESS = os.path.join(tempfile.mkdtemp(), "colosseum.sock")
-SEPARATOR = ">>foobar<<"
-
-
 class Agent:
     def __init__(self, agent_path, id=None):
         self._child_process = None
@@ -262,54 +256,4 @@ class Agent:
         return False
 
     def _boot_agent(self):
-        logging.info("Using docker boot")
-
-        agent_path = self._agent_path.replace("Dockerfile", "")
-        tag = self.id
-
-        self.build_container(tag, agent_path)
-
-        self._server_start()
-
-        container_id = self.start_container(tag)
-        atexit.register(self.kill_container, container_id)
-
-        self._server_connect()
-
-        logging.info(f"agent {tag} running on container {container_id}")
-
-    def _server_start(self):
-        logging.info(f"starting server on {SERVER_ADDRESS}")
-        self._server = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-        self._server.bind(SERVER_ADDRESS)
-        self._server.listen()
-        logging.info("server started")
-
-    def _server_connect(self):
-        logging.info("waiting for connection")
-        self._clientsocket, self._clientaddress = self._server.accept()
-        logging.info("connected")
-
-    def start_container(self, tag):
-        logging.info(f"starting container with {tag=}")
-        cmd = (
-            "docker run --rm=true --tty=true --interactive=true --detach "
-            + f'--env SEPARATOR="{SEPARATOR}" '
-            + f"--volume {SERVER_ADDRESS}:/var/colosseum.socket "
-            + tag
-        )
-        logging.debug(f"starting server with {cmd}")
-        proc = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE)
-        return proc.stdout.readline().decode()[:-1]
-
-    def kill_container(self, container_id):
-        logging.info(f"killing container with {container_id=}")
-        subprocess.call(["docker", "kill", container_id], stdout=subprocess.PIPE)
-
-    def build_container(self, tag, dockerfile):
-        logging.info(f"building container with {tag=}")
-        cmd = f"docker build --tag={tag} {dockerfile}"
-        logging.debug(f"building container with {cmd}")
-        if subprocess.call(shlex.split(cmd)) != 0:
-            raise Exception("Couldn't build container")
-        return
+        return PopenSpawn("./colosseum/network_wrapper.py")
