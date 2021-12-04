@@ -21,10 +21,8 @@ SEPARATOR = "\n"
 def reader(socket, read_size=64):
     buffer = ""
     while True:
-        print(f"try to read from sock with blocksize of {read_size}")
         new_data = socket.recv(read_size).decode()
         buffer += new_data
-        print(f"got: {new_data}")
 
         if SEPARATOR in buffer:
             data, _, buffer = buffer.partition(SEPARATOR)
@@ -72,28 +70,23 @@ class NetworkAgent:
         logging.info("connected")
 
     def _event_loop(self):
-        print(f"using separator {SEPARATOR}")
-        print("stating event loop")
         while True:
             data_out = sys.stdin.readline().encode()
-            print(f"sending: {data_out}")
             self._clientsocket.sendall(data_out)
-            print("sent, waiting for response")
-            data_in = next(reader(self._clientsocket))
-            print(f"got: {data_in}")
+            data = next(reader(self._clientsocket))
+            sys.stdout.write(data)
+            sys.stdout.flush()
 
     def start_container(self, tag):
         logging.info(f"starting container with {tag=}")
         cmd = (
-            # "docker run --rm=true --tty=true --interactive=true --detach "
-            "docker run --rm=true --tty=true --interactive=true "
+            "docker run --rm=true --tty=true --interactive=true --detach "
             + f"--volume {SERVER_ADDRESS_PATH}:/var/colosseum/ "
             + tag
         )
         logging.debug(f"starting server with {cmd}")
-        # proc = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE)
-        # return proc.stdout.readline().decode()[:-1]
-        return "foo"
+        proc = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE)
+        return proc.stdout.readline().decode()[:-1]
 
     def kill_container(self, container_id):
         logging.info(f"killing container with {container_id=}")
