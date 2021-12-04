@@ -13,8 +13,8 @@ logging.basicConfig(level=logging.DEBUG)
 
 # FIXME: This probably needs to be random to allow multiple agents to run at
 # the same time without issues
-SERVER_ADDRESS = os.path.join(tempfile.mkdtemp(), "colosseum.socket")
-SERVER_ADDRESS = "colosseum.socket"
+SERVER_ADDRESS_PATH = tempfile.mkdtemp()
+SERVER_ADDRESS = os.path.join(SERVER_ADDRESS_PATH, "colosseum.socket")
 SEPARATOR = "\n"
 
 
@@ -87,8 +87,7 @@ class NetworkAgent:
         cmd = (
             # "docker run --rm=true --tty=true --interactive=true --detach "
             "docker run --rm=true --tty=true --interactive=true "
-            # + f'--env SEPARATOR="{SEPARATOR}" '
-            + f"--volume {SERVER_ADDRESS}:/var/colosseum.socket "
+            + f"--volume {SERVER_ADDRESS_PATH}:/var/colosseum/ "
             + tag
         )
         logging.debug(f"starting server with {cmd}")
