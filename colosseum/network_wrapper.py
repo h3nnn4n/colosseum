@@ -9,7 +9,8 @@ import subprocess
 import tempfile
 
 
-logging.basicConfig(level=logging.DEBUG)
+# logging.basicConfig(level=logging.ERROR)
+logging.basicConfig(filename="network_wrapper.log", level=logging.DEBUG)
 
 # FIXME: This probably needs to be random to allow multiple agents to run at
 # the same time without issues
@@ -32,6 +33,7 @@ def reader(socket, read_size=64):
 
 
 def main(agent_path, agent_id):
+    logging.debug(f"running with {agent_path=} {agent_id=}")
     NetworkAgent(agent_path, agent_id).boot()
 
 
@@ -98,13 +100,23 @@ class NetworkAgent:
         logging.info(f"building container with {tag=}")
         cmd = f"docker build --tag={tag} {dockerfile}"
         logging.debug(f"building container with {cmd}")
-        if subprocess.call(shlex.split(cmd)) != 0:
+        if (
+            subprocess.call(
+                shlex.split(cmd),
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+            != 0
+        ):
+            logging.info(f"failed to build")
             raise Exception("Couldn't build container")
+        logging.info(f"finished building container with {tag=}")
         return
 
 
 def clean_socket():
-    os.remove(SERVER_ADDRESS)
+    if os.path.exists(SERVER_ADDRESS):
+        os.remove(SERVER_ADDRESS)
 
 
 if __name__ == "__main__":

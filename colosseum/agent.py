@@ -256,4 +256,4 @@ class Agent:
         return False
 
     def _boot_agent(self):
-        return PopenSpawn("./colosseum/network_wrapper.py")
+        return PopenSpawn(["./colosseum/network_wrapper.py", self._agent_path, self.id])
