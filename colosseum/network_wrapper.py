@@ -26,6 +26,8 @@ def reader(socket, read_size=64):
 
         if SEPARATOR in buffer:
             data, _, buffer = buffer.partition(SEPARATOR)
+            if "\n" not in data:
+                data = data + "\n"
             yield data
 
 
