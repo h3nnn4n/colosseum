@@ -49,13 +49,10 @@ class NetworkAgent:
 
     def boot(self):
         agent_path = self._agent_path.replace("Dockerfile", "")
-        tag = self.id
 
-        self.build_container(tag, agent_path)
-
+        self.build_container(self.id, agent_path)
         self._server_start()
-
-        self.container_id = self.start_container(tag)
+        self.container_id = self.start_container(self.id)
 
         self._server_connect()
         self._event_loop()
