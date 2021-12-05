@@ -8,7 +8,6 @@ import socket
 import subprocess
 import sys
 import tempfile
-from signal import SIGTERM
 from tempfile import mkdtemp
 from uuid import uuid4
 
@@ -171,7 +170,6 @@ class Agent:
         try:
             payload = json.dumps({"stop": {"reason": reason}})
             self._child_process.sendline(payload)
-            self._child_process.kill(SIGTERM)
             logging.info(f"agent {self.id} stopped")
         except Exception as e:
             logging.info(f"failed to stop agent {payload} {e}")
