@@ -7,15 +7,18 @@ import shlex
 import socket
 import subprocess
 import tempfile
+import uuid
 
+self_id = str(uuid.uuid4())
 
-# logging.basicConfig(level=logging.ERROR)
-logging.basicConfig(filename="network_wrapper.log", level=logging.DEBUG)
+logging.basicConfig(filename=f"network_wrapper_{self_id}.log", level=logging.DEBUG)
+# logging.basicConfig(level=logging.DEBUG)
 
 # FIXME: This probably needs to be random to allow multiple agents to run at
 # the same time without issues
 SERVER_ADDRESS_PATH = tempfile.mkdtemp()
-SERVER_ADDRESS = os.path.join(SERVER_ADDRESS_PATH, "colosseum.socket")
+SERVER_FILE = f"colosseum_{self_id}.socket"
+SERVER_ADDRESS = os.path.join(SERVER_ADDRESS_PATH, SERVER_FILE)
 SEPARATOR = "\n"
 
 
