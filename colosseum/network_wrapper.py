@@ -91,6 +91,7 @@ class NetworkAgent:
         logging.info(f"starting container with {tag=}")
         cmd = (
             "docker run --rm=true --tty=true --interactive=true --detach "
+            + f"--env SOCKET_FILE={SERVER_FILE} "
             + f"--volume {SERVER_ADDRESS_PATH}:/var/colosseum/ "
             + tag
         )
