@@ -25,11 +25,6 @@ API_TOKEN = os.environ.get("API_TOKEN")
 AGENT_FOLDER = "agents_tmp"
 
 
-class EntryType(Enum):
-    DOCKER = 1
-    RAW_PYTHON = 2
-
-
 class Participant:
     def __init__(self, id):
         # FIXME: Doing an (rest) api call during init might not be a good idea
@@ -39,7 +34,6 @@ class Participant:
         self._file_hash = data["file_hash"]
         self._ran = False
         self._agent_path = None
-        self._entrypoint_type = None
         self._download_url = data["file"]
 
         self.wins = data["wins"]
@@ -80,16 +74,9 @@ class Participant:
 
                 for file in files:
                     if file == "Dockerfile":
-                        self._entrypoint_type = EntryType.DOCKER
                         self._agent_path = os.path.join(dirpath, file)
                         self._agent_path = self._agent_path.replace(" ", "_")
                         print(f"found DOCKER entrypoint at {self._agent_path}")
-                        break
-                    elif file == "agent.py":
-                        self._entrypoint_type = EntryType.RAW_PYTHON
-                        self._agent_path = os.path.join(dirpath, file)
-                        self._agent_path = self._agent_path.replace(" ", "_")
-                        print(f"found PYTHON entrypoint at {self._agent_path}")
                         break
 
         if not self._agent_path:
