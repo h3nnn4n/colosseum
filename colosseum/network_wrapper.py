@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import atexit
+import json
 import logging
 import os
 import shlex
@@ -80,11 +81,13 @@ class NetworkAgent:
         while True:
             data_out = sys.stdin.readline().encode()
             self._clientsocket.sendall(data_out)
-            data = next(reader(self._clientsocket))
-            logging.debug(f"sent: {data_out}   got: {data}")
-            if data == "DONE":
+
+            if check_stop(data_out):
+                logging.info("sending stop")
                 break
 
+            data = next(reader(self._clientsocket))
+            logging.debug(f"sent: {data_out}   got: {data}")
             sys.stdout.write(data)
             sys.stdout.flush()
 
@@ -124,6 +127,16 @@ class NetworkAgent:
 def clean_socket():
     if os.path.exists(SERVER_ADDRESS):
         os.remove(SERVER_ADDRESS)
+
+
+def check_stop(raw_message):
+    try:
+        payload = json.loads(raw_message)
+        if payload.get("stop"):
+            logging.info("found stop command")
+            return True
+    except Exception as e:
+        return False
 
 
 if __name__ == "__main__":
