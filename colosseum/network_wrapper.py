@@ -81,6 +81,10 @@ class NetworkAgent:
             data_out = sys.stdin.readline().encode()
             self._clientsocket.sendall(data_out)
             data = next(reader(self._clientsocket))
+            logging.debug(f"sent: {data_out}   got: {data}")
+            if data == "DONE":
+                break
+
             sys.stdout.write(data)
             sys.stdout.flush()
 
