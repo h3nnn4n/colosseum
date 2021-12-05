@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import atexit
 import json
 import logging
 import os
@@ -10,13 +9,11 @@ import subprocess
 import tempfile
 import uuid
 
+
 self_id = str(uuid.uuid4())
 
 logging.basicConfig(filename=f"network_wrapper_{self_id}.log", level=logging.DEBUG)
-# logging.basicConfig(level=logging.DEBUG)
 
-# FIXME: This probably needs to be random to allow multiple agents to run at
-# the same time without issues
 SERVER_ADDRESS_PATH = tempfile.mkdtemp()
 SERVER_FILE = f"colosseum_{self_id}.socket"
 SERVER_ADDRESS = os.path.join(SERVER_ADDRESS_PATH, SERVER_FILE)
@@ -38,7 +35,11 @@ def reader(socket, read_size=64):
 
 def main(agent_path, agent_id):
     logging.debug(f"running with {agent_path=} {agent_id=}")
-    NetworkAgent(agent_path, agent_id).boot()
+    network_agent = NetworkAgent(agent_path, agent_id)
+    try:
+        network_agent.boot()
+    finally:
+        network_agent.cleanup()
 
 
 class NetworkAgent:
@@ -47,9 +48,6 @@ class NetworkAgent:
         self.id = agent_id
 
     def boot(self):
-        logging.info("Using docker boot")
-        atexit.register(clean_socket)
-
         agent_path = self._agent_path.replace("Dockerfile", "")
         tag = self.id
 
@@ -57,13 +55,14 @@ class NetworkAgent:
 
         self._server_start()
 
-        container_id = self.start_container(tag)
-        atexit.register(self.kill_container, container_id)
+        self.container_id = self.start_container(tag)
 
         self._server_connect()
         self._event_loop()
 
-        logging.info(f"agent {tag} running on container {container_id}")
+    def cleanup(self):
+        clean_socket()
+        self.kill_container(self.container_id)
 
     def _server_start(self):
         logging.info(f"starting server on {SERVER_ADDRESS}")
