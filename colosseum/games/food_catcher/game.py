@@ -13,6 +13,9 @@ from .config import Config
 from .food import Food
 
 
+logging.basicConfig(level=logging.WARNING)
+
+
 class World:
     def __init__(self):
         self._config = Config

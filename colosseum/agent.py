@@ -15,7 +15,7 @@ import pexpect
 from pexpect.popen_spawn import PopenSpawn
 
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.WARNING)
 
 
 class Agent:
