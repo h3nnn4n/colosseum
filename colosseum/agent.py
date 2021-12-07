@@ -1,9 +1,21 @@
+import atexit
 import json
 import logging
-from signal import SIGTERM
+import os
+import shlex
+import shutil
+import socket
+import subprocess
+import sys
+import tempfile
+from tempfile import mkdtemp
 from uuid import uuid4
 
+import pexpect
 from pexpect.popen_spawn import PopenSpawn
+
+
+logging.basicConfig(level=logging.DEBUG)
 
 
 class Agent:
@@ -12,6 +24,7 @@ class Agent:
         self._agent_path = agent_path
         self.id = id or str(uuid4())
         self.name = None
+        self._machine_name = None
         self.version = None
 
         self._agent_started = None
@@ -22,7 +35,7 @@ class Agent:
         self._max_errors_allowed = 10
 
     def start(self):
-        self._child_process = PopenSpawn(self._agent_path)
+        self._child_process = self._boot_agent()
 
         try:
             payload = json.dumps({"set_agent_id": self.id})
@@ -157,7 +170,6 @@ class Agent:
         try:
             payload = json.dumps({"stop": {"reason": reason}})
             self._child_process.sendline(payload)
-            self._child_process.kill(SIGTERM)
             logging.info(f"agent {self.id} stopped")
         except Exception as e:
             logging.info(f"failed to stop agent {payload} {e}")
@@ -240,3 +252,6 @@ class Agent:
             return True
 
         return False
+
+    def _boot_agent(self):
+        return PopenSpawn(["./colosseum/network_wrapper.py", self._agent_path, self.id])

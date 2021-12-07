@@ -5,6 +5,7 @@ import shutil
 import tarfile
 import urllib
 import uuid
+from enum import Enum
 from pathlib import Path
 
 import requests
@@ -68,12 +69,15 @@ class Participant:
 
         if not self._agent_path:
             for dirpath, subdirs, files in os.walk(base_path):
+                if self._agent_path is not None:
+                    break
+
                 for file in files:
-                    # FIXME: We need to support other agent types
-                    if file == "agent.py":
+                    if file == "Dockerfile":
                         self._agent_path = os.path.join(dirpath, file)
                         self._agent_path = self._agent_path.replace(" ", "_")
-                        print(f"found entrypoint at {self._agent_path}")
+                        print(f"found DOCKER entrypoint at {self._agent_path}")
+                        break
 
         if not self._agent_path:
             print(f"entrypoint not found for {self.name} / {self.id}")
@@ -289,5 +293,4 @@ def online_tournament(tournament_id=None):
         tournament = Tournament(tournament_id)
         tournament.run()
     else:
-        while True:
-            MatchRunner.run_next_match()
+        MatchRunner.run_next_match()
