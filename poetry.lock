@@ -100,6 +100,14 @@ python-versions = ">=3.5.0"
 unicode_backport = ["unicodedata2"]
 
 [[package]]
+name = "chess"
+version = "1.7.0"
+description = "A chess library with move generation and validation, Polyglot opening book probing, PGN reading and writing, Gaviota tablebase probing, Syzygy tablebase probing, and XBoard/UCI engine communication."
+category = "main"
+optional = false
+python-versions = ">=3.7"
+
+[[package]]
 name = "codespell"
 version = "2.1.0"
 description = "Codespell"
@@ -461,6 +469,17 @@ toml = "*"
 testing = ["argcomplete", "hypothesis (>=3.56)", "mock", "nose", "requests", "xmlschema"]
 
 [[package]]
+name = "python-chess"
+version = "1.999"
+description = "A chess library with move generation, move validation, and support for common formats."
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+chess = ">=1,<2"
+
+[[package]]
 name = "python-dotenv"
 version = "0.19.2"
 description = "Read key-value pairs from a .env file and set them as environment variables"
@@ -691,7 +710,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 [metadata]
 lock-version = "1.1"
 python-versions = "3.10"
-content-hash = "ac9dcc79435921662409e5f8577bb138facd3c20934d6cbe554ab8a6ecc40ff8"
+content-hash = "c2fb7afc50e82e125541c7574c371c42038eb6f0f65bd75c7c04f51c250410b4"
 
 [metadata.files]
 appnope = [
@@ -777,6 +796,10 @@ cffi = [
 charset-normalizer = [
     {file = "charset-normalizer-2.0.7.tar.gz", hash = "sha256:e019de665e2bcf9c2b64e2e5aa025fa991da8720daa3c1138cadd2fd1856aed0"},
     {file = "charset_normalizer-2.0.7-py3-none-any.whl", hash = "sha256:f7af805c321bfa1ce6714c51f254e0d5bb5e5834039bc17db7ebe3a4cec9492b"},
+]
+chess = [
+    {file = "chess-1.7.0-py3-none-any.whl", hash = "sha256:e032bb0b61e31ec7fa19c21abe5620b02cb1f951acd5338b45db18d878fbf58a"},
+    {file = "chess-1.7.0.tar.gz", hash = "sha256:c3236e5a2a7666970983523ba40036a9ca2bcae0a9ec66fa76ca72f083ae2d8c"},
 ]
 codespell = [
     {file = "codespell-2.1.0-py3-none-any.whl", hash = "sha256:b864c7d917316316ac24272ee992d7937c3519be4569209c5b60035ac5d569b5"},
@@ -942,6 +965,10 @@ pyparsing = [
 pytest = [
     {file = "pytest-6.2.5-py3-none-any.whl", hash = "sha256:7310f8d27bc79ced999e760ca304d69f6ba6c6649c0b60fb0e04a4a77cacc134"},
     {file = "pytest-6.2.5.tar.gz", hash = "sha256:131b36680866a76e6781d13f101efb86cf674ebb9762eb70d3082b6f29889e89"},
+]
+python-chess = [
+    {file = "python-chess-1.999.tar.gz", hash = "sha256:8cad0388c42242d890ac6368ad64def15cd0165db033df0ad479492e266e5e6c"},
+    {file = "python_chess-1.999-py3-none-any.whl", hash = "sha256:93b562f8f1124cb7bf56fb095e18743758e69dc6a028ccda0badcaa5c59d88c8"},
 ]
 python-dotenv = [
     {file = "python-dotenv-0.19.2.tar.gz", hash = "sha256:a5de49a31e953b45ff2d2fd434bbc2670e8db5273606c1e737cc6b93eff3655f"},

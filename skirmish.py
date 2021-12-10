@@ -4,9 +4,13 @@ import json
 import logging
 import sys
 
+from colosseum.games.chess.game import Game as ChessGame
 from colosseum.games.food_catcher.game import World
 from colosseum.match import match
 from colosseum.utils import get_internal_id
+
+
+game_name = "chess"
 
 
 def main():
@@ -14,8 +18,12 @@ def main():
 
     logging.basicConfig(filename=f"match_{get_internal_id()}.log", level=logging.INFO)
 
-    world = World()
-    scores = match(world, agent_paths=agent_paths)
+    if game_name == "chess":
+        game = ChessGame()
+    else:
+        game = World()
+
+    scores = match(game, agent_paths=agent_paths)
 
     print(json.dumps(scores))
 
