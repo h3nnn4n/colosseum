@@ -57,12 +57,35 @@ class Manager:
         logging.info("ping completed")
 
     def loop(self):
-        for _ in range(self._number_of_ticks):
+        while not self.world.finished():
             self.tick()
             if self._check_for_tainted_agents():
                 break
 
     def tick(self):
+        if self.world.config["update_mode"] == "ALTERNATING":
+            self._tick_alternating()
+        else:
+            self._tick_simultaneous()
+
+    def _tick_alternating(self):
+        world_state = self.world.state
+        world_state["epoch"] = self._tick
+        world_state["max_epoch"] = self._number_of_ticks
+        world_state["agent_ids"] = [agent.id for agent in self.agents]
+
+        agent_index = self._tick % len(self.agents)
+        agent_to_update = self.agents[agent_index]
+        agent_to_update.update_state(world_state)
+
+        agent_actions = [agent_to_update.get_actions()]
+        self._save_replay(world_state, agent_actions)
+        self.world.update(agent_actions)
+
+        logging.info(f"tick {self._tick}")
+        self._tick += 1
+
+    def _tick_simultaneons(self):
         world_state = self.world.state
         world_state["epoch"] = self._tick
         world_state["max_epoch"] = self._number_of_ticks
@@ -88,7 +111,11 @@ class Manager:
 
     @property
     def results(self):
-        return {"scores": self.scores, "replay_file": self._replay_filename}
+        return {
+            "scores": self.scores,
+            "replay_file": self._replay_filename,
+            "outcome": self.world.outcome,
+        }
 
     @property
     def scores(self):

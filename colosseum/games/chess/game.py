@@ -37,25 +37,25 @@ class Game:
     @property
     def state(self):
         legal_moves = [str(m) for m in self._legal_moves]
-        outcome = self._board.outcome()
-
-        state = {
+        return {
             "fen": self._board.fen(),
             "epd": self._board.epd(),
             "turn": self._board.turn,
-            "outcome": {},
             "legal_moves": legal_moves,
             "last_move": self._last_move_uci,
         }
 
-        if outcome:
-            state["outcome"] = {
-                "termination": outcome.termination.__str__().split(".")[-1],
-                "winner": outcome.winner,
-                "result": outcome.result(),
-            }
+    @property
+    def outcome(self):
+        outcome = self._board.outcome()
+        if not outcome:
+            return
 
-        return state
+        return {
+            "termination": outcome.termination.__str__().split(".")[-1],
+            "winner": outcome.winner,
+            "result": outcome.result(),
+        }
 
     @property
     def _last_move(self):
@@ -88,7 +88,10 @@ class Game:
 
     @property
     def config(self):
-        return {"game_name": self._config.game_name}
+        return {
+            "game_name": self._config.game_name,
+            "update_mode": self._config.update_mode,
+        }
 
     @property
     def scores(self):
@@ -103,6 +106,11 @@ class Game:
     def update(self, agent_actions):
         for agent_action in agent_actions:
             self.process_agent_actions(agent_action)
+
+    def finished(self):
+        if self._board.outcome():
+            return True
+        return False
 
     def process_agent_actions(self, agent_action):
         move_str = agent_action.get("move")
