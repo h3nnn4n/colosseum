@@ -37,14 +37,25 @@ class Game:
     @property
     def state(self):
         legal_moves = [str(m) for m in self._legal_moves]
-        return {
+        outcome = self._board.outcome()
+
+        state = {
             "fen": self._board.fen(),
             "epd": self._board.epd(),
             "turn": self._board.turn,
-            # "outcome": self._board.outcome(),
+            "outcome": {},
             "legal_moves": legal_moves,
             "last_move": self._last_move_uci,
         }
+
+        if outcome:
+            state["outcome"] = {
+                "termination": outcome.termination.__str__().split(".")[-1],
+                "winner": outcome.winner,
+                "result": outcome.result(),
+            }
+
+        return state
 
     @property
     def _last_move(self):
