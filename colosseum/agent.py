@@ -254,4 +254,9 @@ class Agent:
         return False
 
     def _boot_agent(self):
+        # Pure python agent
+        if "agent.py" in self.agent_path:
+            return PopenSpawn([self._agent_path])
+
+        # Docker agent
         return PopenSpawn(["./colosseum/network_wrapper.py", self._agent_path, self.id])

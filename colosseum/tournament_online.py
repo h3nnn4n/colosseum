@@ -22,6 +22,7 @@ load_dotenv()
 
 API_URL = os.environ.get("API_URL")
 API_TOKEN = os.environ.get("API_TOKEN")
+USE_DOCKER = os.environ.get("USE_DOCKER", False)
 AGENT_FOLDER = "agents_tmp"
 
 
@@ -73,10 +74,16 @@ class Participant:
                     break
 
                 for file in files:
-                    if file == "Dockerfile":
+                    if file == "Dockerfile" and USE_DOCKER:
                         self._agent_path = os.path.join(dirpath, file)
                         self._agent_path = self._agent_path.replace(" ", "_")
                         print(f"found DOCKER entrypoint at {self._agent_path}")
+                        break
+
+                    if file == "agent.py" and not USE_DOCKER:
+                        self._agent_path = os.path.join(dirpath, file)
+                        self._agent_path = self._agent_path.replace(" ", "_")
+                        print(f'found "agent.py" entrypoint at {self._agent_path}')
                         break
 
         if not self._agent_path:
