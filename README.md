@@ -39,6 +39,7 @@ The project is spread across multiple repositories:
 - [Renderer](https://github.com/h3nnn4n/colosseum_renderer)
 - [Agent SDK](https://github.com/h3nnn4n/colosseum_sdk)
 - [Website Source](https://github.com/h3nnn4n/colosseum_website)
+- [Infra](https://github.com/h3nnn4n/colosseum_infra)
 
 # Running locally
 
