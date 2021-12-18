@@ -267,7 +267,7 @@ def upload_match_replay(match_id, replay_filename):
     print(f"uploading match replay {match_id} {replay_filename}")
 
     with open(replay_filename) as f:
-        data = lzma.compress(f.read())
+        data = lzma.compress(f.read().encode())
 
     response = requests.post(
         API_URL + f"matches/{match_id}/upload_replay/",
