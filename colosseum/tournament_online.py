@@ -1,5 +1,6 @@
 import itertools
 import json
+import lzma
 import os
 import shutil
 import tarfile
@@ -264,10 +265,14 @@ def get_match(match_id):
 
 def upload_match_replay(match_id, replay_filename):
     print(f"uploading match replay {match_id} {replay_filename}")
+
+    with open(replay_filename) as f:
+        data = lzma.compress(f.read())
+
     response = requests.post(
         API_URL + f"matches/{match_id}/upload_replay/",
         headers={"authorization": f"token {API_TOKEN}"},
-        files={"file": open(replay_filename).read()},
+        files={"file": data},
     )
     if response.status_code > 400:
         print(
