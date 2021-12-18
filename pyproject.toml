@@ -33,6 +33,7 @@ numpy = "^1.21.4"
 pexpect = "^4.8.0"
 requests = "^2.26.0"
 python-dotenv = "^0.19.2"
+colosseum-sdk = "^0.1.3"
 
 
 [tool.poetry.dev-dependencies]
