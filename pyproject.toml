@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "colosseum-arena"
-version = "0.1.1"
+version = "0.2.0"
 description = "An AI arena, where agents fight each other"
 authors = ["h3nnn4n <colosseum@h3nnn4n.me>"]
 license = "MIT"
