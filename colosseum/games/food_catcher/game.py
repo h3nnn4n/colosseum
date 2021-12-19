@@ -13,7 +13,7 @@ from .config import Config
 from .food import Food
 
 
-logging.basicConfig(level=logging.WARNING)
+logging.basicConfig(level=logging.INFO)
 
 
 class World:
@@ -40,6 +40,9 @@ class World:
         self._spawn_actor_cost = self._config.spawn_actor_cost
         self._make_base_cost = self._config.make_base_cost
         self._base_spawn_border_offset = self._config.base_spawn_border_offset
+        self._n_epochs = self._config.n_epochs
+
+        self._tick = 0
 
         self._base_spawn_slots = []
         self._set_base_spawn_slots()
@@ -147,6 +150,7 @@ class World:
         return [entity.state for entity in self.dead_entities]
 
     def update(self, agent_actions):
+        self._tick += 1
         self._update_food()
 
         # We shuffle to use as a tiebreaker when multiple agents are trying to
@@ -166,6 +170,14 @@ class World:
             data[agent_id] = score
 
         return data
+
+    @property
+    def finished(self):
+        return self._tick >= self._n_epochs
+
+    @property
+    def outcome(self):
+        return {}
 
     def process_agent_actions(self, agent_action):
         owner_id = agent_action.get("agent_id")
