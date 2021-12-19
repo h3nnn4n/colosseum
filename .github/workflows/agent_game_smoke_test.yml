@@ -22,16 +22,30 @@ jobs:
       run: |
         poetry install
 
-    - name: Run smoke test
+    - name: Clone agents
       run: |
         git clone https://github.com/h3nnn4n/colosseum_agents
-        poetry run python skirmish.py \
-          colosseum_agents/food_catcher/rusher/agent.py \
-          colosseum_agents/food_catcher/exterminator/agent.py \
-          colosseum_agents/food_catcher/dummy/agent.py \
-          colosseum_agents/food_catcher/first/agent.py
-        poetry run python skirmish.py \
-          colosseum_agents/food_catcher/nearest/agent.py \
-          colosseum_agents/food_catcher/first/agent.py \
-          colosseum_agents/food_catcher/first/agent.py \
-          colosseum_agents/food_catcher/dummy/agent.py
+
+    - name: Run smoke test (food_catcher)
+      run: |
+        poetry run python skirmish.py --game=food_catcher \
+          --agent=colosseum_agents/food_catcher/dummy/agent.py \
+          --agent=colosseum_agents/food_catcher/exterminator/agent.py \
+          --agent=colosseum_agents/food_catcher/first/agent.py \
+          --agent=colosseum_agents/food_catcher/greedy/agent.py
+
+        poetry run python skirmish.py --game=food_catcher \
+          --agent=colosseum_agents/food_catcher/greedy_replicator/agent.py \
+          --agent=colosseum_agents/food_catcher/half_rusher/agent.py \
+          --agent=colosseum_agents/food_catcher/nearest/agent.py \
+          --agent=colosseum_agents/food_catcher/replicator/agent.py
+
+        poetry run python skirmish.py --game=food_catcher \
+          --agent=colosseum_agents/food_catcher/dummy/agent.py \
+          --agent=colosseum_agents/food_catcher/rusher/agent.py
+
+    - name: Run smoke test (chess)
+      run: |
+        poetry run python skirmish.py --game=food_catcher \
+          --colosseum_agents/food_catcher/rusher/agent.py \
+          --colosseum_agents/food_catcher/exterminator/agent.py \
