@@ -47,5 +47,5 @@ jobs:
     - name: Run smoke test (chess)
       run: |
         poetry run python skirmish.py --game=food_catcher \
-          --colosseum_agents/food_catcher/rusher/agent.py \
-          --colosseum_agents/food_catcher/exterminator/agent.py \
+          --agent=colosseum_agents/food_catcher/rusher/agent.py \
+          --agent=colosseum_agents/food_catcher/exterminator/agent.py
