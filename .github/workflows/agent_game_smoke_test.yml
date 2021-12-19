@@ -2,8 +2,8 @@ name: Agent smoke test
 
 on: push
 
-food_catcher:
-  run:
+jobs:
+  food_catcher:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -26,7 +26,7 @@ food_catcher:
       run: |
         git clone https://github.com/h3nnn4n/colosseum_agents
 
-    - name: Run smoke test (food_catcher)
+    - name: Run smoke test
       run: |
         poetry run python skirmish.py --game=food_catcher \
           --agent=colosseum_agents/food_catcher/dummy/agent.py \
@@ -44,8 +44,7 @@ food_catcher:
           --agent=colosseum_agents/food_catcher/dummy/agent.py \
           --agent=colosseum_agents/food_catcher/rusher/agent.py
 
-chess:
-  run:
+  chess:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -68,7 +67,7 @@ chess:
       run: |
         git clone https://github.com/h3nnn4n/colosseum_agents
 
-    - name: Run smoke test (chess)
+    - name: Run smoke test
       run: |
         poetry run python skirmish.py --game=food_catcher \
           --agent=colosseum_agents/food_catcher/rusher/agent.py \
