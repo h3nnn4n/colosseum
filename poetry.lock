@@ -128,6 +128,17 @@ optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
 [[package]]
+name = "colosseum-sdk"
+version = "0.1.3"
+description = "Colosseum's SDK for developing agents"
+category = "main"
+optional = false
+python-versions = ">=3.10,<3.11"
+
+[package.dependencies]
+numpy = ">=1.21.4,<2.0.0"
+
+[[package]]
 name = "cryptography"
 version = "36.0.0"
 description = "cryptography is a package which provides cryptographic recipes and primitives to Python developers."
@@ -710,7 +721,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 [metadata]
 lock-version = "1.1"
 python-versions = "3.10"
-content-hash = "c2fb7afc50e82e125541c7574c371c42038eb6f0f65bd75c7c04f51c250410b4"
+content-hash = "cfbb21d0b3bf34a4003d1c19221ba0e9c7887495369d767078b780e5859437c2"
 
 [metadata.files]
 appnope = [
@@ -808,6 +819,10 @@ codespell = [
 colorama = [
     {file = "colorama-0.4.4-py2.py3-none-any.whl", hash = "sha256:9f47eda37229f68eee03b24b9748937c7dc3868f906e8ba69fbcbdd3bc5dc3e2"},
     {file = "colorama-0.4.4.tar.gz", hash = "sha256:5941b2b48a20143d2267e95b1c2a7603ce057ee39fd88e7329b0c292aa16869b"},
+]
+colosseum-sdk = [
+    {file = "colosseum_sdk-0.1.3-py3-none-any.whl", hash = "sha256:8c678761049fc9e22ec68b80b0f6baa4f8db5f962d808066c8ba260a60e4cbfa"},
+    {file = "colosseum_sdk-0.1.3.tar.gz", hash = "sha256:41e7afea1c4c069c2e8b5daa38eb55e6d0788229056c55469da3baee8c59c9c8"},
 ]
 cryptography = [
     {file = "cryptography-36.0.0-cp36-abi3-macosx_10_10_universal2.whl", hash = "sha256:9511416e85e449fe1de73f7f99b21b3aa04fba4c4d335d30c486ba3756e3a2a6"},

@@ -1,5 +1,6 @@
 import itertools
 import json
+import lzma
 import os
 import shutil
 import tarfile
@@ -22,12 +23,12 @@ load_dotenv()
 
 API_URL = os.environ.get("API_URL")
 API_TOKEN = os.environ.get("API_TOKEN")
+USE_DOCKER = os.environ.get("USE_DOCKER", False)
 AGENT_FOLDER = "agents_tmp"
 
 
 class Participant:
     def __init__(self, id):
-        # FIXME: Doing an (rest) api call during init might not be a good idea
         data = get_participant(id)
         self.id = id
         self.name = data["name"]
@@ -73,10 +74,16 @@ class Participant:
                     break
 
                 for file in files:
-                    if file == "Dockerfile":
+                    if file == "Dockerfile" and USE_DOCKER:
                         self._agent_path = os.path.join(dirpath, file)
                         self._agent_path = self._agent_path.replace(" ", "_")
                         print(f"found DOCKER entrypoint at {self._agent_path}")
+                        break
+
+                    if file == "agent.py" and not USE_DOCKER:
+                        self._agent_path = os.path.join(dirpath, file)
+                        self._agent_path = self._agent_path.replace(" ", "_")
+                        print(f'found "agent.py" entrypoint at {self._agent_path}')
                         break
 
         if not self._agent_path:
@@ -257,10 +264,14 @@ def get_match(match_id):
 
 def upload_match_replay(match_id, replay_filename):
     print(f"uploading match replay {match_id} {replay_filename}")
+
+    with open(replay_filename) as f:
+        data = lzma.compress(f.read().encode())
+
     response = requests.post(
         API_URL + f"matches/{match_id}/upload_replay/",
         headers={"authorization": f"token {API_TOKEN}"},
-        files={"file": open(replay_filename).read()},
+        files={"file": data},
     )
     if response.status_code > 400:
         print(
