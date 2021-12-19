@@ -118,45 +118,24 @@ class Game:
             self._register_match(self._players, 0.5)
 
     def _register_match(self, participants, result):
-        if self._match:
-            payload = {
-                "errors": self._error_payload(self._raw_result),
-                "result": result,
-                "ran": True,
-                "participants": [p.id for p in participants],
-                "player1": participants[0].id,
-                "player2": participants[1].id,
-            }
-            response = requests.patch(
-                API_URL + f"matches/{self._match['id']}/",
-                json=payload,
-                headers={"authorization": f"token {API_TOKEN}"},
-            )
-            if response.status_code > 400:
-                print(
-                    f"got error {response.status_code} when trying to update match: {response.body}"
-                )
-            upload_match_replay(self._match["id"], self._replay_file)
-            return
-
         payload = {
-            "participants": [p.id for p in participants],
             "errors": self._error_payload(self._raw_result),
             "result": result,
             "ran": True,
+            "participants": [p.id for p in participants],
+            "player1": participants[0].id,
+            "player2": participants[1].id,
         }
-        response = requests.post(
-            API_URL + "matches/",
+        response = requests.patch(
+            API_URL + f"matches/{self._match['id']}/",
             json=payload,
             headers={"authorization": f"token {API_TOKEN}"},
         )
-
         if response.status_code > 400:
             print(
-                f"got error {response.status_code} when trying to register match: {response.body}"
+                f"got error {response.status_code} when trying to update match: {response.text}"
             )
-        else:
-            upload_match_replay(response.json()["id"], self._replay_file)
+        upload_match_replay(self._match["id"], self._replay_file)
 
     @property
     def players(self):
@@ -192,32 +171,6 @@ class Game:
         for score in raw_results["scores"]:
             payload[score["agent_id"]] = {"error": score.get("tainted", False)}
         return payload
-
-
-class Tournament:
-    def __init__(self, id):
-        data = get_tournament(id)
-        self.id = id
-        self.mode = "ROUND_ROBIN"
-        self.participant_ids = data["participants"]
-        self.participants = [
-            Participant(participant_id) for participant_id in self.participant_ids
-        ]
-
-    def run(self):
-        print("\nstarting tournament\n")
-        n_rounds = 1
-        n_participants_per_round = 2
-
-        for n_round in range(n_rounds):
-            for agent_bracket in itertools.combinations(
-                self.participants, n_participants_per_round
-            ):
-                print(f"running game with {list([a.name for a in agent_bracket])}")
-                world = World()
-                agent_paths = [a.agent_path for a in agent_bracket]
-                game = Game(*list(agent_bracket))
-                game.set_results(match(world, agent_paths=agent_paths))
 
 
 class MatchRunner:
@@ -275,19 +228,10 @@ def upload_match_replay(match_id, replay_filename):
     )
     if response.status_code > 400:
         print(
-            f"got error {response.status_code} while trying to upload replay: {response.body}"
+            f"got error {response.status_code} while trying to upload replay: {response.text}"
         )
     else:
         os.remove(replay_filename)
-
-
-def get_tournament(tournament_id):
-    print(f"fetching tournament {tournament_id}")
-    response = requests.get(
-        API_URL + f"tournaments/{tournament_id}/",
-        headers={"authorization": f"token {API_TOKEN}"},
-    )
-    return json.loads(response.text)
 
 
 def get_participant(participant_id):
@@ -300,8 +244,4 @@ def get_participant(participant_id):
 
 
 def online_tournament(tournament_id=None):
-    if tournament_id:
-        tournament = Tournament(tournament_id)
-        tournament.run()
-    else:
-        MatchRunner.run_next_match()
+    MatchRunner.run_next_match()
