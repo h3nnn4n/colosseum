@@ -12,7 +12,8 @@ from pathlib import Path
 import requests
 from dotenv import load_dotenv
 
-from colosseum.games.food_catcher.game import World
+from colosseum.games.chess.game import Game as ChessGame
+from colosseum.games.food_catcher.game import World as FoodCatcherGame
 
 from .agent import Agent
 from .match import match
@@ -92,7 +93,7 @@ class Participant:
             print(f"using cached agent path: {self._agent_path}")
 
 
-class Game:
+class GameRunner:
     def __init__(self, *args, match=None):
         self._players = args
         self._result = None
@@ -193,9 +194,17 @@ class MatchRunner:
 
         agents = [Agent(p.agent_path, id=p.id) for p in participants]
 
-        world = World()
-        game = Game(*participants, match=match_data)
-        game.set_results(match(world, agents=agents))
+        game_name = match_data["game"]["name"]
+
+        if game_name == "food_catcher":
+            game = FoodCatcherGame()
+        elif game_name == "chess":
+            game = ChessGame()
+        else:
+            raise ValueError(f"{game_name} is not a supported game!")
+
+        game_runner = GameRunner(*participants, match=match_data)
+        game_runner.set_results(match(game, agents=agents))
 
 
 def get_next_match():
