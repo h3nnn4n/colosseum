@@ -29,7 +29,6 @@ AGENT_FOLDER = "agents_tmp"
 
 class Participant:
     def __init__(self, id):
-        # FIXME: Doing an (rest) api call during init might not be a good idea
         data = get_participant(id)
         self.id = id
         self.name = data["name"]
