@@ -23,8 +23,10 @@ def main(game_name, agent_paths):
 
     if game_name == "chess":
         game = ChessGame()
-    else:
+    elif game_name == "food_catcher":
         game = World()
+    else:
+        raise ValueError(f"{game_name} is not a valid game")
 
     scores = match(game, agent_paths=agent_paths)
 
