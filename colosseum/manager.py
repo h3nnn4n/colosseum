@@ -9,10 +9,7 @@ class Manager:
         self.world = world
         self._replay_enable = True
         self._replay_filename = None
-
         self._tick = 1
-        self._number_of_ticks = 1000
-
         self._stop = False
 
         self._set_replay_file()
@@ -57,7 +54,7 @@ class Manager:
         logging.info("ping completed")
 
     def loop(self):
-        while not self.world.finished():
+        while not self.world.finished:
             self.tick()
             if self._check_for_tainted_agents():
                 break
@@ -65,13 +62,16 @@ class Manager:
     def tick(self):
         if self.world.config["update_mode"] == "ALTERNATING":
             self._tick_alternating()
-        else:
+        elif self.world.config["update_mode"] == "SIMULTANEOUS":
             self._tick_simultaneous()
+        else:
+            raise ValueError(
+                f"{self.world.config['update_mode']} is not a valid update mode"
+            )
 
     def _tick_alternating(self):
         world_state = self.world.state
         world_state["epoch"] = self._tick
-        world_state["max_epoch"] = self._number_of_ticks
         world_state["agent_ids"] = [agent.id for agent in self.agents]
 
         agent_index = self._tick % len(self.agents)
@@ -85,10 +85,9 @@ class Manager:
         logging.info(f"tick {self._tick}")
         self._tick += 1
 
-    def _tick_simultaneons(self):
+    def _tick_simultaneous(self):
         world_state = self.world.state
         world_state["epoch"] = self._tick
-        world_state["max_epoch"] = self._number_of_ticks
         world_state["agent_ids"] = [agent.id for agent in self.agents]
 
         for agent in self.agents:
@@ -158,7 +157,7 @@ class Manager:
         data = {
             "game_config": self.world.config,
             "epoch": self._tick,
-            "max_epoch": self._number_of_ticks,
+            "max_epoch": self.world.config["n_epochs"],
             "world_state": world_state,
             "agent_actions": agent_actions,
             "agent_ids": [agent.id for agent in self.agents],

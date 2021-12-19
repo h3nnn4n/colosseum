@@ -1,6 +1,8 @@
 class Config:
     # Game Settings
     game_name = "food_catcher"
+    update_mode = "SIMULTANEOUS"
+
     grid_width = 40
     grid_height = 40
     max_food_sources = 10
@@ -12,6 +14,7 @@ class Config:
     spawn_actor_cost = 100
     make_base_cost = 500
     base_spawn_border_offset = 0.15
+    n_epochs = 1000
 
     # Actor Settings
     actor_speed = 1

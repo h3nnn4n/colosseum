@@ -91,6 +91,7 @@ class Game:
         return {
             "game_name": self._config.game_name,
             "update_mode": self._config.update_mode,
+            "n_epochs": self._config.n_epochs,
         }
 
     @property
@@ -107,6 +108,7 @@ class Game:
         for agent_action in agent_actions:
             self.process_agent_actions(agent_action)
 
+    @property
     def finished(self):
         if self._board.outcome():
             return True
