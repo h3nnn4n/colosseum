@@ -3,16 +3,16 @@
 
 Colosseum é uma plataforma automatizada de competições de agentes autônomos. O
 projeto tem como principal objetivo o incentivo dos estudos em Inteligência
-Artificial e disciplinas relacionadas atravéz de competição e premem em
+Artificial e disciplinas relacionadas através de competição e premios em
 dinheiro. Alternativamente, o projeto também oferece aos envolvidos uma
 oportunidade de trabalhar e desenvolver utilizando tecnologias frequentemente
 encontradas no mercado de trabalho.
 
-O projeto conta com um sistema modular, onde multiplos jogos podem ser
+O projeto conta com um sistema modular, onde múltiplos jogos podem ser
 integrados ao sistema e participantes podem registrar agentes para competir
-nestes jogos. Os agentes competem uns contra os outros de maneira autonoma em
-torneios periodicos. Premiações podem ser oferecidas aos vencedores de
-torneiros específicos, ou com base nos rankings dos agents.
+nestes jogos. Os agentes competem uns contra os outros de maneira autônoma em
+torneios periódicos. Premiações podem ser oferecidas aos vencedores de
+torneiros específicos, ou com base nos rankings dos agentes.
 
 ## Timeline
 
@@ -36,7 +36,7 @@ torneiros específicos, ou com base nos rankings dos agents.
 
 ## Recursos necessários
 
-Para o desempenho do projeto multiplos recursos são desejáveis e/ou necessários:
+Para o desempenho do projeto múltiplos recursos são desejáveis e/ou necessários:
 
 Necessários:
 - Servidores (físicos ou virtuais)
@@ -58,9 +58,9 @@ Desejáveis:
 - Tirar dúvidas
 - Documentação do sistema
 - Manutenção do sistema
-- Adiministração da infraestrutura
+- Administração da infraestrutura
 - Correção de bugs
-- Implementação de novas funcionalizades
+- Implementação de novas funcionalidades
 - Divulgação
 - Criação de conteúdo
   - Tutoriais
@@ -68,7 +68,7 @@ Desejáveis:
 
 ## Estado atual do projeto
 
-O projeto conta atualmente com um sistema completamente funcional e autonomo
+O projeto conta atualmente com um sistema completamente funcional e autônomo
 hospedado em atualmente hospedado em
 [https://colosseum.website](https://colosseum.website).
 Dois jogos estão disponíveis. O primeiro deles sendo xadrez. O segundo jogo
@@ -79,16 +79,16 @@ Os seguintes repositórios contem o projeto:
 - [Colosseum](https://github.com/h3nnn4n/colosseum): Motor de torneios e os
   modulos de jogos / problemas.
 - [Website](https://github.com/h3nnn4n/colosseum_website): Site com placar e
-  API utilizada pelo motors de torneios.
+  API utilizada pelo motor de torneios.
 - [Agentes](https://github.com/h3nnn4n/colosseum_agents): Agentes de exemplo
-  para os games implementados na engine.
+  para os games implementados no motor.
 - [SDK](https://github.com/h3nnn4n/colosseum_sdk): SDK para os games. Todos os
   jogos contam com uma interface padronizada que permite agentes em qualquer
-  linguagem. Este repositorio contem bibliotecas para facilitar a implementação
-  em lingaguens específicas.
-- [Infraestrutura](https://github.com/h3nnn4n/colosseum_infra): Codigo
+  linguagem. Este repositório contem bibliotecas para facilitar a implementação
+  em linguagens específicas.
+- [Infraestrutura](https://github.com/h3nnn4n/colosseum_infra): Código
   utilizado para gerenciamento de recursos, servidores, releases, etc.
-- [Vizualizadores](https://github.com/h3nnn4n/colosseum_renderer): Contem
-  vizualizadores modulares para executar replays dos games. Pode auxiliar a
-  depuração dos agentes, monitoramento ou vizualização para fins de
-  entreterimento (exemplo: Fazer streaming das finais de uma temporada).
+- [Visualizadores](https://github.com/h3nnn4n/colosseum_renderer): Contem
+  Visualizadores modulares para executar replays dos games. Pode auxiliar a
+  depuração dos agentes, monitoramento ou visualização para fins de
+  entretenimento (exemplo: Fazer streaming das finais de uma temporada).
