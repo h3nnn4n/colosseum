@@ -55,9 +55,10 @@ Desejáveis:
 ## Papel do bolsista
 
 - Testar o sistema
-- Tirar dúvidas
+- Tirar dúvidas de participantes
 - Documentação do sistema
 - Manutenção do sistema
+- Manutenção do website
 - Administração da infraestrutura
 - Correção de bugs
 - Implementação de novas funcionalidades
