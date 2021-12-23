@@ -1,5 +1,8 @@
 import json
 import logging
+import string
+from datetime import datetime
+from random import choices
 
 from .agent import Agent
 
@@ -23,13 +26,9 @@ class Manager:
         if not self._replay_enable:
             return
 
-        import random
-        import string
-        from datetime import datetime
-
         now = datetime.now()
         random_string = "".join(
-            random.choices(
+            choices(
                 string.ascii_lowercase + string.ascii_uppercase + string.digits, k=6
             )
         )
