@@ -116,8 +116,8 @@ class Game:
 
     def process_agent_actions(self, agent_action):
         move_str = agent_action.get("move")
-        if not move_str:
-            return
+        # FIXME: We should handle this gracefully
+        assert move_str
 
         move = chess.Move.from_uci(move_str)
         # FIXME: We should handle this gracefully
