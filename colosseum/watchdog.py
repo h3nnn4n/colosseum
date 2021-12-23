@@ -1,5 +1,5 @@
 import os
-from time import sleep
+from time import sleep, time
 
 import requests
 from dotenv import load_dotenv
@@ -10,6 +10,7 @@ load_dotenv()
 
 API_URL = os.environ.get("API_URL")
 API_TOKEN = os.environ.get("API_TOKEN")
+LOOP_INTERVAL = 3
 
 
 def create_automated_tournaments():
@@ -32,7 +33,11 @@ def get_agents():
 
 def main():
     while True:
+        t = time()
         create_pending_matches()
         create_automated_tournaments()
         get_agents()
-        sleep(5)
+        t_diff = time() - t
+
+        if t_diff < LOOP_INTERVAL:
+            sleep(LOOP_INTERVAL - t_diff)
