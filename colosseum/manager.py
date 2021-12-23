@@ -1,5 +1,8 @@
 import json
 import logging
+import string
+from datetime import datetime
+from random import choices
 
 from .agent import Agent
 
@@ -23,13 +26,9 @@ class Manager:
         if not self._replay_enable:
             return
 
-        import random
-        import string
-        from datetime import datetime
-
         now = datetime.now()
         random_string = "".join(
-            random.choices(
+            choices(
                 string.ascii_lowercase + string.ascii_uppercase + string.digits, k=6
             )
         )
@@ -74,8 +73,7 @@ class Manager:
         world_state["epoch"] = self._tick
         world_state["agent_ids"] = [agent.id for agent in self.agents]
 
-        agent_index = self._tick % len(self.agents)
-        agent_to_update = self.agents[agent_index]
+        agent_to_update = self._get_agent(self.world.agent_to_move)
         agent_to_update.update_state(world_state)
 
         agent_actions = [agent_to_update.get_actions()]
