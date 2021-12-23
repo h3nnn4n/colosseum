@@ -73,8 +73,7 @@ class Manager:
         world_state["epoch"] = self._tick
         world_state["agent_ids"] = [agent.id for agent in self.agents]
 
-        agent_index = self._tick % len(self.agents)
-        agent_to_update = self.agents[agent_index]
+        agent_to_update = self._get_agent(self.world.agent_to_move)
         agent_to_update.update_state(world_state)
 
         agent_actions = [agent_to_update.get_actions()]

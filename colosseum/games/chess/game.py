@@ -1,7 +1,7 @@
 import itertools
 import logging
 from collections import defaultdict
-from random import shuffle, uniform
+from random import choice, shuffle, uniform
 
 import chess
 
@@ -18,10 +18,14 @@ logging.basicConfig(level=logging.WARNING)
 class Game:
     def __init__(self):
         self.agents = set()
+        self.agent_color = {}
+        self.agent_by_color = {}
+        self._colors_left = ["WHITE", "BLACK"]
 
         self._config = Config()
         self.name = self._config.game_name
         self._board = chess.Board()
+        self._turn = "WHITE"
 
         logging.info("chess initialized")
 
@@ -30,9 +34,16 @@ class Game:
             logging.warning(f"tried to register {agent.id} more than once")
             return
 
-        self.agents.add(agent.id)
+        # FIXME: Handle this gracefully
+        assert len(self.agents) < 2
 
-        logging.info(f"agent {agent.id} registered")
+        self.agents.add(agent.id)
+        agent_color = choice(self._colors_left)
+        self._colors_left.remove(agent_color)
+        self.agent_color[agent.id] = agent_color
+        self.agent_by_color[agent_color] = agent.id
+
+        logging.info(f"agent {agent.id} registered as {agent_color}")
 
     @property
     def state(self):
@@ -98,9 +109,21 @@ class Game:
     def scores(self):
         data = {}
 
-        # FIXME: We need to get the actual score
+        result = self._board.outcome().result()
+        white, black = result.split("-")
+
+        try:
+            white = int(white)
+            black = int(black)
+        except ValueError:
+            white = 0.5
+            black = 0.5
+
         for agent_id in self.agents:
-            data[agent_id] = 1
+            if self.agent_color[agent_id] == "WHITE":
+                data[agent_id] = white
+            else:
+                data[agent_id] = black
 
         return data
 
@@ -108,11 +131,20 @@ class Game:
         for agent_action in agent_actions:
             self.process_agent_actions(agent_action)
 
+        if self._turn == "WHITE":
+            self._turn = "BLACK"
+        else:
+            self._turn = "WHITE"
+
     @property
     def finished(self):
         if self._board.outcome():
             return True
         return False
+
+    @property
+    def agent_to_move(self):
+        return self.agent_by_color[self._turn]
 
     def process_agent_actions(self, agent_action):
         move_str = agent_action.get("move")
@@ -123,3 +155,6 @@ class Game:
         # FIXME: We should handle this gracefully
         assert move in self._legal_moves
         self._board.push(move)
+
+    def assign_agent_colors(self):
+        assert len(self.agents) == 2
