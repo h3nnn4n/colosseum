@@ -38,11 +38,6 @@ class Participant:
         self._agent_path = None
         self._download_url = data["file"]
 
-        self.wins = data["wins"]
-        self.loses = data["loses"]
-        self.draws = data["draws"]
-        self.score = data["score"]
-        self.elo = data["elo"]
         self.agent_path
 
     @property
