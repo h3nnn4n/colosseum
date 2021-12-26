@@ -1,3 +1,4 @@
+import logging
 import os
 from time import sleep, time
 
@@ -6,6 +7,7 @@ from dotenv import load_dotenv
 
 
 load_dotenv()
+logging.basicConfig(level=logging.INFO)
 
 
 API_URL = os.environ.get("API_URL")
@@ -14,21 +16,36 @@ LOOP_INTERVAL = 3
 
 
 def create_automated_tournaments():
-    requests.post(
+    logging.info("Creating automated tournaments")
+    response = requests.post(
         API_URL + "tournaments/create_automated_tournaments/",
         headers={"authorization": f"token {API_TOKEN}"},
     )
 
+    if response.status_code >= 400:
+        logging.warning(f"{response.status_code} {response.content}")
+
 
 def create_pending_matches():
-    requests.post(
+    logging.info("Creating pending matches")
+    response = requests.post(
         API_URL + "next_match/", headers={"authorization": f"token {API_TOKEN}"}
     )
+
+    if response.status_code >= 400:
+        logging.warning(f"{response.status_code} {response.content}")
 
 
 # HACK: This is here so we keep the cache always fresh
 def get_agents():
-    requests.get(API_URL + "next_match/?format=json")
+    logging.info("Refreshing agent cache (games played)")
+    response = requests.get(
+        API_URL + "next_match/?format=json",
+        headers={"authorization": f"token {API_TOKEN}"},
+    )
+
+    if response.status_code >= 400:
+        logging.warning(f"{response.status_code} {response.content}")
 
 
 def main():
