@@ -14,11 +14,11 @@ jobs:
         repository: "h3nnn4n/colosseum_infra"
 
       - name: Setup ssh
-        runs: |
+        run: |
           install -m 600 -D /dev/null ~/.ssh/id_rsa
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           echo "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
 
       - name: Deploy
-        runs: |
+        run: |
           ansible-playbook -i production.yml colosseum_workers.yml --tags colosseum_worker
