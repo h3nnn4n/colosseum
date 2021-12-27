@@ -11,7 +11,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-        repository: "h3nnn4n/colosseum_infra"
+        with:
+          repository: "h3nnn4n/colosseum_infra"
 
       - name: Setup ssh
         run: |
