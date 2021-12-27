@@ -1,0 +1,25 @@
+name: Create production PR
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  createPR:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Create Pull Request
+        uses: repo-sync/pull-request@v2
+        with:
+          source_branch: "develop"
+          destination_branch: "production"
+          pr_title: "Production Deploy"
+          pr_body: "Automated Production Deploy Pull Request. Opened with Github Actions. Merge this to trigger a deploy."
+          pr_label: "Production Deploy"
+          pr_allow_empty: true
+          github_token: ${{ secrets.GITHUB_TOKEN }}
