@@ -15,10 +15,6 @@ jobs:
         with:
           repository: "h3nnn4n/colosseum_infra"
 
-      - name: debug
-        run: |
-          ls
-
       - name: Setup ssh
         run: |
           install -m 600 -D /dev/null ~/.ssh/id_rsa
@@ -27,4 +23,5 @@ jobs:
 
       - name: Deploy
         run: |
+          cd ansible
           ansible-playbook -i production.yml colosseum_workers.yml --tags colosseum_worker
