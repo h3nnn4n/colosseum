@@ -10,7 +10,7 @@ jobs:
 
     - uses: actions/setup-python@v2
       with:
-        python-version: "3.10.0"
+        python-version: "3.10"
 
     - name: Install poetry
       run: |
@@ -51,7 +51,7 @@ jobs:
 
     - uses: actions/setup-python@v2
       with:
-        python-version: "3.10.0"
+        python-version: "3.10"
 
     - name: Install poetry
       run: |
