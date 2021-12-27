@@ -1,10 +1,9 @@
 name: Deploy
 
-on: push
-#on:
-  #push:
-    #branches:
-      #- production
+on:
+  push:
+    branches:
+      - production
 
 jobs:
   deploy:
