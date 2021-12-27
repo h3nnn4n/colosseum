@@ -1,20 +1,24 @@
 name: Deploy
 
-on: push
+on:
+  push:
+    branches:
+      - production
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
-    - uses: actions/checkout@v2
-      repository: "h3nnn4n/colosseum_infra"
+      - uses: actions/checkout@v2
+        repository: "h3nnn4n/colosseum_infra"
 
-    - name: Setup ssh
-      runs: |
-        install -m 600 -D /dev/null ~/.ssh/id_rsa
-        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-        echo "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+      - name: Setup ssh
+        run: |
+          install -m 600 -D /dev/null ~/.ssh/id_rsa
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          echo "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
 
-    - name: Deploy
-      runs: |
-        ansible-playbook -i production.yml colosseum_workers.yml --tags colosseum_worker
+      - name: Deploy
+        run: |
+          ansible-playbook -i production.yml colosseum_workers.yml --tags colosseum_worker
