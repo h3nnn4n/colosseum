@@ -1,0 +1,14 @@
+name: Deploy
+
+on: push
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      repository: "h3nnn4n/colosseum_infra"
+
+    - name: Deploy
+      runs: |
+        ansible-playbook -i production.yml colosseum_workers.yml --tags colosseum_worker
