@@ -22,6 +22,7 @@ class Game:
 
         self.agents.add(agent.id)
         self.agent_worlds[agent.id] = FoodCatcherWorld(config=self._config)
+        self.agent_worlds[agent.id].register_agent(agent)
 
         logging.info(f"agent {agent.id} registered")
 
@@ -46,13 +47,28 @@ class Game:
         data = {}
 
         for agent_id in self.agents:
-            data[agent_id] = 1
+            data[agent_id] = self.agent_worlds[agent_id].scores[agent_id]
 
         return data
 
     @property
     def state(self):
-        return {"foo": "bar"}
+        return {
+            "state_by_agent": {
+                agent_id: world.state for agent_id, world in self.agent_worlds.items()
+            }
+        }
 
     def update(self, agent_actions):
         self._tick += 1
+
+        for agent_action in agent_actions:
+            self._process_agent_actions(agent_action)
+
+    def _process_agent_actions(self, agent_action):
+        owner_id = agent_action.get("agent_id")
+        if owner_id not in self.agents:
+            logging.warning(f"agent with id {owner_id} is not registered. Ignoring")
+            return
+
+        self.agent_worlds[owner_id].update([agent_action])
