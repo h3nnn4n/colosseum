@@ -15,11 +15,20 @@ jobs:
           repository: "h3nnn4n/colosseum_infra"
 
       - name: Setup ssh
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          known_hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
+          if_key_exists: fail
+
+      - name: Install requirements
         run: |
-          install -m 600 -D /dev/null ~/.ssh/id_rsa
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          echo "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          cd ansible
+          ansible-galaxy install -r requirements.yml
 
       - name: Deploy
         run: |
+          cd ansible
           ansible-playbook -i production.yml colosseum_workers.yml --tags colosseum_worker
+        env:
+          VAULT_PASSWORD: "${{ secrets.VAULT_PASSWORD }}"
