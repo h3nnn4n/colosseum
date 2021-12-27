@@ -25,3 +25,5 @@ jobs:
         run: |
           cd ansible
           ansible-playbook -i production.yml colosseum_workers.yml --tags colosseum_worker
+        env:
+          VAULT_PASSWORD: "${{ secrets.VAULT_PASSWORD }}"
