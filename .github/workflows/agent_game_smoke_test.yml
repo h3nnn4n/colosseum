@@ -44,6 +44,47 @@ jobs:
           --agent=colosseum_agents/food_catcher/dummy/agent.py \
           --agent=colosseum_agents/food_catcher/rusher/agent.py
 
+  cherry_picker:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - uses: actions/setup-python@v2
+      with:
+        python-version: "3.10"
+
+    - name: Install poetry
+      run: |
+        python -m pip install poetry
+        curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -
+        source $HOME/.poetry/env
+
+    - name: Install project deps
+      run: |
+        poetry install
+
+    - name: Clone agents
+      run: |
+        git clone https://github.com/h3nnn4n/colosseum_agents
+
+    - name: Run smoke test
+      run: |
+        poetry run python skirmish.py --game=cherry_picker \
+          --agent=colosseum_agents/food_catcher/dummy/agent.py \
+          --agent=colosseum_agents/food_catcher/exterminator/agent.py \
+          --agent=colosseum_agents/food_catcher/first/agent.py \
+          --agent=colosseum_agents/food_catcher/greedy/agent.py
+
+        poetry run python skirmish.py --game=cherry_picker \
+          --agent=colosseum_agents/food_catcher/greedy_replicator/agent.py \
+          --agent=colosseum_agents/food_catcher/half_rusher/agent.py \
+          --agent=colosseum_agents/food_catcher/nearest/agent.py \
+          --agent=colosseum_agents/food_catcher/replicator/agent.py
+
+        poetry run python skirmish.py --game=cherry_picker \
+          --agent=colosseum_agents/food_catcher/dummy/agent.py \
+          --agent=colosseum_agents/food_catcher/rusher/agent.py
+
   chess:
     runs-on: ubuntu-latest
     steps:
