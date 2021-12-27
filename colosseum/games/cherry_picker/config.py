@@ -1,7 +1,7 @@
 class Config:
     # Game Settings
     game_name = "cherry_picker"
-    update_mode = "SIMULTANEOUS"
+    update_mode = "ISOLATED"
 
     grid_width = 50
     grid_height = 50
