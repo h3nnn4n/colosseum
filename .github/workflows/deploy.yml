@@ -21,6 +21,11 @@ jobs:
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           echo "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
 
+      - name: Install requirements
+        run: |
+          cd ansible
+          ansible-galaxy install -r requirements.yml
+
       - name: Deploy
         run: |
           cd ansible
