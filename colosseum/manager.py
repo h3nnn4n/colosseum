@@ -60,13 +60,22 @@ class Manager:
 
     def tick(self):
         if self.world.config["update_mode"] == "ALTERNATING":
+            # Participants play in alternating order, like chess
             self._tick_alternating()
         elif self.world.config["update_mode"] == "SIMULTANEOUS":
+            # Participants all play at the same time
             self._tick_simultaneous()
+        elif self.world.config["update_mode"] == "ISOLATED":
+            # Participants play independent and isolated game instances
+            # Example: Two agents play tetris and the one with the highest score wins
+            self._tick_isolated()
         else:
             raise ValueError(
                 f"{self.world.config['update_mode']} is not a valid update mode"
             )
+
+        logging.info(f"tick {self._tick}")
+        self._tick += 1
 
     def _tick_alternating(self):
         world_state = self.world.state
@@ -80,9 +89,6 @@ class Manager:
         self._save_replay(world_state, agent_actions)
         self.world.update(agent_actions)
 
-        logging.info(f"tick {self._tick}")
-        self._tick += 1
-
     def _tick_simultaneous(self):
         world_state = self.world.state
         world_state["epoch"] = self._tick
@@ -92,13 +98,24 @@ class Manager:
             agent.update_state(world_state)
 
         agent_actions = [agent.get_actions() for agent in self.agents]
-
         self._save_replay(world_state, agent_actions)
-
         self.world.update(agent_actions)
 
-        logging.info(f"tick {self._tick}")
-        self._tick += 1
+    def _tick_isolated(self):
+        world_state = self.world.state
+        base_state = {}
+        base_state["epoch"] = self._tick
+        base_state["agent_ids"] = [agent.id for agent in self.agents]
+
+        agent_states = world_state.pop("state_by_agent")
+
+        for agent in self.agents:
+            agent_state = {**base_state, **agent_states[agent.id]}
+            agent.update_state(agent_state)
+
+        agent_actions = [agent.get_actions() for agent in self.agents]
+        self._save_replay(world_state, agent_actions)
+        self.world.update(agent_actions)
 
     def stop(self):
         for agent in self.agents:
