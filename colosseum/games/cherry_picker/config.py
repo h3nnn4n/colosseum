@@ -5,7 +5,7 @@ class Config:
 
     grid_width = 75
     grid_height = 75
-    max_food_sources = 50
+    max_food_sources = 15
     take_food_max_distance = 1
     deposit_food_max_distance = 0.15
     actor_radius = 0.45
