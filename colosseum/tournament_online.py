@@ -12,6 +12,7 @@ from pathlib import Path
 import requests
 from dotenv import load_dotenv
 
+from colosseum.games.cherry_picker.game import Game as CherryPickerGame
 from colosseum.games.chess.game import Game as ChessGame
 from colosseum.games.food_catcher.game import World as FoodCatcherGame
 
@@ -193,6 +194,8 @@ class MatchRunner:
 
         if game_name == "food_catcher":
             game = FoodCatcherGame()
+        elif game_name == "cherry_picker":
+            game = CherryPickerGame()
         elif game_name == "chess":
             game = ChessGame()
         else:

@@ -13,12 +13,15 @@ from .config import Config
 from .food import Food
 
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.WARNING)
 
 
 class World:
-    def __init__(self):
-        self._config = Config
+    def __init__(self, config=None):
+        if not config:
+            config = Config
+
+        self._config = config
 
         self.width = self._config.grid_width
         self.height = self._config.grid_height

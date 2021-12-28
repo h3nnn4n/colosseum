@@ -5,6 +5,7 @@ import json
 import logging
 import sys
 
+from colosseum.games.cherry_picker.game import Game as CherryPickerGame
 from colosseum.games.chess.game import Game as ChessGame
 from colosseum.games.food_catcher.game import World
 from colosseum.match import match
@@ -23,6 +24,8 @@ def main(game_name, agent_paths):
 
     if game_name == "chess":
         game = ChessGame()
+    if game_name == "cherry_picker":
+        game = CherryPickerGame()
     elif game_name == "food_catcher":
         game = World()
     else:
