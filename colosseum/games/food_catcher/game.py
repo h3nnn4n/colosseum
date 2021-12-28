@@ -13,7 +13,7 @@ from .config import Config
 from .food import Food
 
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.WARNING)
 
 
 class World:
