@@ -3,8 +3,8 @@ class Config:
     game_name = "cherry_picker"
     update_mode = "ISOLATED"
 
-    grid_width = 50
-    grid_height = 50
+    grid_width = 75
+    grid_height = 75
     max_food_sources = 50
     take_food_max_distance = 1
     deposit_food_max_distance = 0.15
