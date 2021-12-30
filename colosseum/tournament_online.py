@@ -128,7 +128,7 @@ class GameRunner:
             json=payload,
             headers={"authorization": f"token {API_TOKEN}"},
         )
-        if response.status_code > 400:
+        if response.status_code >= 400:
             print(
                 f"got error {response.status_code} when trying to update match: {response.text}"
             )
@@ -233,7 +233,7 @@ def upload_match_replay(match_id, replay_filename):
         headers={"authorization": f"token {API_TOKEN}"},
         files={"file": data},
     )
-    if response.status_code > 400:
+    if response.status_code >= 400:
         print(
             f"got error {response.status_code} while trying to upload replay: {response.text}"
         )
