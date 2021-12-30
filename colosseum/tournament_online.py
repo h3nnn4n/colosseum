@@ -8,6 +8,7 @@ import urllib
 import uuid
 from enum import Enum
 from pathlib import Path
+from time import time
 
 import requests
 from dotenv import load_dotenv
@@ -97,6 +98,7 @@ class GameRunner:
         self._replay_file = None
         self._result_by_player = {}
         self._match = match
+        self._start_time = time()
 
     def set_results(self, result):
         self._raw_result = result
@@ -115,6 +117,8 @@ class GameRunner:
             self._register_match(self._players, 0.5)
 
     def _register_match(self, participants, result):
+        _end_time = time()
+        duration = _end_time - self._start_time
         payload = {
             "errors": self._error_payload(self._raw_result),
             "result": result,
@@ -122,13 +126,14 @@ class GameRunner:
             "participants": [p.id for p in participants],
             "player1": participants[0].id,
             "player2": participants[1].id,
+            "duration": duration,
         }
         response = requests.patch(
             API_URL + f"matches/{self._match['id']}/",
             json=payload,
             headers={"authorization": f"token {API_TOKEN}"},
         )
-        if response.status_code > 400:
+        if response.status_code >= 400:
             print(
                 f"got error {response.status_code} when trying to update match: {response.text}"
             )
@@ -233,7 +238,7 @@ def upload_match_replay(match_id, replay_filename):
         headers={"authorization": f"token {API_TOKEN}"},
         files={"file": data},
     )
-    if response.status_code > 400:
+    if response.status_code >= 400:
         print(
             f"got error {response.status_code} while trying to upload replay: {response.text}"
         )
