@@ -24,7 +24,7 @@ def main(game_name, agent_paths):
 
     if game_name == "chess":
         game = ChessGame()
-    if game_name == "cherry_picker":
+    elif game_name == "cherry_picker":
         game = CherryPickerGame()
     elif game_name == "food_catcher":
         game = World()
