@@ -29,6 +29,7 @@ class World(BaseGame):
         self.actors = []
         self.dead_entities = []
         self.agents = set()
+        self.agent_ids = set()
 
         self.name = self._config.game_name
 
@@ -53,11 +54,12 @@ class World(BaseGame):
         logging.info("food_catcher initialized")
 
     def register_agent(self, agent):
-        if agent.id in self.agents:
+        if agent.id in self.agent_ids:
             logging.warning(f"tried to register {agent.id} more than once")
             return
 
-        self.agents.add(agent.id)
+        self.agents.add(agent)
+        self.agent_ids.add(agent.id)
 
         x, y = self._get_base_spawn_slot()
 
@@ -165,7 +167,7 @@ class World(BaseGame):
     def scores(self):
         data = {}
 
-        for agent_id in self.agents:
+        for agent_id in self.agent_ids:
             bases = [base for base in self.bases if base.owner_id == agent_id]
             score = sum([base.food for base in bases])
             data[agent_id] = score
@@ -178,11 +180,17 @@ class World(BaseGame):
 
     @property
     def outcome(self):
-        return {}
+        termination = "GAME_ENDED"
+        if self.has_tainted_agent:
+            termination = "TAINTED"
+
+        return {
+            "termination": termination,
+        }
 
     def process_agent_actions(self, agent_action):
         owner_id = agent_action.get("agent_id")
-        if owner_id not in self.agents:
+        if owner_id not in self.agent_ids:
             logging.warning(f"agent with id {owner_id} is not registered. Ignoring")
             return
 
