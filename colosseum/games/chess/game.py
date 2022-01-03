@@ -21,7 +21,7 @@ class Game(BaseGame):
         self.agent_by_color = {}
         self._colors_left = ["WHITE", "BLACK"]
 
-        self._config = Config()
+        self._config = Config
         self.name = self._config.game_name
         self._board = chess.Board()
         self._turn = "WHITE"
@@ -29,15 +29,10 @@ class Game(BaseGame):
         logging.info("chess initialized")
 
     def register_agent(self, agent):
-        if agent.id in self.agent_ids:
-            logging.warning(f"tried to register {agent.id} more than once")
-            return
+        super().register_agent(agent)
 
         # FIXME: Handle this gracefully
-        assert len(self.agents) < 2
-
-        self.agent_ids.add(agent.id)
-        self.agents.add(agent)
+        assert len(self.agents) <= 2
         agent_color = choice(self._colors_left)
         self._colors_left.remove(agent_color)
         self.agent_color[agent.id] = agent_color
@@ -141,14 +136,6 @@ class Game(BaseGame):
     @property
     def _legal_moves(self):
         return self._board.legal_moves
-
-    @property
-    def config(self):
-        return {
-            "game_name": self._config.game_name,
-            "update_mode": self._config.update_mode,
-            "n_epochs": self._config.n_epochs,
-        }
 
     @property
     def scores(self):
