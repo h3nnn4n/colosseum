@@ -58,15 +58,60 @@ class Game(BaseGame):
 
     @property
     def outcome(self):
-        outcome = self._board.outcome()
-        if not outcome:
-            return
-
         return {
-            "termination": outcome.termination.__str__().split(".")[-1],
-            "winner": outcome.winner,
-            "result": outcome.result(),
+            "termination": self._termination,
+            "winner": self._winner_color,
+            "result": self._result,
         }
+
+    @property
+    def _termination(self):
+        if outcome := self._board.outcome():
+            return outcome.termination.__str__().split(".")[-1]
+
+        return "TAINTED"
+
+    @property
+    def _result(self):
+        if outcome := self._board.outcome():
+            return outcome.result()
+
+        # Otherwise an agent got tainted
+        white_agent = self._get_agent(self.agent_by_color["WHITE"])
+        black_agent = self._get_agent(self.agent_by_color["BLACK"])
+
+        if white_agent.tainted:
+            if black_agent.tainted:
+                return "1/2-1/2"
+            else:
+                return "0-1"
+        elif black_agent.tainted:
+            return "1-0"
+
+    @property
+    def _winner_color(self):
+        if self._board.outcome():
+            # If here is an outcome then the game ended due to a chess rule
+            result = self._board.outcome().result()
+            white, black = result.split("-")
+            if int(white) == 1:
+                return "WHITE"
+            elif int(black) == 1:
+                return "BLACK"
+            else:
+                return "DRAW"
+
+        # Otherwise an agent got tainted
+        white_agent = self._get_agent(self.agent_by_color["WHITE"])
+        black_agent = self._get_agent(self.agent_by_color["BLACK"])
+
+        if white_agent.tainted:
+            if black_agent.tainted:
+                return "DRAW"
+            else:
+                return "BLACK"
+        elif black_agent.tainted:
+            return "WHITE"
 
     @property
     def _last_move(self):
