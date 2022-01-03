@@ -20,7 +20,10 @@ class Manager:
         if agents:
             self.agents = agents
         else:
-            self.agents = [Agent(agent_path) for agent_path in agent_paths]
+            self.agents = [
+                Agent(agent_path, time_config=world.initial_config)
+                for agent_path in agent_paths
+            ]
 
     def _set_replay_file(self):
         if not self._replay_enable:
@@ -129,6 +132,7 @@ class Manager:
             "scores": self.scores,
             "replay_file": self._replay_filename,
             "outcome": self.world.outcome,
+            "has_tainted_agent": self.has_tainted_agent,
         }
 
     @property
@@ -145,6 +149,7 @@ class Manager:
                     "agent_id": agent_id,
                     "agent_path": agent.agent_path,
                     "tainted": agent.tainted,
+                    "tainted_reason": agent.tainted_reason,
                 }
             )
 

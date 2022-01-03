@@ -1,5 +1,6 @@
 import itertools
 import json
+import logging
 import lzma
 import os
 import shutil
@@ -16,6 +17,7 @@ from dotenv import load_dotenv
 from colosseum.games.cherry_picker.game import Game as CherryPickerGame
 from colosseum.games.chess.game import Game as ChessGame
 from colosseum.games.food_catcher.game import World as FoodCatcherGame
+from colosseum.utils import get_internal_id
 
 from .agent import Agent
 from .match import match
@@ -104,6 +106,13 @@ class GameRunner:
         self._raw_result = result
         self._result = result["scores"]
         self._replay_file = result["replay_file"]
+        has_tainted_agent = result["has_tainted_agent"]
+        outcome = result["outcome"]
+
+        if has_tainted_agent:
+            end_reason = "TAINTED"
+        else:
+            end_reason = "RULES"
 
         if self.n_players != 2:
             raise RuntimeError("only pairwise matches are supported at this point")
@@ -111,22 +120,23 @@ class GameRunner:
         if self.has_winner:
             winner = self._get_player_by_agent_path(self.rankings[0]["agent_path"])
             loser = self._get_player_by_agent_path(self.rankings[1]["agent_path"])
-            self._register_match([winner, loser], 1)
+            self._register_match([winner, loser], 1, outcome, end_reason)
 
         if self.is_draw:
-            self._register_match(self._players, 0.5)
+            self._register_match(self._players, 0.5, outcome, end_reason)
 
-    def _register_match(self, participants, result):
+    def _register_match(self, participants, result, outcome, end_reason):
         _end_time = time()
         duration = _end_time - self._start_time
         payload = {
             "errors": self._error_payload(self._raw_result),
             "result": result,
             "ran": True,
-            "participants": [p.id for p in participants],
             "player1": participants[0].id,
             "player2": participants[1].id,
             "duration": duration,
+            "end_reason": end_reason,
+            "outcome": outcome,
         }
         response = requests.patch(
             API_URL + f"matches/{self._match['id']}/",
@@ -188,13 +198,6 @@ class MatchRunner:
 
         match_data = get_match(next_match["id"])
 
-        participant_ids = match_data["participants"]
-        participants = [
-            Participant(participant_id) for participant_id in participant_ids
-        ]
-
-        agents = [Agent(p.agent_path, id=p.id) for p in participants]
-
         game_name = match_data["game"]["name"]
 
         if game_name == "food_catcher":
@@ -205,6 +208,16 @@ class MatchRunner:
             game = ChessGame()
         else:
             raise ValueError(f"{game_name} is not a supported game!")
+
+        participant_ids = match_data["participants"]
+        participants = [
+            Participant(participant_id) for participant_id in participant_ids
+        ]
+
+        agents = [
+            Agent(p.agent_path, id=p.id, time_config=game.initial_config)
+            for p in participants
+        ]
 
         game_runner = GameRunner(*participants, match=match_data)
         game_runner.set_results(match(game, agents=agents))
@@ -256,4 +269,7 @@ def get_participant(participant_id):
 
 
 def online_tournament(tournament_id=None):
+    logging.basicConfig(
+        filename=f"online_tournament_{get_internal_id()}.log", level=logging.INFO
+    )
     MatchRunner.run_next_match()

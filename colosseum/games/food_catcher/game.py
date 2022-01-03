@@ -7,16 +7,14 @@ import numpy as np
 
 from colosseum.utils import object_distance, random_id
 
+from ..game import BaseGame
 from .actor import Actor
 from .base import Base
 from .config import Config
 from .food import Food
 
 
-logging.basicConfig(level=logging.WARNING)
-
-
-class World:
+class World(BaseGame):
     def __init__(self, config=None):
         if not config:
             config = Config
@@ -31,6 +29,7 @@ class World:
         self.actors = []
         self.dead_entities = []
         self.agents = set()
+        self.agent_ids = set()
 
         self.name = self._config.game_name
 
@@ -55,11 +54,12 @@ class World:
         logging.info("food_catcher initialized")
 
     def register_agent(self, agent):
-        if agent.id in self.agents:
+        if agent.id in self.agent_ids:
             logging.warning(f"tried to register {agent.id} more than once")
             return
 
-        self.agents.add(agent.id)
+        self.agents.add(agent)
+        self.agent_ids.add(agent.id)
 
         x, y = self._get_base_spawn_slot()
 
@@ -167,7 +167,7 @@ class World:
     def scores(self):
         data = {}
 
-        for agent_id in self.agents:
+        for agent_id in self.agent_ids:
             bases = [base for base in self.bases if base.owner_id == agent_id]
             score = sum([base.food for base in bases])
             data[agent_id] = score
@@ -180,11 +180,17 @@ class World:
 
     @property
     def outcome(self):
-        return {}
+        termination = "GAME_ENDED"
+        if self.has_tainted_agent:
+            termination = "TAINTED"
+
+        return {
+            "termination": termination,
+        }
 
     def process_agent_actions(self, agent_action):
         owner_id = agent_action.get("agent_id")
-        if owner_id not in self.agents:
+        if owner_id not in self.agent_ids:
             logging.warning(f"agent with id {owner_id} is not registered. Ignoring")
             return
 
