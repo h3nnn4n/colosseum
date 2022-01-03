@@ -54,19 +54,12 @@ class World(BaseGame):
         logging.info("food_catcher initialized")
 
     def register_agent(self, agent):
-        if agent.id in self.agent_ids:
-            logging.warning(f"tried to register {agent.id} more than once")
-            return
-
-        self.agents.add(agent)
-        self.agent_ids.add(agent.id)
+        super().register_agent(agent)
 
         x, y = self._get_base_spawn_slot()
 
         self._spawn_base(agent.id, (x, y))
         self._spawn_actor(agent.id, (x, y))
-
-        logging.info(f"agent {agent.id} registered")
 
     def _spawn_food(self):
         while len(self.foods) < self._max_food_sources:

@@ -18,16 +18,10 @@ class Game(BaseGame):
         self.agent_worlds = {}
 
     def register_agent(self, agent):
-        if agent.id in self.agent_ids:
-            logging.warning(f"tried to register {agent.id} more than once")
-            return
+        super().register_agent(agent)
 
-        self.agents.add(agent)
-        self.agent_ids.add(agent.id)
         self.agent_worlds[agent.id] = FoodCatcherWorld(config=self._config)
         self.agent_worlds[agent.id].register_agent(agent)
-
-        logging.info(f"agent {agent.id} registered")
 
     @property
     def finished(self):

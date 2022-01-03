@@ -29,15 +29,10 @@ class Game(BaseGame):
         logging.info("chess initialized")
 
     def register_agent(self, agent):
-        if agent.id in self.agent_ids:
-            logging.warning(f"tried to register {agent.id} more than once")
-            return
+        super().register_agent(agent)
 
         # FIXME: Handle this gracefully
-        assert len(self.agents) < 2
-
-        self.agent_ids.add(agent.id)
-        self.agents.add(agent)
+        assert len(self.agents) <= 2
         agent_color = choice(self._colors_left)
         self._colors_left.remove(agent_color)
         self.agent_color[agent.id] = agent_color
