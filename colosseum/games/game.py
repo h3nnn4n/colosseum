@@ -23,6 +23,25 @@ class BaseGame:
             if not k.startswith("_")
         }
 
+    @property
+    def state(self):
+        raise NotImplementedError
+
+    @property
+    def outcome(self):
+        raise NotImplementedError
+
+    @property
+    def scores(self):
+        raise NotImplementedError
+
+    @property
+    def finished(self):
+        raise NotImplementedError
+
+    def update(self, agent_actions):
+        raise NotImplementedError
+
     def _get_agent(self, id):
         return next((agent for agent in self.agents if agent.id == id), None)
 
