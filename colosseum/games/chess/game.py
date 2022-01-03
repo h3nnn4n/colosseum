@@ -21,7 +21,7 @@ class Game(BaseGame):
         self.agent_by_color = {}
         self._colors_left = ["WHITE", "BLACK"]
 
-        self._config = Config()
+        self._config = Config
         self.name = self._config.game_name
         self._board = chess.Board()
         self._turn = "WHITE"
@@ -136,14 +136,6 @@ class Game(BaseGame):
     @property
     def _legal_moves(self):
         return self._board.legal_moves
-
-    @property
-    def config(self):
-        return {
-            "game_name": self._config.game_name,
-            "update_mode": self._config.update_mode,
-            "n_epochs": self._config.n_epochs,
-        }
 
     @property
     def scores(self):

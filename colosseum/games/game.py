@@ -15,6 +15,14 @@ class BaseGame:
                 return True
         return False
 
+    @property
+    def config(self):
+        return {
+            k: v
+            for k, v in dict(self._config.__dict__).items()
+            if not k.startswith("_")
+        }
+
     def _get_agent(self, id):
         return next((agent for agent in self.agents if agent.id == id), None)
 

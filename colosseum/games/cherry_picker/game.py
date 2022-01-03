@@ -38,14 +38,6 @@ class Game(BaseGame):
         }
 
     @property
-    def config(self):
-        return {
-            k: v
-            for k, v in dict(self._config.__dict__).items()
-            if not k.startswith("_")
-        }
-
-    @property
     def scores(self):
         data = {}
 
