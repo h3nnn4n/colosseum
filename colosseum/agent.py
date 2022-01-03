@@ -96,7 +96,7 @@ class Agent:
             payload = {"ping": "foobar"}
             self._child_process.sendline(json.dumps(payload))
         except Exception as e:
-            logging.info(f"failed to send ping payload {payload} {e}")
+            self.logger.info(f"failed to send ping payload {payload} {e}")
             self._log_error_count()
             self._errors.append(
                 {
