@@ -7,16 +7,14 @@ import numpy as np
 
 from colosseum.utils import object_distance, random_id
 
+from ..game import BaseGame
 from .actor import Actor
 from .base import Base
 from .config import Config
 from .food import Food
 
 
-logging.basicConfig(level=logging.WARNING)
-
-
-class World:
+class World(BaseGame):
     def __init__(self, config=None):
         if not config:
             config = Config

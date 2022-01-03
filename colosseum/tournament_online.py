@@ -1,5 +1,6 @@
 import itertools
 import json
+import logging
 import lzma
 import os
 import shutil
@@ -16,6 +17,7 @@ from dotenv import load_dotenv
 from colosseum.games.cherry_picker.game import Game as CherryPickerGame
 from colosseum.games.chess.game import Game as ChessGame
 from colosseum.games.food_catcher.game import World as FoodCatcherGame
+from colosseum.utils import get_internal_id
 
 from .agent import Agent
 from .match import match
@@ -188,13 +190,6 @@ class MatchRunner:
 
         match_data = get_match(next_match["id"])
 
-        participant_ids = match_data["participants"]
-        participants = [
-            Participant(participant_id) for participant_id in participant_ids
-        ]
-
-        agents = [Agent(p.agent_path, id=p.id) for p in participants]
-
         game_name = match_data["game"]["name"]
 
         if game_name == "food_catcher":
@@ -205,6 +200,16 @@ class MatchRunner:
             game = ChessGame()
         else:
             raise ValueError(f"{game_name} is not a supported game!")
+
+        participant_ids = match_data["participants"]
+        participants = [
+            Participant(participant_id) for participant_id in participant_ids
+        ]
+
+        agents = [
+            Agent(p.agent_path, id=p.id, time_config=game.initial_config)
+            for p in participants
+        ]
 
         game_runner = GameRunner(*participants, match=match_data)
         game_runner.set_results(match(game, agents=agents))
@@ -256,4 +261,7 @@ def get_participant(participant_id):
 
 
 def online_tournament(tournament_id=None):
+    logging.basicConfig(
+        filename=f"online_tournament_{get_internal_id()}.log", level=logging.INFO
+    )
     MatchRunner.run_next_match()

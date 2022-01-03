@@ -20,7 +20,9 @@ parser.add_argument("--agent", action="append", required=True, type=str)
 
 
 def main(game_name, agent_paths):
-    logging.basicConfig(filename=f"match_{get_internal_id()}.log", level=logging.INFO)
+    logging.basicConfig(
+        filename=f"skirmish_{get_internal_id()}.log", level=logging.INFO
+    )
 
     if game_name == "chess":
         game = ChessGame()
