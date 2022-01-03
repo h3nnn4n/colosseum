@@ -190,13 +190,6 @@ class MatchRunner:
 
         match_data = get_match(next_match["id"])
 
-        participant_ids = match_data["participants"]
-        participants = [
-            Participant(participant_id) for participant_id in participant_ids
-        ]
-
-        agents = [Agent(p.agent_path, id=p.id) for p in participants]
-
         game_name = match_data["game"]["name"]
 
         if game_name == "food_catcher":
@@ -207,6 +200,16 @@ class MatchRunner:
             game = ChessGame()
         else:
             raise ValueError(f"{game_name} is not a supported game!")
+
+        participant_ids = match_data["participants"]
+        participants = [
+            Participant(participant_id) for participant_id in participant_ids
+        ]
+
+        agents = [
+            Agent(p.agent_path, id=p.id, time_config=game.initial_config)
+            for p in participants
+        ]
 
         game_runner = GameRunner(*participants, match=match_data)
         game_runner.set_results(match(game, agents=agents))

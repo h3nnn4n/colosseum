@@ -20,3 +20,7 @@ class Config:
     actor_speed = 1
     actor_damage = 5
     actor_max_health = 50
+
+    # Time settings
+    step_time_limit = 200  # 200 ms
+    step_limit_pool = 2000  # 2 seconds
