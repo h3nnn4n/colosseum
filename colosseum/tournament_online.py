@@ -106,6 +106,13 @@ class GameRunner:
         self._raw_result = result
         self._result = result["scores"]
         self._replay_file = result["replay_file"]
+        has_tainted_agent = result["has_tainted_agent"]
+        outcome = result["outcome"]
+
+        if has_tainted_agent:
+            end_reason = "TAINTED"
+        else:
+            end_reason = "RULES"
 
         if self.n_players != 2:
             raise RuntimeError("only pairwise matches are supported at this point")
@@ -113,22 +120,23 @@ class GameRunner:
         if self.has_winner:
             winner = self._get_player_by_agent_path(self.rankings[0]["agent_path"])
             loser = self._get_player_by_agent_path(self.rankings[1]["agent_path"])
-            self._register_match([winner, loser], 1)
+            self._register_match([winner, loser], 1, outcome, end_reason)
 
         if self.is_draw:
-            self._register_match(self._players, 0.5)
+            self._register_match(self._players, 0.5, outcome, end_reason)
 
-    def _register_match(self, participants, result):
+    def _register_match(self, participants, result, outcome, end_reason):
         _end_time = time()
         duration = _end_time - self._start_time
         payload = {
             "errors": self._error_payload(self._raw_result),
             "result": result,
             "ran": True,
-            "participants": [p.id for p in participants],
             "player1": participants[0].id,
             "player2": participants[1].id,
             "duration": duration,
+            "end_reason": end_reason,
+            "outcome": outcome,
         }
         response = requests.patch(
             API_URL + f"matches/{self._match['id']}/",

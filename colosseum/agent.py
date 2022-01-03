@@ -34,6 +34,7 @@ class Agent:
         self._set_agent_id = None
         self._errors = []
         self._tainted = False
+        self._tainted_reason = None
         self._max_errors_allowed = 10
 
         self._time_config = time_config
@@ -251,6 +252,7 @@ class Agent:
         # TODO: Report why the agent got tainted
         if self.error_count > self._max_errors_allowed:
             # Too many errors
+            self._tainted_reason = "TOO_MANY_ERRORS"
             self._tainted = True
 
         if self._agent_started is False:
@@ -259,22 +261,30 @@ class Agent:
 
         if self._successful_ping is False:
             # Agent failed to ack ping
+            self._tainted_reason = "PING_FAIL"
             self._tainted = True
 
         if self._set_config is False:
             # Agent failed to ack set config
+            self._tainted_reason = "SET_CONFIG_FAIL"
             self._tainted = True
 
         if self._set_agent_id is False:
             # Agent failed to ack set agent id
+            self._tainted_reason = "SET_AGENT_ID_FAIL"
             self._tainted = True
 
         self._step_duration_check()
         if self._overtime:
             # Agent took too long to respond
+            self._tainted_reason = "TIMEOUT"
             self._tainted = True
 
         return self._tainted
+
+    @property
+    def tainted_reason(self):
+        return self._tainted_reason
 
     def _tick(self):
         if self.t_end is not None:
