@@ -120,12 +120,12 @@ class GameRunner:
         if self.has_winner:
             winner = self._get_player_by_agent_path(self.rankings[0]["agent_path"])
             loser = self._get_player_by_agent_path(self.rankings[1]["agent_path"])
-            self._register_match([winner, loser], 1, outcome, end_reason)
+            self._register_match([winner, loser], 1, outcome, end_reason, result)
 
         if self.is_draw:
-            self._register_match(self._players, 0.5, outcome, end_reason)
+            self._register_match(self._players, 0.5, outcome, end_reason, result)
 
-    def _register_match(self, participants, result, outcome, end_reason):
+    def _register_match(self, participants, result, outcome, end_reason, raw_result):
         _end_time = time()
         duration = _end_time - self._start_time
         payload = {
@@ -137,6 +137,7 @@ class GameRunner:
             "duration": duration,
             "end_reason": end_reason,
             "outcome": outcome,
+            "_raw": raw_result,
         }
         response = requests.patch(
             API_URL + f"matches/{self._match['id']}/",
