@@ -165,13 +165,13 @@ class World(BaseGame):
 
     @property
     def outcome(self):
-        termination = "GAME_ENDED"
-        if self.has_tainted_agent:
-            termination = "TAINTED"
+        outcome = {"termination": "GAME_ENDED"}
 
-        return {
-            "termination": termination,
-        }
+        if self.has_tainted_agent:
+            outcome["termination"] = "TAINTED"
+            outcome["tainted_reason"] = self.tainted_agents[0].tainted_reason
+
+        return outcome
 
     def process_agent_actions(self, agent_action):
         owner_id = agent_action.get("agent_id")
