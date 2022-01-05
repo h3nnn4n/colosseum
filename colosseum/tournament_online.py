@@ -137,7 +137,7 @@ class GameRunner:
             "duration": duration,
             "end_reason": end_reason,
             "outcome": outcome,
-            "_raw": raw_result,
+            "raw_result": raw_result,
         }
         response = requests.patch(
             API_URL + f"matches/{self._match['id']}/",
