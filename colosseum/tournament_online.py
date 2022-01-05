@@ -144,11 +144,13 @@ class GameRunner:
             json=payload,
             headers={"authorization": f"token {API_TOKEN}"},
         )
+
         if response.status_code >= 400:
             print(
                 f"got error {response.status_code} when trying to update match: {response.text}"
             )
-        upload_match_replay(self._match["id"], self._replay_file)
+        else:
+            upload_match_replay(self._match["id"], self._replay_file)
 
     @property
     def players(self):
