@@ -53,11 +53,16 @@ class Game(BaseGame):
 
     @property
     def outcome(self):
-        return {
+        outcome = {
             "termination": self._termination,
             "winner": self._winner_color,
             "result": self._result,
         }
+
+        if tainted_reason := self._tainted_reason:
+            outcome["tainted_reason"] = tainted_reason
+
+        return outcome
 
     @property
     def _termination(self):
@@ -65,6 +70,18 @@ class Game(BaseGame):
             return outcome.termination.__str__().split(".")[-1]
 
         return "TAINTED"
+
+    @property
+    def _tainted_reason(self):
+        white_agent = self._get_agent(self.agent_by_color["WHITE"])
+        black_agent = self._get_agent(self.agent_by_color["BLACK"])
+
+        # FIXME: What if both agents are tainted?
+        if white_agent.tainted:
+            return white_agent.tainted_reason
+
+        if black_agent.tainted:
+            return black_agent.tainted_reason
 
     @property
     def _result(self):

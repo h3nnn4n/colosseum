@@ -9,6 +9,10 @@ class BaseGame:
         return self._config
 
     @property
+    def tainted_agents(self):
+        return [agent for agent in self.agents if agent.tainted]
+
+    @property
     def has_tainted_agent(self):
         for agent in self.agents:
             if agent.tainted:
