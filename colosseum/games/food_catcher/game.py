@@ -152,10 +152,13 @@ class World(BaseGame):
     def scores(self):
         data = {}
 
-        for agent_id in self.agent_ids:
-            bases = [base for base in self.bases if base.owner_id == agent_id]
-            score = sum([base.food for base in bases])
-            data[agent_id] = score
+        for agent in self.agents:
+            if agent.tainted:
+                data[agent.id] = -1
+            else:
+                bases = [base for base in self.bases if base.owner_id == agent.id]
+                score = sum([base.food for base in bases])
+                data[agent.id] = score
 
         return data
 

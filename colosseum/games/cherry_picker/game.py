@@ -41,8 +41,11 @@ class Game(BaseGame):
     def scores(self):
         data = {}
 
-        for agent_id in self.agent_ids:
-            data[agent_id] = self.agent_worlds[agent_id].scores[agent_id]
+        for agent in self.agents:
+            if agent.tainted:
+                data[agent.id] = -1
+            else:
+                data[agent.id] = self.agent_worlds[agent.id].scores[agent.id]
 
         return data
 
