@@ -70,9 +70,6 @@ class Participant:
 
         if not self._agent_path:
             for dirpath, subdirs, files in os.walk(base_path):
-                if self._agent_path is not None:
-                    break
-
                 for file in files:
                     if file == "Dockerfile" and USE_DOCKER:
                         self._agent_path = os.path.join(dirpath, file)
@@ -80,7 +77,7 @@ class Participant:
                         print(f"found DOCKER entrypoint at {self._agent_path}")
                         break
 
-                    if file == "agent.py" and not USE_DOCKER:
+                    if file == "agent.py" and not self._agent_path:
                         self._agent_path = os.path.join(dirpath, file)
                         self._agent_path = self._agent_path.replace(" ", "_")
                         print(f'found "agent.py" entrypoint at {self._agent_path}')
