@@ -16,6 +16,11 @@ self_id = str(uuid.uuid4())
 logging.basicConfig(filename=f"network_wrapper_{self_id}.log", level=logging.DEBUG)
 
 
+def _exchange_data(data):
+    response = requests.post("http://localhost:8080", json=json.loads(data))
+    return response.content.decode()
+
+
 def main(agent_path, agent_id):
     logging.info(f"running with {agent_path=} {agent_id=}")
     http_agent = HttpAgent(agent_path, agent_id)
@@ -50,14 +55,12 @@ class HttpAgent:
             logging.debug("2")
             logging.debug(f"sending to agent: {data_out}")
             try:
-                response = requests.post(
-                    "http://localhost:8080", json=json.loads(data_out)
-                )
+                data_in = _exchange_data(data_out)
             except Exception as e:
                 logging.exception(e)
+
             logging.debug("3")
 
-            data_in = response.content.decode()
             logging.debug("4")
             logging.debug(f"got from agent: {data_in}")
             sys.stdout.write(data_in)
