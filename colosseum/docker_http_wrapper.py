@@ -71,9 +71,11 @@ class HttpAgent:
     def start_container(self, tag):
         logging.info(f"starting container with {tag=}")
         cmd = "docker run -p 127.0.0.1:8080:80/tcp --rm=true --detach " + tag
-        logging.info(f"starting server with {cmd}")
+        logging.info(f"starting container with {cmd}")
         proc = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE)
-        return proc.stdout.readline().decode()[:-1]
+        output = proc.stdout.readline().decode()[:-1]
+        logging.debug(f"docker start returned {output=}")
+        return output
 
     def kill_container(self, container_id):
         logging.info(f"killing container with {container_id=}")
