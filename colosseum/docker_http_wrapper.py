@@ -9,6 +9,7 @@ import tempfile
 import uuid
 
 import requests
+from retrying import retry
 
 
 self_id = str(uuid.uuid4())
@@ -16,6 +17,7 @@ self_id = str(uuid.uuid4())
 logging.basicConfig(filename=f"network_wrapper_{self_id}.log", level=logging.DEBUG)
 
 
+@retry(wait_exponential_multiplier=10, wait_exponential_max=5000)
 def _exchange_data(data):
     response = requests.post("http://localhost:8080", json=json.loads(data))
     return response.content.decode()
