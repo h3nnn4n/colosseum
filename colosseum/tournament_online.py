@@ -3,13 +3,14 @@ import json
 import logging
 import lzma
 import os
+import random
 import shutil
 import tarfile
 import urllib
 import uuid
 from enum import Enum
 from pathlib import Path
-from time import time
+from time import sleep, time
 
 import requests
 from dotenv import load_dotenv
@@ -193,7 +194,10 @@ class MatchRunner:
     def run_next_match(cls):
         next_match = get_next_match()
         if not next_match.get("id"):
-            # This is usually a failure on the producer side. We just do nothing
+            # This is usually a failure on the producer side, or there are no
+            # matches left to play. We sleep for ~1 second and check again if
+            # there is a new match to be played.
+            sleep(random.uniform(0.9, 1.1))
             return
 
         match_data = get_match(next_match["id"])
