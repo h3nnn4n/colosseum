@@ -7,6 +7,7 @@ import shlex
 import subprocess
 import tempfile
 import uuid
+from random import randint
 
 import requests
 from retrying import retry
@@ -14,12 +15,16 @@ from retrying import retry
 
 self_id = str(uuid.uuid4())
 
+DOCKER_AGENT_PORT = randint(1024, 65535)
+
 logging.basicConfig(filename=f"network_wrapper_{self_id}.log", level=logging.DEBUG)
 
 
 @retry(wait_exponential_multiplier=10, wait_exponential_max=5000)
 def _exchange_data(data):
-    response = requests.post("http://localhost:8080", json=json.loads(data))
+    response = requests.post(
+        f"http://localhost:{DOCKER_AGENT_PORT}", json=json.loads(data)
+    )
     return response.content.decode()
 
 
@@ -72,7 +77,10 @@ class HttpAgent:
 
     def start_container(self, tag):
         logging.info(f"starting container with {tag=}")
-        cmd = "docker run -p 127.0.0.1:8080:80/tcp --rm=true --detach " + tag
+        cmd = (
+            f"docker run -p 127.0.0.1:{DOCKER_AGENT_PORT}:80/tcp --rm=true --detach "
+            + tag
+        )
         logging.info(f"starting container with {cmd}")
         proc = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE)
         output = proc.stdout.readline().decode()[:-1]
