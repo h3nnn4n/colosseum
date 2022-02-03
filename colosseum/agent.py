@@ -320,4 +320,6 @@ class Agent:
             return PopenSpawn([self._agent_path])
 
         # Docker agent
-        return PopenSpawn(["./colosseum/network_wrapper.py", self._agent_path, self.id])
+        return PopenSpawn(
+            ["./colosseum/docker_http_wrapper.py", self._agent_path, self.id]
+        )
