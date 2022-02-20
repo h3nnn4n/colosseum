@@ -430,14 +430,6 @@ python-versions = "*"
 six = ">=1.7.0"
 
 [[package]]
-name = "simple-elo"
-version = "0.1.1"
-description = "Library implementing simple functions to implement the Elo system"
-category = "main"
-optional = false
-python-versions = ">=3.7,<4.0"
-
-[[package]]
 name = "six"
 version = "1.16.0"
 description = "Python 2 and 3 compatibility utilities"
@@ -530,7 +522,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 [metadata]
 lock-version = "1.1"
 python-versions = "3.10.*"
-content-hash = "b58e7a471d9c74c9c62edfa2dda4181d7d2a9eaace82a6666261da5ecfd69e88"
+content-hash = "9f794e23bd667092bd6e7a27a77204c84fb649680449440fbb79cde2c95ba5bc"
 
 [metadata.files]
 appnope = [
@@ -705,10 +697,6 @@ requests = [
 ]
 retrying = [
     {file = "retrying-1.3.3.tar.gz", hash = "sha256:08c039560a6da2fe4f2c426d0766e284d3b736e355f8dd24b37367b0bb41973b"},
-]
-simple-elo = [
-    {file = "simple-elo-0.1.1.tar.gz", hash = "sha256:817f60a5efafd930746f03fec04be01243a093427f405d690145363bc021c58b"},
-    {file = "simple_elo-0.1.1-py3-none-any.whl", hash = "sha256:fee8da75eb2a741fcea3c1c8fee71be731c52575236720bc1c248c5f2347c350"},
 ]
 six = [
     {file = "six-1.16.0-py2.py3-none-any.whl", hash = "sha256:8abb2f1d86890a2dfb989f9a77cfcfd3e47c2a354b01111771326f8aa26e0254"},
