@@ -4,9 +4,8 @@ import itertools
 from collections import defaultdict
 from pathlib import Path
 
-from simple_elo import compute_updated_ratings
-
 from colosseum.games.food_catcher.game import World
+from colosseum.simple_elo import compute_updated_ratings
 
 from .match import match
 
