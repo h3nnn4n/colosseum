@@ -188,7 +188,7 @@ class GameRunner:
 
 class MatchRunner:
     def __init__(self):
-        pass
+        print(f"{USE_DOCKER=}")
 
     @classmethod
     def run_next_match(cls):
