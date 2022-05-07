@@ -13,6 +13,7 @@ from pathlib import Path
 from time import sleep, time
 
 import requests
+from decouple import config
 from dotenv import load_dotenv
 
 from colosseum.games.cherry_picker.game import Game as CherryPickerGame
@@ -29,7 +30,7 @@ load_dotenv()
 
 API_URL = os.environ.get("API_URL")
 API_TOKEN = os.environ.get("API_TOKEN")
-USE_DOCKER = os.environ.get("USE_DOCKER", False)
+USE_DOCKER = config("USE_DOCKER", default=False, cast=bool)
 AGENT_FOLDER = "agents_tmp"
 
 
