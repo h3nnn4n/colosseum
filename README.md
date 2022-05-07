@@ -13,32 +13,27 @@ and have fun.
 ## Features
 
 - Round robin tournament formats
+- Seasons with multiple tournaments
 - Open format using json for data representation and stdin / stdout to communicate
 - Sample agents
 - Python SDK
-- Sample game
-- Replay Renderer
+- Sample games
+- Replay visualization tool
 - Headless mode
 - Website to interact with the automated tournament system
   - Register and upload new agents
   - Persistent elo ratings
-  - Downloadable replays
+  - Download replays or watch them in the browser
 - Automated runner to run tournament matches
-
-## Planned
-
-- Swiss tournament format
-- Bracket tournament format
-- Seasons
 
 ## Environment
 
 The project is spread across multiple repositories:
-- [Automated Tournaments](https://github.com/h3nnn4n/colosseum)
+- [Tournament Engine](https://github.com/h3nnn4n/colosseum)
+- [Website / API](https://github.com/h3nnn4n/colosseum_website)
 - [Sample Agents](https://github.com/h3nnn4n/colosseum_agents)
-- [Renderer](https://github.com/h3nnn4n/colosseum_renderer)
+- [Replay Renderer](https://github.com/h3nnn4n/colosseum_renderer)
 - [Agent SDK](https://github.com/h3nnn4n/colosseum_sdk)
-- [Website Source](https://github.com/h3nnn4n/colosseum_website)
 - [Infra](https://github.com/h3nnn4n/colosseum_infra)
 
 # Running locally
