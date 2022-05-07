@@ -193,6 +193,7 @@ class MatchRunner:
 
     @classmethod
     def run_next_match(cls):
+        send_heartbeat()
         next_match = get_next_match()
         if not next_match.get("id"):
             # This is usually a failure on the producer side, or there are no
@@ -271,6 +272,14 @@ def get_participant(participant_id):
         headers={"authorization": f"token {API_TOKEN}"},
     )
     return json.loads(response.text)
+
+
+def send_heartbeat():
+    print("sending heartbeat")
+    requests.post(
+        API_URL + "colosseum_heartbeat/",
+        headers={"authorization": f"token {API_TOKEN}"},
+    )
 
 
 def online_tournament(tournament_id=None):
