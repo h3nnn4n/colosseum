@@ -1,9 +1,9 @@
-name: Deploy
+name: Staging Deploy
 
 on:
   push:
     branches:
-      - production
+      - develop
 
 jobs:
   deploy:
@@ -29,6 +29,6 @@ jobs:
       - name: Deploy
         run: |
           cd ansible
-          ansible-playbook -i environments/production colosseum_workers.yml
+          ansible-playbook -i environments/staging colosseum_workers.yml
         env:
           VAULT_PASSWORD: "${{ secrets.VAULT_PASSWORD }}"
