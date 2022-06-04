@@ -1,0 +1,34 @@
+name: Redeployer
+
+on:
+  schedule:
+    - cron:  '11 * * * *'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          repository: "h3nnn4n/colosseum_infra"
+
+      - name: Setup ssh
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          known_hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
+          if_key_exists: fail
+
+      - name: Install requirements
+        run: |
+          cd ansible
+          ansible-galaxy install -r requirements.yml
+
+      - name: Redeploy
+        run: |
+          cd ansible
+          ansible-playbook -i environments/production redis.yml colosseum_workers.yml celery_workers.yml web_workers.yml
+          ansible-playbook -i environments/staging    redis.yml colosseum_workers.yml celery_workers.yml web_workers.yml
+        env:
+          VAULT_PASSWORD: "${{ secrets.VAULT_PASSWORD }}"
