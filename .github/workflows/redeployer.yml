@@ -28,7 +28,7 @@ jobs:
       - name: Redeploy
         run: |
           cd ansible
-          ansible-playbook -i environments/production redis.yml colosseum_workers.yml celery_workers.yml web_workers.yml
-          ansible-playbook -i environments/staging    redis.yml colosseum_workers.yml celery_workers.yml web_workers.yml
+          ansible-playbook -i environments/production redis.yml colosseum_workers.yml celery_workers.yml web_servers.yml
+          ansible-playbook -i environments/staging    redis.yml colosseum_workers.yml celery_workers.yml web_servers.yml
         env:
           VAULT_PASSWORD: "${{ secrets.VAULT_PASSWORD }}"
