@@ -14,7 +14,7 @@ class Config:
     spawn_actor_cost = 100
     make_base_cost = 500
     base_spawn_border_offset = 0.15
-    n_epochs = 5000
+    n_epochs = 10000
 
     # Actor Settings
     actor_speed = 1
