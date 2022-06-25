@@ -8,13 +8,18 @@ from colosseum.tournament_online import online_tournament
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run tournament matches from an API")
     parser.add_argument("--loop", action="store_true", help="Runs in a loop")
-    args = vars(parser.parse_args())
+    parser.add_argument(
+        "--game", action="store", help="Specify a particular game to be ran"
+    )
+    kwargs = vars(parser.parse_args())
 
-    if not args.get("loop"):
-        online_tournament()
-    else:
+    loop = kwargs.pop("loop")
+
+    if loop:
         while True:
             try:
-                online_tournament()
-            except Exception:
-                pass
+                online_tournament(**kwargs)
+            except Exception as e:
+                print(f"tournament failed with: {e}")
+    else:
+        online_tournament(**kwargs)
