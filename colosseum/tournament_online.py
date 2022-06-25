@@ -192,7 +192,7 @@ class MatchRunner:
         print(f"{USE_DOCKER=}")
 
     @classmethod
-    def run_next_match(cls):
+    def run_next_match(cls, game=None):
         send_heartbeat()
         next_match = get_next_match()
         if not next_match.get("id"):
@@ -205,6 +205,13 @@ class MatchRunner:
         match_data = get_match(next_match["id"])
 
         game_name = match_data["game"]["name"]
+
+        if game and game_name != game:
+            # HACK: This is dumb, because we are taking thinks out of the queue
+            # and throwing it away. If we ever wanna super high throuput for a
+            # particular game it can basically prevent other games from running
+            print(f"skipping match {game_name}:{match_data['id']}. Only playing {game}")
+            return
 
         if game_name == "food_catcher":
             game = FoodCatcherGame()
@@ -282,8 +289,8 @@ def send_heartbeat():
     )
 
 
-def online_tournament(tournament_id=None):
+def online_tournament(**kwargs):
     logging.basicConfig(
         filename=f"online_tournament_{get_internal_id()}.log", level=logging.INFO
     )
-    MatchRunner.run_next_match()
+    MatchRunner.run_next_match(**kwargs)
