@@ -106,11 +106,16 @@ class Game(BaseGame):
             # If here is an outcome then the game ended due to a chess rule
             result = self._board.outcome().result()
             white, black = result.split("-")
-            if int(white) == 1:
-                return "WHITE"
-            elif int(black) == 1:
-                return "BLACK"
-            else:
+            try:
+                if int(white) == 1:
+                    return "WHITE"
+                elif int(black) == 1:
+                    return "BLACK"
+                else:
+                    raise RuntimeError(
+                        "Neither black or white won, and game wasn't a draw!"
+                    )
+            except ValueError:
                 return "DRAW"
 
         # Otherwise an agent got tainted
