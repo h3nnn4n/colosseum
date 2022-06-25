@@ -297,21 +297,32 @@ class Agent:
             raise RuntimeError("Called _tock without calling _tick first")
 
         self.t_end = time()
-        self._step_durations.append(self.t_end - self.t_start)
+        duration = self.t_end - self.t_start
+        self._step_durations.append(duration)
         self.t_start = None
         self.t_end = None
 
-    def _step_duration_check(self):
+        if duration > self._step_time_limit:
+            self.logger.warning(
+                f"agent {self.name} tick took {duration}. "
+                f"Limit is {self._step_time_limit}. "
+                f"Spent {duration - self._step_time_limit}. "
+                f"Time pool remaining {self._overtime_pool}"
+            )
+
+    @property
+    def _overtime_pool(self):
         times_above_limit = [
             x - self._step_time_limit
             for x in self._step_durations
             if x > self._step_time_limit
         ]
         overtime = sum(times_above_limit)
-        if overtime > self._step_limit_pool:
-            self.logger.warning(
-                f"agent is overtime by {overtime - self._step_limit_pool}"
-            )
+        return self._step_limit_pool - overtime
+
+    def _step_duration_check(self):
+        if self._overtime_pool < 0:
+            self.logger.warning(f"agent is overtime by {self._overtime_pool}")
             self._overtime = True
 
     def _boot_agent(self):
