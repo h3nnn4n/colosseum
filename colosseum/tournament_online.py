@@ -23,7 +23,7 @@ from colosseum.games.snake.game import Game as SnakeGame
 from colosseum.utils import get_internal_id
 
 from .agent import Agent
-from .match import match
+from .match import run_match
 
 
 load_dotenv()
@@ -236,7 +236,7 @@ class MatchRunner:
         ]
 
         game_runner = GameRunner(*participants, match=match_data)
-        game_runner.set_results(match(game, agents=agents))
+        game_runner.set_results(run_match(game, agents=agents))
 
 
 def get_next_match():
