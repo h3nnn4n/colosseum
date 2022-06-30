@@ -26,9 +26,10 @@ jobs:
     - name: Run smoke test
       run: |
         git clone https://github.com/h3nnn4n/colosseum_agents
-        poetry run python tournament.py \
-          colosseum_agents/food_catcher/dummy/agent.py \
+        poetry run python tournament.py                       \
+          --game food_catcher                                 \
+          colosseum_agents/food_catcher/dummy/agent.py        \
           colosseum_agents/food_catcher/exterminator/agent.py \
-          colosseum_agents/food_catcher/first/agent.py \
-          colosseum_agents/food_catcher/nearest/agent.py
+          colosseum_agents/food_catcher/first/agent.py        \
+          colosseum_agents/food_catcher/nearest/agent.py      \
           colosseum_agents/food_catcher/rusher/agent.py
