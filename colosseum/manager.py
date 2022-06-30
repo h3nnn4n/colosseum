@@ -7,6 +7,7 @@ from random import choices
 from .agent import Agent
 
 
+# TODO: ``world'' should be ``game''
 class Manager:
     def __init__(self, world, agent_paths=None, agents=None):
         self.world = world
@@ -35,8 +36,9 @@ class Manager:
                 string.ascii_lowercase + string.ascii_uppercase + string.digits, k=6
             )
         )
+        game_name = self.world.initial_config.game_name
         random_part = "_".join([now.strftime("%y%m%d_%H%M%S"), random_string])
-        self._replay_filename = f"replay_{self.world.name}_{random_part}.jsonl"
+        self._replay_filename = f"replay_{game_name}_{random_part}.jsonl"
 
     def start(self):
         for agent in self.agents:

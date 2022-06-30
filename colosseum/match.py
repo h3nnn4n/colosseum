@@ -1,7 +1,7 @@
 from colosseum.manager import Manager
 
 
-def match(world, **kwargs):
+def run_match(world, **kwargs):
     manager = Manager(world, **kwargs)
     manager.start()
     manager.loop()

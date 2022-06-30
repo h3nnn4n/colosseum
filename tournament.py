@@ -1,14 +1,20 @@
 #!/usr/bin/env python3
 
-import sys
+import argparse
 
 from colosseum.tournament import tournament
 
 
-def main():
-    agent_paths = sys.argv[1:]
+def main(game, agent_paths, mode):
+    print(f"GAME: {game}")
+    print(f"MODE: {mode}")
 
-    result = tournament(agent_paths, "ROUND_ROBIN")
+    print("agents:")
+    for participant in agent_paths:
+        print(f" -> {participant}")
+    print()
+
+    result = tournament(game, agent_paths, mode)
 
     for ranking, participant in result.rankings.items():
         print(
@@ -17,4 +23,21 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description="Run tournament locally with agents")
+    parser.add_argument(
+        "--game",
+        action="store",
+        help="Specify a particular game to be ran",
+        required=True,
+    )
+    parser.add_argument(
+        "--mode",
+        action="store",
+        default="ROUND_ROBIN",
+        help="Tournament mode. Options are ROUND_ROBIN, DOUBLE_ROUND_ROBIN and TRIPLE_ROUND_ROBIN. Default is ROUND_ROBIN",
+    )
+    parser.add_argument("agent_paths", nargs=argparse.REMAINDER)
+    kwargs = vars(parser.parse_args())
+    print(kwargs)
+
+    main(**kwargs)
