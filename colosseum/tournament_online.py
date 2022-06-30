@@ -22,7 +22,7 @@ from colosseum.games.food_catcher.game import World as FoodCatcherGame
 from colosseum.utils import get_internal_id
 
 from .agent import Agent
-from .match import match
+from .match import run_match
 
 
 load_dotenv()
@@ -233,7 +233,7 @@ class MatchRunner:
         ]
 
         game_runner = GameRunner(*participants, match=match_data)
-        game_runner.set_results(match(game, agents=agents))
+        game_runner.set_results(run_match(game, agents=agents))
 
 
 def get_next_match():
