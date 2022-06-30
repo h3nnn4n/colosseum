@@ -6,6 +6,9 @@ from colosseum.tournament import tournament
 
 
 def main(game, agent_paths, mode):
+    if len(agent_paths) == 0:
+        raise ValueError("No agents were provided")
+
     print(f"GAME: {game}")
     print(f"MODE: {mode}")
 
@@ -38,6 +41,5 @@ if __name__ == "__main__":
     )
     parser.add_argument("agent_paths", nargs=argparse.REMAINDER)
     kwargs = vars(parser.parse_args())
-    print(kwargs)
 
     main(**kwargs)
