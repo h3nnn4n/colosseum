@@ -27,6 +27,7 @@ jobs:
       run: |
         git clone https://github.com/h3nnn4n/colosseum_agents
         poetry run python tournament.py \
+          --game food_catcher
           colosseum_agents/food_catcher/dummy/agent.py \
           colosseum_agents/food_catcher/exterminator/agent.py \
           colosseum_agents/food_catcher/first/agent.py \
