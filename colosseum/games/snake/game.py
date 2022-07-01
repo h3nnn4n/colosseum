@@ -79,6 +79,9 @@ class Game(BaseGame):
             base_grid.append(row)
 
         for snake in self.snakes:
+            if snake.dead:
+                continue
+
             while True:
                 x, y = snake.position
                 base_grid[x][y].occupy(snake)
@@ -115,6 +118,7 @@ class Game(BaseGame):
         for agent_action in agent_actions:
             self._process_agent_action(agent_action)
 
+        self._update_snakes()
         self._update_foods()
 
     def _process_agent_action(self, agent_action):
@@ -131,6 +135,18 @@ class Game(BaseGame):
         if len(self.foods) < self._config.min_food_sources:
             # Spawn
             pass
+
+    def _update_snakes(self):
+        # Handle snake going OOB
+        for snake in self.snakes:
+            if snake.dead:
+                continue
+
+            if snake.position.x < 0 or snake.position.x >= self.grid_width:
+                snake.die()
+
+            if snake.position.y < 0 or snake.position.y >= self.grid_height:
+                snake.die()
 
     def _spawn_snake(self, agent_id):
         # TODO: We should make sure we do not generate invalid
@@ -160,6 +176,17 @@ class Snake:
         self.next_cell = None
         self.is_head = head
         self.position = position
+        self.alive = True
+
+    @property
+    def dead(self):
+        return not self.alive
+
+    def die(self):
+        if self.next_cell:
+            self.next_cell.die()
+
+        self.alive = False
 
     def update(self, direction):
         if not self.is_head:
