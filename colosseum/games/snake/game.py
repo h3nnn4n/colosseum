@@ -2,7 +2,7 @@ import itertools
 import logging
 from collections import defaultdict
 from enum import Enum
-from random import choice, shuffle, uniform
+from random import choice, randint, shuffle, uniform
 
 import chess
 
@@ -70,13 +70,22 @@ class Game(BaseGame):
 
     @property
     def _grid_state(self):
-        base_grid = [[Cell()] * self.grid_width] * self.grid_height
+        base_grid = []
+        for y in range(self.grid_height):
+            row = []
+            for x in range(self.grid_width):
+                row.append(Cell())
+
+            base_grid.append(row)
 
         for snake in self.snakes:
-            x, y = snake.position
-            base_grid[x][y].occupy(snake)
-            while snake.size > 1:
+            while True:
+                x, y = snake.position
+                base_grid[x][y].occupy(snake)
                 snake = snake.next_cell
+
+                if not snake:
+                    break
 
         return ["".join([cell.to_string for cell in row]) for row in base_grid]
 
@@ -127,7 +136,9 @@ class Game(BaseGame):
         # TODO: We should make sure we do not generate invalid
         # starting positions, like OOB, instant game over, overlapping
         # with itself or other snakes, over obstacles or food.
-        starting_position = Vector()
+        starting_position = Vector(
+            randint(0, self.grid_width - 1), randint(0, self.grid_height - 1)
+        )
         tail_position = starting_position.clone()
         tail_position.x -= 1
         snake = Snake(agent_id, position=starting_position, head=True)
@@ -144,8 +155,8 @@ class Snake:
     def __init__(self, agent_id, position=None, head=False):
         self.agent_id = agent_id
         self.size = 2
-        # FIXME: Should be based on spawn position
-        self.next_cell_direction = Direction.DOWN
+        # FIXME: We need a proper API
+        self.next_cell_direction = None
         self.next_cell = None
         self.is_head = head
         self.position = position
