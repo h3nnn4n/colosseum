@@ -218,4 +218,22 @@ class Cell:
         if not self.occupied:
             return " "
 
-        return "X"
+        if self.occupied_count > 1:
+            return "X"
+
+        occupee = self.occupied_by[0]
+
+        if occupee.is_head:
+            return "C"
+
+        match occupee.next_cell_direction:
+            case Direction.DOWN:
+                return "V"
+            case Direction.UP:
+                return "^"
+            case Direction.RIGHT:
+                return ">"
+            case Direction.LEFT:
+                return "<"
+
+        return "S"
