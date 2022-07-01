@@ -62,9 +62,13 @@ class Game(BaseGame):
 
     @property
     def outcome(self):
-        return {
-            # foo
-        }
+        outcome = {"termination": "GAME_ENDED"}
+
+        if self.has_tainted_agent:
+            outcome["termination"] = "TAINTED"
+            outcome["tainted_reason"] = self.tainted_agents[0].tainted_reason
+
+        return outcome
 
     @property
     def scores(self):
