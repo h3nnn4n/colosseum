@@ -38,6 +38,8 @@ class Game(BaseGame):
 
         self._config = Config
         self.name = self._config.game_name
+        self.grid_width = self._config.grid_width
+        self.grid_height = self._config.grid_height
 
         self.snakes = []
         self.snakes_by_id = {}
@@ -57,8 +59,26 @@ class Game(BaseGame):
     @property
     def state(self):
         return {
-            # foo
+            "foods": self._food_state,
+            "grid": self._grid_state,
         }
+
+    @property
+    def _food_state(self):
+        # TODO
+        return []
+
+    @property
+    def _grid_state(self):
+        base_grid = [[Cell()] * self.grid_width] * self.grid_height
+
+        for snake in self.snakes:
+            x, y = snake.position
+            base_grid[x][y].occupy(snake)
+            while snake.size > 1:
+                snake = snake.next_cell
+
+        return ""
 
     @property
     def outcome(self):
@@ -78,9 +98,11 @@ class Game(BaseGame):
 
     @property
     def finished(self):
-        return self._tick < self._config.n_epochs
+        return self._tick >= self._config.n_epochs
 
     def update(self, agent_actions):
+        self._tick += 1
+
         for agent_action in agent_actions:
             self._process_agent_action(agent_action)
 
@@ -160,3 +182,22 @@ class Vector:
 
     def clone(self):
         return Vector(self.x, self.y)
+
+    def __iter__(self):
+        return iter([self.x, self.y])
+
+
+class Cell:
+    def __init__(self):
+        self.occupied_by = []
+
+    def occupy(self, thing):
+        self.occupied_by.append(thing)
+
+    @property
+    def occupied(self):
+        return any(self.occupied_by)
+
+    @property
+    def occupied_count(self):
+        return len(self.occupied_by)
