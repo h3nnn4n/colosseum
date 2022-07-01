@@ -148,6 +148,9 @@ class Game(BaseGame):
             if snake.position.y < 0 or snake.position.y >= self.grid_height:
                 snake.die()
 
+        # TODO: Handle collisions
+        # TODO: Handle eating food
+
     def _spawn_snake(self, agent_id):
         # TODO: We should make sure we do not generate invalid
         # starting positions, like OOB, instant game over, overlapping
