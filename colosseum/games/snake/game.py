@@ -78,7 +78,7 @@ class Game(BaseGame):
             while snake.size > 1:
                 snake = snake.next_cell
 
-        return ""
+        return ["".join([cell.to_string for cell in row]) for row in base_grid]
 
     @property
     def outcome(self):
@@ -196,8 +196,15 @@ class Cell:
 
     @property
     def occupied(self):
-        return any(self.occupied_by)
+        return bool(self.occupied_by)
 
     @property
     def occupied_count(self):
         return len(self.occupied_by)
+
+    @property
+    def to_string(self):
+        if not self.occupied:
+            return " "
+
+        return "X"
