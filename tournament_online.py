@@ -2,7 +2,23 @@
 
 import argparse
 
-from colosseum.tournament_online import online_tournament
+from colosseum.tournament_online import _push_metric, online_tournament
+
+
+def _handle_exception(exception):
+    try:
+        _push_metric(
+            name="colosseum_worker_errors",
+            values={"value": 1},
+            tags={
+                "source": "colosseum_worker",
+                "error_class": exception.__class__.__name__,
+            },
+        )
+    except Exception as e:
+        print(
+            f"failed to handle exception {exception} with the following exception: {e}"
+        )
 
 
 if __name__ == "__main__":
@@ -20,6 +36,11 @@ if __name__ == "__main__":
             try:
                 online_tournament(**kwargs)
             except Exception as e:
+                _handle_exception(e)
                 print(f"tournament failed with: {e}")
     else:
-        online_tournament(**kwargs)
+        try:
+            online_tournament(**kwargs)
+        except Exception as e:
+            _handle_exception(e)
+            raise
