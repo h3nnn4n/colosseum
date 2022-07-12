@@ -91,12 +91,14 @@ class Participant:
             if agent_path_docker:
                 print("using DOCKER agent_path")
                 self._agent_path = agent_path_docker
+                push_agent_type_metrics("docker")
             else:
                 print("USE_DOCKER is set but not docker agent was found!")
 
                 if agent_path_python:
                     print("falling back to python agent")
                     self._agent_path = agent_path_python
+                    push_agent_type_metrics("python")
                 else:
                     print("no fallback agent was found! Panicking!!!")
                     raise RuntimeError(f"No agent was found for {base_path}")
@@ -104,8 +106,10 @@ class Participant:
             if agent_path_python:
                 print("using PYTHON agent_path")
                 self._agent_path = agent_path_python
+                push_agent_type_metrics("python")
             else:
                 print("no PYTHON agent_path was found! Panicking!!!")
+                push_agent_type_metrics("not_found")
                 raise RuntimeError(f"No agent was found for {base_path}")
 
         if not self._agent_path:
@@ -295,6 +299,32 @@ def upload_match_replay(match_id, replay_filename):
         os.remove(replay_filename)
 
 
+def push_agent_type_metrics(agent_type):
+    _push_metric(
+        name="agent_type",
+        values={"value": 1},
+        tags={
+            "source": "colosseum_worker",
+            "agent_type": agent_type,
+            "use_docker": USE_DOCKER,
+        },
+    )
+
+
+def _push_metric(name, values, tags):
+    print(f"pushing metric {name=} {values=} {tags=}")
+
+    requests.post(
+        API_URL + "metrics/",
+        headers={"authorization": f"token {API_TOKEN}"},
+        json={
+            "name": name,
+            "values": values,
+            "tags": tags,
+        },
+    )
+
+
 def get_participant(participant_id):
     print(f"fetching agent {participant_id}/")
     response = requests.get(
@@ -309,6 +339,14 @@ def send_heartbeat():
     requests.post(
         API_URL + "colosseum_heartbeat/",
         headers={"authorization": f"token {API_TOKEN}"},
+    )
+    _push_metric(
+        name="heartbeat",
+        values={"value": 1},
+        tags={
+            "source": "colosseum_worker",
+            "use_docker": USE_DOCKER,
+        },
     )
 
 
