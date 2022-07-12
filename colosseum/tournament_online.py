@@ -312,16 +312,18 @@ def push_agent_type_metrics(agent_type):
 
 
 def _push_metric(name, values, tags):
-    print(f"pushing metric {name=} {values=} {tags=}")
+    payload = {
+        "measurement": name,
+        "fields": values,
+        "tags": tags,
+    }
+
+    print(f"pushing metrics {payload=}")
 
     requests.post(
         API_URL + "metrics/",
         headers={"authorization": f"token {API_TOKEN}"},
-        json={
-            "name": name,
-            "values": values,
-            "tags": tags,
-        },
+        json=payload,
     )
 
 
