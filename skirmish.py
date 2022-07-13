@@ -8,7 +8,7 @@ import sys
 from colosseum.games.cherry_picker.game import Game as CherryPickerGame
 from colosseum.games.chess.game import Game as ChessGame
 from colosseum.games.food_catcher.game import World
-from colosseum.match import match
+from colosseum.match import run_match
 from colosseum.utils import get_internal_id
 
 
@@ -33,7 +33,7 @@ def main(game_name, agent_paths):
     else:
         raise ValueError(f"{game_name} is not a valid game")
 
-    scores = match(game, agent_paths=agent_paths)
+    scores = run_match(game, agent_paths=agent_paths)
 
     print(json.dumps(scores))
 

@@ -4,13 +4,25 @@ import itertools
 from collections import defaultdict
 from pathlib import Path
 
-from colosseum.games.food_catcher.game import World
+from colosseum.games.cherry_picker.game import Game as cherry_picker_game
+from colosseum.games.chess.game import Game as chess_game
+from colosseum.games.food_catcher.game import World as food_catcher_game
 from colosseum.simple_elo import compute_updated_ratings
 
-from .match import match
+from .match import run_match
 
 
 INITIAL_ELO = 1200
+
+
+def _get_game_by_name(game_name):
+    match game_name.lower():
+        case "food_catcher":
+            return food_catcher_game
+        case "cherry_picker":
+            return cherry_picker_game
+        case "chess_game":
+            return chess_game
 
 
 class TournamentResult:
@@ -43,7 +55,7 @@ class TournamentResult:
         }
 
 
-class Game:
+class Match:
     def __init__(self, *args):
         self._players = args
         self._result = None
@@ -138,11 +150,11 @@ class Participant:
 
     @property
     def pretty_name(self):
-        return Path(self.agent_path).stem
+        return Path(self.agent_path).parent.name
 
 
-def round_robin(participants, n_rounds=1, n_participants_per_round=2):
-    games = []
+def round_robin(game_name, participants, n_rounds=1, n_participants_per_round=2):
+    matches = []
 
     for n_round in range(n_rounds):
         for agent_bracket in itertools.combinations(
@@ -151,27 +163,28 @@ def round_robin(participants, n_rounds=1, n_participants_per_round=2):
             print(
                 f'participants: {" vs ".join([a.pretty_name for a in agent_bracket])}'
             )
-            game = Game(*list(agent_bracket))
+            match = Match(*list(agent_bracket))
             agent_paths = [a.agent_path for a in agent_bracket]
 
-            world = World()
-            game.set_results(match(world, agent_paths=agent_paths))
-            print(game.pretty_results)
+            game = _get_game_by_name(game_name)()
+            match.set_results(run_match(game, agent_paths=agent_paths))
+            print(match.pretty_results)
             print()
 
-            games.append(game)
+            matches.append(match)
 
-    return TournamentResult(participants, games)
+    return TournamentResult(participants, matches)
 
 
-def tournament(agent_paths, mode):
+def tournament(game, agent_paths, mode):
+    mode = mode.upper()
     participants = [Participant(agent_path) for agent_path in agent_paths]
 
-    if mode == "ROUND_ROBIN":
-        results = round_robin(participants)
     if mode == "DOUBLE_ROUND_ROBIN":
-        results = round_robin(participants, n_rounds=2)
-    if mode == "TRIPLE_ROUND_ROBIN":
-        results = round_robin(participants, n_rounds=3)
+        n_rounds = 2
+    elif mode == "TRIPLE_ROUND_ROBIN":
+        n_rounds = 3
+    else:
+        n_rounds = 1
 
-    return results
+    return round_robin(game, participants, n_rounds=n_rounds)

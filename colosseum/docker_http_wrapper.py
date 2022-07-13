@@ -54,15 +54,25 @@ class HttpAgent:
         self.kill_container(self.container_id)
 
     def _event_loop(self):
+        got_blank_from_agent = False
+        got_blank_from_master = False
         logging.info("starting event loop")
-        while True:
+
+        while not got_blank_from_agent and not got_blank_from_master:
             logging.debug("-------------------")
             logging.debug("1")
             data_out = sys.stdin.readline().encode()
             logging.debug("2")
             logging.debug(f"sending to agent: {data_out}")
+
+            if not data_out:
+                got_blank_from_master = True
+
             try:
                 data_in = _exchange_data(data_out)
+
+                if not data_in:
+                    got_blank_from_agent = True
             except Exception as e:
                 logging.exception(e)
 

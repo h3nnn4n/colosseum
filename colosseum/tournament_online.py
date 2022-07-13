@@ -22,7 +22,7 @@ from colosseum.games.food_catcher.game import World as FoodCatcherGame
 from colosseum.utils import get_internal_id
 
 from .agent import Agent
-from .match import match
+from .match import run_match
 
 
 load_dotenv()
@@ -70,20 +70,46 @@ class Participant:
             file.extractall(base_path)
             file.close()
 
+        agent_path_python = None
+        agent_path_docker = None
+
         if not self._agent_path:
             for dirpath, subdirs, files in os.walk(base_path):
                 for file in files:
                     if file == "Dockerfile" and USE_DOCKER:
-                        self._agent_path = os.path.join(dirpath, file)
-                        self._agent_path = self._agent_path.replace(" ", "_")
-                        print(f"found DOCKER entrypoint at {self._agent_path}")
-                        break
+                        agent_path_docker = os.path.join(dirpath, file)
+                        agent_path_docker = agent_path_docker.replace(" ", "_")
+                        print(f"found DOCKER entrypoint at {agent_path_docker}")
 
                     if file == "agent.py" and not self._agent_path:
-                        self._agent_path = os.path.join(dirpath, file)
-                        self._agent_path = self._agent_path.replace(" ", "_")
-                        print(f'found "agent.py" entrypoint at {self._agent_path}')
-                        break
+                        agent_path_python = os.path.join(dirpath, file)
+                        agent_path_python = agent_path_python.replace(" ", "_")
+                        print(f'found "agent.py" entrypoint at {agent_path_python}')
+
+        if USE_DOCKER:
+            if agent_path_docker:
+                print("using DOCKER agent_path")
+                self._agent_path = agent_path_docker
+                push_agent_type_metrics("docker")
+            else:
+                print("USE_DOCKER is set but not docker agent was found!")
+
+                if agent_path_python:
+                    print("falling back to python agent")
+                    self._agent_path = agent_path_python
+                    push_agent_type_metrics("python")
+                else:
+                    print("no fallback agent was found! Panicking!!!")
+                    raise RuntimeError(f"No agent was found for {base_path}")
+        else:
+            if agent_path_python:
+                print("using PYTHON agent_path")
+                self._agent_path = agent_path_python
+                push_agent_type_metrics("python")
+            else:
+                print("no PYTHON agent_path was found! Panicking!!!")
+                push_agent_type_metrics("not_found")
+                raise RuntimeError(f"No agent was found for {base_path}")
 
         if not self._agent_path:
             print(f"entrypoint not found for {self.name} / {self.id}")
@@ -188,11 +214,9 @@ class GameRunner:
 
 
 class MatchRunner:
-    def __init__(self):
-        print(f"{USE_DOCKER=}")
-
     @classmethod
     def run_next_match(cls, game=None):
+        print(f"{USE_DOCKER=}")
         send_heartbeat()
         next_match = get_next_match()
         if not next_match.get("id"):
@@ -233,7 +257,7 @@ class MatchRunner:
         ]
 
         game_runner = GameRunner(*participants, match=match_data)
-        game_runner.set_results(match(game, agents=agents))
+        game_runner.set_results(run_match(game, agents=agents))
 
 
 def get_next_match():
@@ -272,6 +296,34 @@ def upload_match_replay(match_id, replay_filename):
         os.remove(replay_filename)
 
 
+def push_agent_type_metrics(agent_type):
+    _push_metric(
+        name="agent_type",
+        values={"value": 1},
+        tags={
+            "source": "colosseum_worker",
+            "agent_type": agent_type,
+            "use_docker": USE_DOCKER,
+        },
+    )
+
+
+def _push_metric(name, values, tags):
+    payload = {
+        "measurement": name,
+        "fields": values,
+        "tags": tags,
+    }
+
+    print(f"pushing metrics {payload=}")
+
+    requests.post(
+        API_URL + "metrics/",
+        headers={"authorization": f"token {API_TOKEN}"},
+        json=payload,
+    )
+
+
 def get_participant(participant_id):
     print(f"fetching agent {participant_id}/")
     response = requests.get(
@@ -286,6 +338,14 @@ def send_heartbeat():
     requests.post(
         API_URL + "colosseum_heartbeat/",
         headers={"authorization": f"token {API_TOKEN}"},
+    )
+    _push_metric(
+        name="heartbeat",
+        values={"value": 1},
+        tags={
+            "source": "colosseum_worker",
+            "use_docker": USE_DOCKER,
+        },
     )
 
 
