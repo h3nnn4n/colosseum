@@ -60,7 +60,7 @@ class Game(BaseGame):
     def state(self):
         return {
             "foods": self._food_state,
-            "grid": self._grid_state,
+            "grid": self._grid_state_str,
         }
 
     @property
@@ -90,7 +90,11 @@ class Game(BaseGame):
                 if not snake:
                     break
 
-        return ["".join([cell.to_string for cell in row]) for row in base_grid]
+        return base_grid
+
+    @property
+    def _grid_state_str(self):
+        return ["".join([cell.to_string for cell in row]) for row in self._grid_state]
 
     @property
     def outcome(self):
@@ -118,8 +122,10 @@ class Game(BaseGame):
         for agent_action in agent_actions:
             self._process_agent_action(agent_action)
 
-        self._update_snakes()
-        self._update_foods()
+        self._check_snake_bounds()
+        self._update_collision()
+        self._update_eaten_food()
+        self._update_food_spawning()
 
     def _process_agent_action(self, agent_action):
         owner_id = agent_action.get("agent_id")
@@ -131,13 +137,26 @@ class Game(BaseGame):
         snake = self.snakes_by_id[owner_id]
         snake.update(move_direction)
 
-    def _update_foods(self):
+    def _update_collision(self):
+        grid = self._grid_state
+
+        for y in range(self.grid_height):
+            for x in range(self.grid_width):
+                if grid[x][y].contains_multiple_snakes:
+                    snakes = grid[x][y].occupying_snakes
+                    logging.warning(f"found multiple snakes at cell {x=} {y=}")
+                    for snake in snakes:
+                        snake.die()
+
+    def _update_food_spawning(self):
         if len(self.foods) < self._config.min_food_sources:
             # Spawn
             pass
 
-    def _update_snakes(self):
-        # Handle snake going OOB
+    def _update_eaten_food(self):
+        pass
+
+    def _check_snake_bounds(self):
         for snake in self.snakes:
             if snake.dead:
                 continue
@@ -147,9 +166,6 @@ class Game(BaseGame):
 
             if snake.position.y < 0 or snake.position.y >= self.grid_height:
                 snake.die()
-
-        # TODO: Handle collisions
-        # TODO: Handle eating food
 
     def _spawn_snake(self, agent_id):
         # TODO: We should make sure we do not generate invalid
@@ -242,6 +258,14 @@ class Cell:
     @property
     def occupied_count(self):
         return len(self.occupied_by)
+
+    @property
+    def occupying_snakes(self):
+        return [x for x in self.occupied_by if isinstance(x, Snake)]
+
+    @property
+    def contains_multiple_snakes(self):
+        return len(self.occupying_snakes) > 1
 
     @property
     def to_string(self):
