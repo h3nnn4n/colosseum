@@ -47,6 +47,8 @@ class Game(BaseGame):
 
         self._tick = 0
 
+        self._update_food_spawning()
+
         logging.info("snake initialized")
 
     def register_agent(self, agent):
@@ -65,8 +67,7 @@ class Game(BaseGame):
 
     @property
     def _food_state(self):
-        # TODO
-        return []
+        return [[x.position.x, x.position.y] for x in self.foods]
 
     @property
     def _grid_state(self):
@@ -89,6 +90,10 @@ class Game(BaseGame):
 
                 if not snake:
                     break
+
+        for food in self.foods:
+            x, y = food.position
+            base_grid[x][y].occupy(food)
 
         return base_grid
 
@@ -149,9 +154,19 @@ class Game(BaseGame):
                         snake.die()
 
     def _update_food_spawning(self):
-        if len(self.foods) < self._config.min_food_sources:
-            # Spawn
-            pass
+        if len(self.foods) >= self._config.min_food_sources:
+            return
+
+        grid = self._grid_state
+
+        for _ in range(self._config.min_food_sources - len(self.foods)):
+            position = Vector(
+                randint(0, self.grid_width - 1), randint(0, self.grid_height - 1)
+            )
+
+            # TODO: Ensure we spawn a food piece if there is an empty cell available
+            if grid[position.x][position.y].empty:
+                self.foods.append(Food(position))
 
     def _update_eaten_food(self):
         pass
@@ -232,6 +247,11 @@ class Snake:
             self.next_cell._update(direction)
 
 
+class Food:
+    def __init__(self, position):
+        self.position = position
+
+
 class Vector:
     def __init__(self, x=0, y=0):
         self.x = x
@@ -256,8 +276,20 @@ class Cell:
         return bool(self.occupied_by)
 
     @property
+    def empty(self):
+        return not self.occupied
+
+    @property
     def occupied_count(self):
         return len(self.occupied_by)
+
+    @property
+    def occupying_foods(self):
+        return [x for x in self.occupied_by if isinstance(x, Food)]
+
+    @property
+    def contains_food(self):
+        return len(self.occupying_foods) > 0
 
     @property
     def occupying_snakes(self):
@@ -271,6 +303,9 @@ class Cell:
     def to_string(self):
         if not self.occupied:
             return " "
+
+        if self.contains_food:
+            return "@"
 
         if self.occupied_count > 1:
             return "X"
