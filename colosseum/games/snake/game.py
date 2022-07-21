@@ -266,7 +266,8 @@ class Snake:
         if self.size > 1:
             self.next_cell._update(direction)
         elif self.grow:
-            Snake(self.agent_id, position=old_position)
+            self.next_cell = Snake(self.agent_id, position=old_position)
+            self.grow = False
 
 
 class Food:
