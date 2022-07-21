@@ -169,7 +169,18 @@ class Game(BaseGame):
                 self.foods.append(Food(position))
 
     def _update_eaten_food(self):
-        pass
+        grid = self._grid_state
+
+        for y in range(self.grid_height):
+            for x in range(self.grid_width):
+                if grid[x][y].contains_snake:
+                    snake = grid[x][y].occupying_snakes[0]
+                    food = grid[x][y].occupying_foods[0]
+
+                    snake.eat()
+                    food.eat()
+
+        self.foods = [x for x in self.foods if not x.eaten]
 
     def _check_snake_bounds(self):
         for snake in self.snakes:
@@ -211,10 +222,17 @@ class Snake:
         self.is_head = head
         self.position = position
         self.alive = True
+        self.grow = False
 
     @property
     def dead(self):
         return not self.alive
+
+    def eat(self):
+        if self.size > 1:
+            self.next_cell.eat()
+        else:
+            self.grow = True
 
     def die(self):
         if self.next_cell:
@@ -229,6 +247,8 @@ class Snake:
         self._update(direction)
 
     def _update(self, direction):
+        old_position = self.position.clone()
+
         match direction:
             case Direction.UP:
                 self.position.y -= 1
@@ -245,11 +265,17 @@ class Snake:
 
         if self.size > 1:
             self.next_cell._update(direction)
+        elif self.grow:
+            Snake(self.agent_id, position=old_position)
 
 
 class Food:
     def __init__(self, position):
         self.position = position
+        self.eaten = False
+
+    def eat(self):
+        self.eaten = True
 
 
 class Vector:
@@ -294,6 +320,10 @@ class Cell:
     @property
     def occupying_snakes(self):
         return [x for x in self.occupied_by if isinstance(x, Snake)]
+
+    @property
+    def contains_snake(self):
+        return len(self.occupying_snakes) > 1
 
     @property
     def contains_multiple_snakes(self):
