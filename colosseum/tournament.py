@@ -7,6 +7,7 @@ from pathlib import Path
 from colosseum.games.cherry_picker.game import Game as cherry_picker_game
 from colosseum.games.chess.game import Game as chess_game
 from colosseum.games.food_catcher.game import World as food_catcher_game
+from colosseum.games.snake.game import Game as snake_game
 from colosseum.simple_elo import compute_updated_ratings
 
 from .match import run_match
@@ -23,6 +24,8 @@ def _get_game_by_name(game_name):
             return cherry_picker_game
         case "chess_game":
             return chess_game
+        case "snake":
+            return snake_game
 
 
 class TournamentResult:
