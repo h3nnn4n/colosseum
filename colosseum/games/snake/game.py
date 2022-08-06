@@ -87,9 +87,9 @@ class Game(BaseGame):
     @property
     def _grid_state(self):
         base_grid = []
-        for y in range(self.grid_height):
+        for _ in range(self.grid_width):
             row = []
-            for x in range(self.grid_width):
+            for _ in range(self.grid_height):
                 row.append(Cell())
 
             base_grid.append(row)
@@ -114,7 +114,16 @@ class Game(BaseGame):
 
     @property
     def _grid_state_str(self):
-        return ["".join([cell.to_string for cell in row]) for row in self._grid_state]
+        rows = []
+
+        for y in range(self.grid_height):
+            row = []
+            for x in range(self.grid_width):
+                row.append(self._grid_state[x][y].to_string)
+
+            rows.append("".join(row))
+
+        return rows
 
     @property
     def outcome(self):
