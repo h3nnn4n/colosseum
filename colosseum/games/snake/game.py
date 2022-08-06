@@ -63,7 +63,22 @@ class Game(BaseGame):
         return {
             "foods": self._food_state,
             "grid": self._grid_state_str,
+            "snakes": self._snake_states,
         }
+
+    @property
+    def _snake_states(self):
+        states = {}
+
+        for snake in self.snakes:
+            state = {}
+            state["alive"] = snake.alive
+            state["head_position"] = snake.position.as_list
+            state["positions"] = [p.as_list for p in snake.positions]
+
+            states[snake.agent_id] = state
+
+        return states
 
     @property
     def _food_state(self):
@@ -269,6 +284,15 @@ class Snake:
             self.next_cell = Snake(self.agent_id, position=old_position)
             self.grow = False
 
+    @property
+    def positions(self):
+        p = [self.position]
+
+        if self.size > 1:
+            p.extend(self.next_cell.positions)
+
+        return p
+
 
 class Food:
     def __init__(self, position):
@@ -289,6 +313,10 @@ class Vector:
 
     def __iter__(self):
         return iter([self.x, self.y])
+
+    @property
+    def as_list(self):
+        return [self.x, self.y]
 
 
 class Cell:
