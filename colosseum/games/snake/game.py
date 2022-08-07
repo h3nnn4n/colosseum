@@ -394,12 +394,12 @@ class Cell:
 
         match occupee.next_cell_direction:
             case Direction.DOWN:
-                return "V"
-            case Direction.UP:
                 return "^"
+            case Direction.UP:
+                return "V"
             case Direction.RIGHT:
-                return ">"
-            case Direction.LEFT:
                 return "<"
+            case Direction.LEFT:
+                return ">"
 
         return "S"
