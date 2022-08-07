@@ -10,7 +10,7 @@ class Config:
     grid_height = 10
     food_sources_to_spawn = 2
     min_food_sources = 1
-    n_epochs = 500
+    n_epochs = 25
 
     # Time settings
     step_time_limit = ONE_SECOND * 2
