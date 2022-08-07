@@ -305,11 +305,17 @@ class Snake:
         else:
             self.position = new_position.clone()
 
+        # This grow logic is a mini pile of goo
         if self.size > 1:
             self.next_cell._update(direction, new_position=old_position)
         elif self.grow:
             self.next_cell = Snake(self.agent_id, position=old_position)
+            self.next_cell.size = 1
+            self.size += 1
             self.grow = False
+
+        if self.grow:
+            self.size += 1
 
     @property
     def positions(self):
