@@ -270,25 +270,34 @@ class Snake:
 
         self._update(direction)
 
-    def _update(self, direction):
+    def _update(self, direction, new_position=None):
         old_position = self.position.clone()
 
         match direction:
             case Direction.UP:
-                self.position.y -= 1
                 self.next_cell_direction = Direction.DOWN
             case Direction.RIGHT:
-                self.position.x += 1
                 self.next_cell_direction = Direction.LEFT
             case Direction.DOWN:
-                self.position.y += 1
                 self.next_cell_direction = Direction.UP
             case Direction.LEFT:
-                self.position.x -= 1
                 self.next_cell_direction = Direction.RIGHT
 
+        if new_position is None:
+            match direction:
+                case Direction.UP:
+                    self.position.y -= 1
+                case Direction.RIGHT:
+                    self.position.x += 1
+                case Direction.DOWN:
+                    self.position.y += 1
+                case Direction.LEFT:
+                    self.position.x -= 1
+        else:
+            self.position = new_position.clone()
+
         if self.size > 1:
-            self.next_cell._update(direction)
+            self.next_cell._update(direction, new_position=old_position)
         elif self.grow:
             self.next_cell = Snake(self.agent_id, position=old_position)
             self.grow = False
