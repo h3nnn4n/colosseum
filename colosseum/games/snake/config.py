@@ -8,7 +8,7 @@ class Config:
 
     grid_width = 10
     grid_height = 10
-    food_sources_to_spawn = 2
+    food_sources_to_spawn = 5
     min_food_sources = 1
     n_epochs = 25
 

@@ -188,7 +188,8 @@ class Game(BaseGame):
 
         grid = self._grid_state
 
-        for _ in range(self._config.min_food_sources - len(self.foods)):
+        logging.info(f"spawing {self._config.food_sources_to_spawn - len(self.foods)} foods")
+        for _ in range(self._config.food_sources_to_spawn - len(self.foods)):
             position = Vector(
                 randint(0, self.grid_width - 1), randint(0, self.grid_height - 1)
             )
