@@ -143,7 +143,7 @@ class Game(BaseGame):
 
     @property
     def finished(self):
-        return self._tick >= self._config.n_epochs
+        return self._tick >= self._config.n_epochs or self._snake_alive_count == 0
 
     def update(self, agent_actions):
         self._tick += 1
@@ -221,6 +221,10 @@ class Game(BaseGame):
 
             if snake.position.y < 0 or snake.position.y >= self.grid_height:
                 snake.die()
+
+    @property
+    def _snake_alive_count(self):
+        return len([snake for snake in self.snakes if snake.alive])
 
     def _spawn_snake(self, agent_id):
         # TODO: We should make sure we do not generate invalid
