@@ -157,13 +157,18 @@ class Game(BaseGame):
         self._update_food_spawning()
 
     def _process_agent_action(self, agent_action):
-        owner_id = agent_action.get("agent_id")
-        if owner_id not in self.agent_ids:
-            logging.warning(f"agent with id {owner_id} is not registered. Ignoring")
+        agent_id = agent_action.get("agent_id")
+        if agent_id not in self.agent_ids:
+            logging.warning(f"agent with id {agent_id} is not registered. Ignoring")
             return
 
-        move_direction = Direction.from_string(agent_action.get("move"))
-        snake = self.snakes_by_id[owner_id]
+        move_direction_str = agent_action.get("move")
+        if not move_direction_str:
+            logging.warning(f"got null move from {agent_action=} from {agent_id=}")
+            return
+
+        move_direction = Direction.from_string(move_direction_str)
+        snake = self.snakes_by_id[agent_id]
         snake.update(move_direction)
 
     def _update_collision(self):
