@@ -202,7 +202,7 @@ class Game(BaseGame):
 
         for y in range(self.grid_height):
             for x in range(self.grid_width):
-                if grid[x][y].contains_snake:
+                if grid[x][y].contains_snake and grid[x][y].contains_food:
                     snake = grid[x][y].occupying_snakes[0]
                     food = grid[x][y].occupying_foods[0]
 
@@ -379,7 +379,7 @@ class Cell:
 
     @property
     def contains_snake(self):
-        return len(self.occupying_snakes) > 1
+        return len(self.occupying_snakes) > 0
 
     @property
     def contains_multiple_snakes(self):
