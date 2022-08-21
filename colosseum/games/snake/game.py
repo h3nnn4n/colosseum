@@ -140,7 +140,9 @@ class Game(BaseGame):
 
     @property
     def scores(self):
-        return {snake.agent_id: self.snakes_score[snake.agent_id] for snake in self.snakes}
+        return {
+            snake.agent_id: self.snakes_score[snake.agent_id] for snake in self.snakes
+        }
 
     @property
     def finished(self):
@@ -189,7 +191,9 @@ class Game(BaseGame):
 
         grid = self._grid_state
 
-        logging.info(f"spawing {self._config.food_sources_to_spawn - len(self.foods)} foods")
+        logging.info(
+            f"spawing {self._config.food_sources_to_spawn - len(self.foods)} foods"
+        )
         for _ in range(self._config.food_sources_to_spawn - len(self.foods)):
             position = Vector(
                 randint(0, self.grid_width - 1), randint(0, self.grid_height - 1)
