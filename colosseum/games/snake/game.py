@@ -127,6 +127,7 @@ class Game(BaseGame):
 
     @property
     def outcome(self):
+        # TODO: Implement the rest
         outcome = {"termination": "GAME_ENDED"}
 
         if self.has_tainted_agent:
@@ -137,6 +138,7 @@ class Game(BaseGame):
 
     @property
     def scores(self):
+        # TODO: keep track of scores and return them
         return {
             # foo
         }
