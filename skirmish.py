@@ -8,6 +8,7 @@ import sys
 from colosseum.games.cherry_picker.game import Game as CherryPickerGame
 from colosseum.games.chess.game import Game as ChessGame
 from colosseum.games.food_catcher.game import World
+from colosseum.games.snake.game import Game as SnakeGame
 from colosseum.match import run_match
 from colosseum.utils import get_internal_id
 
@@ -26,6 +27,8 @@ def main(game_name, agent_paths):
 
     if game_name == "chess":
         game = ChessGame()
+    elif game_name == "snake":
+        game = SnakeGame()
     elif game_name == "cherry_picker":
         game = CherryPickerGame()
     elif game_name == "food_catcher":

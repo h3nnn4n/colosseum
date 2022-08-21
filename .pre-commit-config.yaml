@@ -28,3 +28,13 @@ repos:
   hooks:
   - id: isort
     name: isort
+
+- repo: https://github.com/codespell-project/codespell
+  rev: v2.1.0
+  hooks:
+    - id: codespell
+
+- repo: https://github.com/zricethezav/gitleaks
+  rev: v8.2.0
+  hooks:
+    - id: gitleaks
