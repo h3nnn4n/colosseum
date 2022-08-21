@@ -19,6 +19,7 @@ from dotenv import load_dotenv
 from colosseum.games.cherry_picker.game import Game as CherryPickerGame
 from colosseum.games.chess.game import Game as ChessGame
 from colosseum.games.food_catcher.game import World as FoodCatcherGame
+from colosseum.games.snake.game import Game as SnakeGame
 from colosseum.utils import get_internal_id
 
 from .agent import Agent
@@ -243,6 +244,8 @@ class MatchRunner:
             game = CherryPickerGame()
         elif game_name == "chess":
             game = ChessGame()
+        elif game_name == "snake":
+            game = SnakeGame()
         else:
             raise ValueError(f"{game_name} is not a supported game!")
 
