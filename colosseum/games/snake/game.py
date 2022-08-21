@@ -138,10 +138,7 @@ class Game(BaseGame):
 
     @property
     def scores(self):
-        # TODO: keep track of scores and return them
-        return {
-            # foo
-        }
+        return {snake.agent_id: snake.size - 1 for snake in self.snakes}
 
     @property
     def finished(self):
