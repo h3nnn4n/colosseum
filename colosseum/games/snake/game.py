@@ -43,6 +43,7 @@ class Game(BaseGame):
 
         self.snakes = []
         self.snakes_by_id = {}
+        self.snakes_score = defaultdict(int)
         self.foods = []
 
         self._tick = 0
@@ -61,9 +62,10 @@ class Game(BaseGame):
     @property
     def state(self):
         return {
+            "score": self.scores,
+            "snakes": self._snake_states,
             "foods": self._food_state,
             "grid": self._grid_state_str,
-            "snakes": self._snake_states,
         }
 
     @property
@@ -138,7 +140,7 @@ class Game(BaseGame):
 
     @property
     def scores(self):
-        return {snake.agent_id: snake.size - 1 for snake in self.snakes}
+        return {snake.agent_id: self.snakes_score[snake.agent_id] for snake in self.snakes}
 
     @property
     def finished(self):
@@ -208,6 +210,7 @@ class Game(BaseGame):
 
                     snake.eat()
                     food.eat()
+                    self.snakes_score[snake.agent_id] += 1
 
         self.foods = [x for x in self.foods if not x.eaten]
 
