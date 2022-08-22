@@ -219,7 +219,7 @@ class MatchRunner:
     def run_next_match(cls, game=None):
         print(f"{USE_DOCKER=}")
         send_heartbeat()
-        next_match = get_next_match()
+        next_match = get_next_match(game=game)
         if not next_match.get("id"):
             # This is usually a failure on the producer side, or there are no
             # matches left to play. We sleep for ~1 second and check again if
@@ -228,7 +228,6 @@ class MatchRunner:
             return
 
         match_data = get_match(next_match["id"])
-
         game_name = match_data["game"]["name"]
 
         if game and game_name != game:
@@ -263,11 +262,15 @@ class MatchRunner:
         game_runner.set_results(run_match(game, agents=agents))
 
 
-def get_next_match():
-    print("fetching next match")
-    response = requests.get(
-        API_URL + "next_match/", headers={"authorization": f"token {API_TOKEN}"}
-    )
+def get_next_match(game=None):
+    url = API_URL + "next_match/"
+
+    if game:
+        url += f"?game={game}"
+
+    print(f"fetching next match from: {url}")
+
+    response = requests.get(url, headers={"authorization": f"token {API_TOKEN}"})
     return json.loads(response.text)
 
 
