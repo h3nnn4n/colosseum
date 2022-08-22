@@ -170,8 +170,12 @@ class Game(BaseGame):
             logging.warning(f"got null move from {agent_action=} from {agent_id=}")
             return
 
-        move_direction = Direction.from_string(move_direction_str)
         snake = self.snakes_by_id[agent_id]
+
+        if snake.dead:
+            return
+
+        move_direction = Direction.from_string(move_direction_str)
         snake.update(move_direction)
 
     def _update_collision(self):
