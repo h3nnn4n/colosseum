@@ -224,6 +224,16 @@ class Agent:
                 self.logger.warning(f"agent {self.id} return invalid agent id")
 
             return actions
+        except json.JSONDecodeError as e:
+            self.logger.info(
+                f"failed to parse agent actions. Got invalid json payload. Error: {e}"
+            )
+            self.logger.info(f"agent said: {actions_raw}")
+            self._log_error_count()
+            self._errors.append(
+                {"error": "get_actions_failed", "exception": e.__str__()}
+            )
+            return {}
         except Exception as e:
             self.logger.info(f"failed to get agent actions with error: {e}")
             self._log_error_count()
