@@ -18,6 +18,10 @@ from pexpect.popen_spawn import PopenSpawn
 from colosseum.utils import get_internal_id
 
 
+DOCKER_AGENT_TIMEOUT = 30
+NATIVE_AGENT_TIMEOUT = 5
+
+
 class Agent:
     def __init__(self, agent_path, id=None, time_config=None):
         self.id = id or str(uuid4())
@@ -328,9 +332,10 @@ class Agent:
     def _boot_agent(self):
         # Pure python agent
         if "agent.py" in self.agent_path:
-            return PopenSpawn([self._agent_path])
+            return PopenSpawn([self._agent_path], timeout=NATIVE_AGENT_TIMEOUT)
 
         # Docker agent
         return PopenSpawn(
-            ["./colosseum/docker_http_wrapper.py", self._agent_path, self.id]
+            ["./colosseum/docker_http_wrapper.py", self._agent_path, self.id],
+            timeout=DOCKER_AGENT_TIMEOUT,
         )
