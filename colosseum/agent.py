@@ -18,6 +18,10 @@ from pexpect.popen_spawn import PopenSpawn
 from colosseum.utils import get_internal_id
 
 
+DOCKER_AGENT_TIMEOUT = 30
+NATIVE_AGENT_TIMEOUT = 5
+
+
 class Agent:
     def __init__(self, agent_path, id=None, time_config=None):
         self.id = id or str(uuid4())
@@ -220,8 +224,27 @@ class Agent:
                 self.logger.warning(f"agent {self.id} return invalid agent id")
 
             return actions
+        except json.JSONDecodeError as e:
+            self.logger.info(
+                f"failed to parse agent actions. Got invalid json payload. Error: {e}"
+            )
+            self.logger.info(f"agent said: {actions_raw}")
+            while True:
+                try:
+                    agent_output = self._child_process.read_nonblocking(
+                        size=2048, timeout=1
+                    )
+                    if agent_output:
+                        self.logger.info(agent_output)
+                except pexpect.exceptions.EOF:
+                    break
+            self._log_error_count()
+            self._errors.append(
+                {"error": "get_actions_failed", "exception": e.__str__()}
+            )
+            return {}
         except Exception as e:
-            self.logger.info(f"failed to get agent actions{e}")
+            self.logger.info(f"failed to get agent actions with error: {e}")
             self._log_error_count()
             self._errors.append(
                 {"error": "get_actions_failed", "exception": e.__str__()}
@@ -328,9 +351,10 @@ class Agent:
     def _boot_agent(self):
         # Pure python agent
         if "agent.py" in self.agent_path:
-            return PopenSpawn([self._agent_path])
+            return PopenSpawn([self._agent_path], timeout=NATIVE_AGENT_TIMEOUT)
 
         # Docker agent
         return PopenSpawn(
-            ["./colosseum/docker_http_wrapper.py", self._agent_path, self.id]
+            ["./colosseum/docker_http_wrapper.py", self._agent_path, self.id],
+            timeout=DOCKER_AGENT_TIMEOUT,
         )
