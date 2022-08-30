@@ -221,7 +221,7 @@ class Agent:
 
             return actions
         except Exception as e:
-            self.logger.info(f"failed to get agent actions{e}")
+            self.logger.info(f"failed to get agent actions with error: {e}")
             self._log_error_count()
             self._errors.append(
                 {"error": "get_actions_failed", "exception": e.__str__()}
