@@ -229,6 +229,15 @@ class Agent:
                 f"failed to parse agent actions. Got invalid json payload. Error: {e}"
             )
             self.logger.info(f"agent said: {actions_raw}")
+            while True:
+                try:
+                    agent_output = self._child_process.read_nonblocking(
+                        size=2048, timeout=1
+                    )
+                    if agent_output:
+                        self.logger.info(agent_output)
+                except pexpect.exceptions.EOF:
+                    break
             self._log_error_count()
             self._errors.append(
                 {"error": "get_actions_failed", "exception": e.__str__()}
