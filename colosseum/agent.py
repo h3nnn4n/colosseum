@@ -135,6 +135,9 @@ class Agent:
             self._successful_ping = valid_ping
             return valid_ping
         except Exception as e:
+            if not hasattr(self, "response_str"):
+                response_str = "NOT_SET"
+
             self.logger.warning(
                 f"agent {self.id} failed to ack ping: Exception {e}\n{locals()}"
             )
