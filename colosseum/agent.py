@@ -353,6 +353,10 @@ class Agent:
         if "agent.py" in self.agent_path:
             return PopenSpawn([self._agent_path], timeout=NATIVE_AGENT_TIMEOUT)
 
+        # Pure node agent
+        if "agent.js" in self.agent_path:
+            return PopenSpawn([self._agent_path], timeout=NATIVE_AGENT_TIMEOUT)
+
         # Docker agent
         return PopenSpawn(
             ["./colosseum/docker_http_wrapper.py", self._agent_path, self.id],
