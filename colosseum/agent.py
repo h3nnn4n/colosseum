@@ -58,6 +58,7 @@ class Agent:
         except Exception as e:
             self._agent_started = False
             self._log_error_count()
+
             self._errors.append(
                 {
                     "error": "startup_failed",
@@ -92,12 +93,15 @@ class Agent:
         except Exception as e:
             if not hasattr(self, "response_str"):
                 response_str = "NOT_SET"
+            else:
+                self.logger.info(f"agent said: {response_str}")
 
             self._agent_started = False
             self.logger.warn(
-                f"agent {self.id} failed to start with error: {e}"
+                f"agent {self.id} failed to start with error: {e} "
                 f"payload sent: {payload}   payload_received: {response_str}"
             )
+            self.logger.warn("This is an unrecoverable error")
             self._log_error_count()
             self._errors.append(
                 {
@@ -106,14 +110,21 @@ class Agent:
                     "exception": e.__str__(),
                 }
             )
+            self._tainted = True
+            self._tainted_reason = "STARTUP_FAIL"
 
     def ping(self):
         try:
             payload = {"ping": "foobar"}
-            self._child_process.sendline(json.dumps(payload))
+            agent_output_raw = self._child_process.sendline(json.dumps(payload))
         except Exception as e:
+            if not hasattr(self, "agent_output_raw"):
+                agent_output_raw = "NOT_SET"
+
+            self.logger.info(f"agent said: {agent_output_raw}")
             self.logger.info(f"failed to send ping payload {payload} {e}")
             self._log_error_count()
+
             self._errors.append(
                 {
                     "error": "send_ping_failed",
@@ -137,6 +148,8 @@ class Agent:
         except Exception as e:
             if not hasattr(self, "response_str"):
                 response_str = "NOT_SET"
+            else:
+                self.logger.info(f"agent said: {response_str}")
 
             self.logger.warning(
                 f"agent {self.id} failed to ack ping: Exception {e}\n{locals()}"
