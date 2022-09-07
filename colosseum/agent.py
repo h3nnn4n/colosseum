@@ -254,6 +254,7 @@ class Agent:
             )
             return {}
 
+    # FIXME: All calls to this should be after the error gets added, not before
     def _log_error_count(self):
         self.logger.warning(f"error_count: {self.error_count}")
 
