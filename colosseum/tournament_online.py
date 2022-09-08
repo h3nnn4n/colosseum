@@ -267,6 +267,10 @@ class MatchRunner:
             Participant(participant_id) for participant_id in participant_ids
         ]
 
+        print(f"  game {game_name}")
+        for participant in participants:
+            print(f"    agent: {participant.name}")
+
         agents = [
             Agent(p.agent_path, id=p.id, time_config=game.initial_config)
             for p in participants
