@@ -116,6 +116,7 @@ class Game(BaseGame):
 
     @property
     def _grid_state_str(self):
+        data = {"width": self.grid_width, "height": self.grid_height}
         rows = []
 
         for y in range(self.grid_height):
@@ -125,7 +126,9 @@ class Game(BaseGame):
 
             rows.append("".join(row))
 
-        return rows
+        data["grid_string"] = rows
+
+        return data
 
     @property
     def outcome(self):

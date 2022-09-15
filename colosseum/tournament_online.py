@@ -71,6 +71,7 @@ class Participant:
             file.extractall(base_path)
             file.close()
 
+        agent_path_js = None
         agent_path_python = None
         agent_path_docker = None
 
@@ -87,6 +88,11 @@ class Participant:
                         agent_path_python = agent_path_python.replace(" ", "_")
                         print(f'found "agent.py" entrypoint at {agent_path_python}')
 
+                    if file == "agent.js" and not self._agent_path:
+                        agent_path_js = os.path.join(dirpath, file)
+                        agent_path_js = agent_path_js.replace(" ", "_")
+                        print(f'found "agent.js" entrypoint at {agent_path_js}')
+
         if USE_DOCKER:
             if agent_path_docker:
                 print("using DOCKER agent_path")
@@ -99,6 +105,10 @@ class Participant:
                     print("falling back to python agent")
                     self._agent_path = agent_path_python
                     push_agent_type_metrics("python")
+                elif agent_path_js:
+                    print("falling back to js agent")
+                    self._agent_path = agent_path_js
+                    push_agent_type_metrics("js")
                 else:
                     print("no fallback agent was found! Panicking!!!")
                     raise RuntimeError(f"No agent was found for {base_path}")
@@ -107,8 +117,12 @@ class Participant:
                 print("using PYTHON agent_path")
                 self._agent_path = agent_path_python
                 push_agent_type_metrics("python")
+            elif agent_path_js:
+                print("using JS agent_path")
+                self._agent_path = agent_path_js
+                push_agent_type_metrics("js")
             else:
-                print("no PYTHON agent_path was found! Panicking!!!")
+                print("no NATIVE agent_path was found! Panicking!!!")
                 push_agent_type_metrics("not_found")
                 raise RuntimeError(f"No agent was found for {base_path}")
 
@@ -252,6 +266,10 @@ class MatchRunner:
         participants = [
             Participant(participant_id) for participant_id in participant_ids
         ]
+
+        print(f"  game {game_name}")
+        for participant in participants:
+            print(f"    agent: {participant.name}")
 
         agents = [
             Agent(p.agent_path, id=p.id, time_config=game.initial_config)
