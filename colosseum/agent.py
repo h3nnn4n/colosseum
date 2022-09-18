@@ -175,7 +175,7 @@ class Agent:
 
     @property
     def agent_channel(self):
-        return self.agent_manifest.get("agent_channel", DEFAULT_AGENT_CHANNEL).upper()
+        return self.agent_manifest.get("channel", DEFAULT_AGENT_CHANNEL).upper()
 
     @property
     def error_count(self):
