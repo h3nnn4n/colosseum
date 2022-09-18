@@ -41,6 +41,8 @@ class Agent:
         self._tainted_reason = None
         self._max_errors_allowed = 10
 
+        self._agent_type = None
+
         self._time_config = time_config
         self.t_start = None
         self.t_end = None
@@ -52,66 +54,35 @@ class Agent:
     def start(self):
         self._child_process = self._boot_agent()
 
-        try:
-            payload = json.dumps({"set_agent_id": self.id})
-            self._child_process.sendline(payload)
-        except Exception as e:
+        payload = json.dumps({"set_agent_id": self.id})
+        response = self._exchange_message(payload)
+
+        if not response:
+            self.logger.warn(f"agent {self.id} failed to start")
             self._agent_started = False
-            self._log_error_count()
-
-            self._errors.append(
-                {
-                    "error": "startup_failed",
-                    "payload": payload,
-                    "exception": e.__str__(),
-                }
-            )
-            return
-
-        try:
-            response_str = self._child_process.readline()
-            response = json.loads(response_str)
-
-            if response.get("agent_id") != self.id or response.get("agent_id") is None:
-                self.logger.warning(f"agent failed to set id. got: {response}")
-                self._set_agent_id = False
-                self._log_error_count()
-            else:
-                self._set_agent_id = True
-
-            if response.get("agent_name"):
-                self.name = response.get("agent_name")
-
-            if response.get("agent_version"):
-                self.version = response.get("agent_version")
-
-            if self.name:
-                self.logger.info(f"agent name {self.name} {self.version}")
-
-            self.logger.info(f"agent {self.id} started")
-            self._agent_started = True
-        except Exception as e:
-            if not hasattr(self, "response_str"):
-                response_str = "NOT_SET"
-            else:
-                self.logger.info(f"agent said: {response_str}")
-
-            self._agent_started = False
-            self.logger.warn(
-                f"agent {self.id} failed to start with error: {e} "
-                f"payload sent: {payload}   payload_received: {response_str}"
-            )
             self.logger.warn("This is an unrecoverable error")
-            self._log_error_count()
-            self._errors.append(
-                {
-                    "error": "startup_failed",
-                    "payload": response_str,
-                    "exception": e.__str__(),
-                }
-            )
             self._tainted = True
             self._tainted_reason = "STARTUP_FAIL"
+            return
+
+        if response.get("agent_id") != self.id or response.get("agent_id") is None:
+            self.logger.warning(f"agent failed to set id. got: {response}")
+            self._set_agent_id = False
+            self._log_error_count()
+        else:
+            self._set_agent_id = True
+
+        if response.get("agent_name"):
+            self.name = response.get("agent_name")
+
+        if response.get("agent_version"):
+            self.version = response.get("agent_version")
+
+        if self.name:
+            self.logger.info(f"agent name {self.name} {self.version}")
+
+        self.logger.info(f"agent {self.id} started")
+        self._agent_started = True
 
     def ping(self):
         try:
@@ -364,6 +335,53 @@ class Agent:
         if self._overtime_pool < 0:
             self.logger.warning(f"agent is overtime by {self._overtime_pool}")
             self._overtime = True
+
+    def _exchange_message(self, message):
+        if not self._agent_type or self._agent_type == "STDIO":
+            return self._exchange_stdio_message(message)
+
+        return self._exchange_http_message(message)
+
+    def _exchange_stdio_message(self, message):
+        try:
+            payload = json.dumps({"set_agent_id": self.id})
+            self._child_process.sendline(payload)
+        except Exception as e:
+            self._errors.append(
+                {
+                    "error": "failed to send message",
+                    "payload": payload,
+                    "exception": e.__str__(),
+                }
+            )
+
+            self._log_error_count()
+            return None
+
+        try:
+            response_str = self._child_process.readline()
+            response = json.loads(response_str)
+            return response
+        except Exception as e:
+            if not hasattr(self, "response_str"):
+                response_str = "NOT_SET"
+            else:
+                self.logger.info(f"agent said: {response_str}")
+
+            self._errors.append(
+                {
+                    "error": "failed to receive message",
+                    "payload": response_str,
+                    "exception": e.__str__(),
+                }
+            )
+            self._log_error_count()
+            return None
+        else:
+            return response
+
+    def _exchange_http_message(self, message):
+        pass
 
     def _boot_agent(self):
         # Pure python agent
