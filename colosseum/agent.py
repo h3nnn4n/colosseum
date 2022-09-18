@@ -108,64 +108,35 @@ class Agent:
         self._exchange_message({"stop": {"reason": reason}})
 
     def update_state(self, state):
-        payload = json.dumps(state)
-        try:
-            self._tick()
-            self._child_process.sendline(payload)
-        except Exception as e:
-            self.logger.info(f"failed to update agent state {payload} {e}")
-            self._log_error_count()
-            self._errors.append(
-                {
-                    "error": "update_state_failed",
-                    "payload": payload,
-                    "exception": e.__str__(),
-                }
-            )
+        self._tick()
+        self.__next_action = self._exchange_message(state)
+        self._tock()
 
     def get_actions(self):
-        actions_raw = self._child_process.readline()
-        # FIXME: The duration should start counting when update_state is called
-        # and stop when get_actions gets called
-        self._tock()
-        try:
-            actions = json.loads(actions_raw)
-            agent_id = actions.get("agent_id")
-
-            if agent_id is None:
-                self.logger.warning(f"agent {self.id} did not give an agent id")
-            elif agent_id != self.id:
-                self.logger.warning(f"agent {self.id} return invalid agent id")
-
-            return actions
-        except json.JSONDecodeError as e:
-            self.logger.info(
-                f"failed to parse agent actions. Got invalid json payload. Error: {e}"
-            )
-            self.logger.info(f"agent said: {actions_raw}")
-            while True:
-                try:
-                    agent_output = self._child_process.read_nonblocking(
-                        size=2048, timeout=1
-                    )
-                    if agent_output:
-                        self.logger.info(agent_output)
-                except pexpect.exceptions.EOF:
-                    break
-            self._log_error_count()
-            self._errors.append(
-                {"error": "get_actions_failed", "exception": e.__str__()}
-            )
-            return {}
-        except Exception as e:
-            self.logger.info(f"failed to get agent actions with error: {e}")
-            self._log_error_count()
-            self._errors.append(
-                {"error": "get_actions_failed", "exception": e.__str__()}
-            )
+        if self.__next_action is None:
+            self.logger.info("failed to get agent actions")
             return {}
 
-    # FIXME: All calls to this should be after the error gets added, not before
+        actions = self.__next_action
+        agent_id = actions.get("agent_id")
+
+        if agent_id is None:
+            self.logger.warning(f"agent {self.id} did not give an agent id")
+        elif agent_id != self.id:
+            self.logger.warning(f"agent {self.id} return invalid agent id")
+
+        return actions
+
+        while True:
+            try:
+                agent_output = self._child_process.read_nonblocking(
+                    size=2048, timeout=1
+                )
+                if agent_output:
+                    self.logger.info(agent_output)
+            except pexpect.exceptions.EOF:
+                break
+
     def _log_error_count(self):
         self.logger.warning(f"error_count: {self.error_count}")
 
