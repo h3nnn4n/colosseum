@@ -99,48 +99,13 @@ class Agent:
         return valid_ping
 
     def set_config(self, config):
-        try:
-            payload = {"config": config}
-            self._child_process.sendline(json.dumps(payload))
-        except Exception as e:
-            self.logger.info(f"failed to send config payload {payload} {e}")
-            self._log_error_count()
-            self._errors.append(
-                {
-                    "error": "send_set_config",
-                    "payload": payload,
-                    "exception": e.__str__(),
-                }
-            )
-            self._set_config = False
-            return
+        response = self._exchange_message({"config": config})
 
-        try:
-            self._child_process.readline()
-            self._set_config = True
-        except Exception as e:
-            self.logger.info(f"failed to get config payload back {payload} {e}")
-            self._log_error_count()
-            self._errors.append(
-                {
-                    "error": "send_ping_failed",
-                    "payload": payload,
-                    "exception": e.__str__(),
-                }
-            )
+        if response is None:
             self._set_config = False
 
     def stop(self, reason="end_of_game"):
-        try:
-            payload = json.dumps({"stop": {"reason": reason}})
-            self._child_process.sendline(payload)
-            self.logger.info(f"agent {self.id} stopped")
-        except Exception as e:
-            self.logger.info(f"failed to stop agent {payload} {e}")
-            self._log_error_count()
-            self._errors.append(
-                {"error": "stop_failed", "payload": payload, "exception": e.__str__()}
-            )
+        self._exchange_message({"stop": {"reason": reason}})
 
     def update_state(self, state):
         payload = json.dumps(state)
