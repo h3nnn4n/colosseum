@@ -271,7 +271,7 @@ class Agent:
     def _exchange_stdio_message(self, message):
         try:
             payload = json.dumps(message)
-            self._child_process.sendline(payload)
+            self._child_process.sendline(payload, timeout=NATIVE_AGENT_TIMEOUT)
         except Exception as e:
             self._errors.append(
                 {
@@ -285,7 +285,7 @@ class Agent:
             return None
 
         try:
-            response_str = self._child_process.readline()
+            response_str = self._child_process.readline(timeout=NATIVE_AGENT_TIMEOUT)
             response = json.loads(response_str)
             return response
         except json.JSONDecodeError as e:
