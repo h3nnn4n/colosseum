@@ -24,6 +24,8 @@ NATIVE_AGENT_TIMEOUT = 5
 
 DEFAULT_AGENT_CHANNEL = "STDIO"
 
+logging.basicConfig(level=logging.INFO)
+
 
 class Agent:
     def __init__(self, agent_path, id=None, time_config=None):
