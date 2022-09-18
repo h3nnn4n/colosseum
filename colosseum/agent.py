@@ -2,6 +2,7 @@ import atexit
 import json
 import logging
 import os
+import os.path
 import shlex
 import shutil
 import socket
@@ -20,6 +21,8 @@ from colosseum.utils import get_internal_id
 
 DOCKER_AGENT_TIMEOUT = 30
 NATIVE_AGENT_TIMEOUT = 5
+
+DEFAULT_AGENT_CHANNEL = "STDIO"
 
 
 class Agent:
@@ -41,8 +44,6 @@ class Agent:
         self._tainted_reason = None
         self._max_errors_allowed = 10
 
-        self._agent_type = None
-
         self._time_config = time_config
         self.t_start = None
         self.t_end = None
@@ -52,6 +53,9 @@ class Agent:
         self._overtime = None
 
     def start(self):
+        # The log message is both helpful, and warms the cache too
+        self.logger.info(f"using agent_channel = {self.agent_channel}")
+
         self._child_process = self._boot_agent()
 
         response = self._exchange_message({"set_agent_id": self.id})
@@ -133,6 +137,39 @@ class Agent:
     @property
     def agent_path(self):
         return self._agent_path
+
+    @property
+    def agent_manifest(self):
+        if hasattr(self, "_manifest"):
+            return self._manifest
+
+        agent_folder = os.path.dirname(os.path.normpath(self.agent_path))
+        manifest_path = os.path.join(agent_folder, "manifest.json")
+
+        self.logger.info(f"reading manifest from {manifest_path=}")
+
+        if not os.path.isfile(manifest_path):
+            self.logger.info(
+                f"manifest file at {manifest_path=} does not exist. Assuming defaults"
+            )
+            self._manifest = {}
+            return self._manifest
+
+        with open(manifest_path, "rt") as f:
+            manifest_raw = f.read()
+
+        try:
+            manifest = json.loads(manifest_raw)
+            self._manifest = manifest
+            self.logger.info(f"manifest file at {manifest_path=} parsed successfully")
+        except Exception:
+            self.logger.info(f"failed to parsemanifest file at {manifest_path=}")
+
+        return self._manifest
+
+    @property
+    def agent_channel(self):
+        return self.agent_manifest.get("agent_channel", DEFAULT_AGENT_CHANNEL).upper()
 
     @property
     def error_count(self):
@@ -226,7 +263,7 @@ class Agent:
             self._overtime = True
 
     def _exchange_message(self, message):
-        if not self._agent_type or self._agent_type == "STDIO":
+        if not self.agent_channel or self.agent_channel == "STDIO":
             return self._exchange_stdio_message(message)
 
         return self._exchange_http_message(message)
