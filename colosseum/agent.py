@@ -54,8 +54,7 @@ class Agent:
     def start(self):
         self._child_process = self._boot_agent()
 
-        payload = json.dumps({"set_agent_id": self.id})
-        response = self._exchange_message(payload)
+        response = self._exchange_message({"set_agent_id": self.id})
 
         if not response:
             self.logger.warn(f"agent {self.id} failed to start")
@@ -85,56 +84,19 @@ class Agent:
         self._agent_started = True
 
     def ping(self):
-        try:
-            payload = {"ping": "foobar"}
-            agent_output_raw = self._child_process.sendline(json.dumps(payload))
-        except Exception as e:
-            if not hasattr(self, "agent_output_raw"):
-                agent_output_raw = "NOT_SET"
+        response = self._exchange_message({"ping": "ping"})
 
-            self.logger.info(f"agent said: {agent_output_raw}")
-            self.logger.info(f"failed to send ping payload {payload} {e}")
-            self._log_error_count()
-
-            self._errors.append(
-                {
-                    "error": "send_ping_failed",
-                    "payload": payload,
-                    "exception": e.__str__(),
-                }
-            )
+        if not response:
             self._successful_ping = False
             return False
 
-        try:
-            response_str = self._child_process.readline()
-            data = json.loads(response_str)
-            valid_ping = data.get("pong") is not None
-            if not valid_ping:
-                self.logger.warning(
-                    f"agent {self.id} sent invalid response to ping: {data}"
-                )
-            self._successful_ping = valid_ping
-            return valid_ping
-        except Exception as e:
-            if not hasattr(self, "response_str"):
-                response_str = "NOT_SET"
-            else:
-                self.logger.info(f"agent said: {response_str}")
-
+        valid_ping = response.get("pong") is not None
+        if not valid_ping:
             self.logger.warning(
-                f"agent {self.id} failed to ack ping: Exception {e}\n{locals()}"
+                f"agent {self.id} sent invalid response to ping: {response}"
             )
-            self._log_error_count()
-            self._errors.append(
-                {
-                    "error": "ping_failed",
-                    "payload": response_str,
-                    "exception": e.__str__(),
-                }
-            )
-            self._successful_ping = False
-            return False
+        self._successful_ping = valid_ping
+        return valid_ping
 
     def set_config(self, config):
         try:
@@ -344,7 +306,7 @@ class Agent:
 
     def _exchange_stdio_message(self, message):
         try:
-            payload = json.dumps({"set_agent_id": self.id})
+            payload = json.dumps(message)
             self._child_process.sendline(payload)
         except Exception as e:
             self._errors.append(
