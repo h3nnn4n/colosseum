@@ -127,16 +127,6 @@ class Agent:
 
         return actions
 
-        while True:
-            try:
-                agent_output = self._child_process.read_nonblocking(
-                    size=2048, timeout=1
-                )
-                if agent_output:
-                    self.logger.info(agent_output)
-            except pexpect.exceptions.EOF:
-                break
-
     def _log_error_count(self):
         self.logger.warning(f"error_count: {self.error_count}")
 
@@ -261,6 +251,34 @@ class Agent:
             response_str = self._child_process.readline()
             response = json.loads(response_str)
             return response
+        except json.JSONDecodeError as e:
+            self.logger.info(
+                f"failed to parse agent actions. Got invalid json payload. Error: {e}"
+            )
+            self.logger.info("agent said:")
+
+            if hasattr(self, "response_str"):
+                self.logger.info(response_str)
+
+            while True:
+                try:
+                    agent_output = self._child_process.read_nonblocking(
+                        size=2048, timeout=1
+                    )
+                    if agent_output:
+                        self.logger.info(agent_output)
+                except pexpect.exceptions.EOF:
+                    break
+
+            self._errors.append(
+                {
+                    "error": "failed to receive message",
+                    "payload": response_str,
+                    "exception": e.__str__(),
+                }
+            )
+            self._log_error_count()
+            return None
         except Exception as e:
             if not hasattr(self, "response_str"):
                 response_str = "NOT_SET"
