@@ -230,6 +230,7 @@ class Agent:
 
         if self._agent_started is False:
             # Agent failed to start
+            self._tainted_reason = "STARTUP_FAIL"
             self._tainted = True
 
         if self._successful_ping is False:
