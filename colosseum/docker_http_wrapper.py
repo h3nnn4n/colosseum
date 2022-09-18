@@ -15,7 +15,7 @@ from retrying import retry
 
 self_id = str(uuid.uuid4())
 
-DOCKER_AGENT_PORT = randint(1024, 65535)
+DOCKER_AGENT_PORT = randint(1025, 65535)
 
 logging.basicConfig(filename=f"network_wrapper_{self_id}.log", level=logging.DEBUG)
 
@@ -38,9 +38,10 @@ def main(agent_path, agent_id):
 
 
 class HttpAgent:
-    def __init__(self, agent_path, agent_id):
+    def __init__(self, agent_path, agent_id, port=None):
         self._agent_path = agent_path
         self.id = agent_id
+        self.docker_agent_port = port or DOCKER_AGENT_PORT
 
     def boot(self):
         agent_path = self._agent_path.replace("Dockerfile", "")
@@ -88,7 +89,7 @@ class HttpAgent:
     def start_container(self, tag):
         logging.info(f"starting container with {tag=}")
         cmd = (
-            f"docker run -p 127.0.0.1:{DOCKER_AGENT_PORT}:80/tcp --rm=true --detach "
+            f"docker run -p 127.0.0.1:{self.docker_agent_port}:80/tcp --rm=true --detach "
             + tag
         )
         logging.info(f"starting container with {cmd}")
