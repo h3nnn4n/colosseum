@@ -15,6 +15,7 @@ from time import time
 from uuid import uuid4
 
 import pexpect
+import requests
 from pexpect.popen_spawn import PopenSpawn
 from retrying import retry
 
@@ -343,8 +344,22 @@ class Agent:
             return response
 
     def _exchange_http_message(self, message):
-        raise NotImplementedError
-        pass
+        @retry(wait_exponential_multiplier=10, wait_exponential_max=5000)
+        def _exchange_data(data, port=None):
+            self.logger.debug(f"post to http://localhost:{port}")
+            self.logger.debug(f"data = {json.dumps(data)}")
+            response = requests.post(f"http://localhost:{port}", json=data)
+            data_back = response.content.decode()
+
+            self.logger.debug(f"got from bot: {data_back}")
+
+            try:
+                return json.loads(data_back)
+            except json.JSONDecodeError:
+                self.logger.warning(f"got invalid payload from bot: {data_back}")
+                return {}
+
+        return _exchange_data(message, port=self._docker_agent_port)
 
     def _boot_agent(self):
         # Pure python agent
