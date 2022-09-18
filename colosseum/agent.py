@@ -9,12 +9,14 @@ import socket
 import subprocess
 import sys
 import tempfile
+from random import randint
 from tempfile import mkdtemp
 from time import time
 from uuid import uuid4
 
 import pexpect
 from pexpect.popen_spawn import PopenSpawn
+from retrying import retry
 
 from colosseum.utils import get_internal_id
 
@@ -53,6 +55,8 @@ class Agent:
         self._step_time_limit = time_config.step_time_limit
         self._step_limit_pool = time_config.step_limit_pool
         self._overtime = None
+
+        self._docker_agent_port = randint(1025, 65535)
 
     def start(self):
         # The log message is both helpful, and warms the cache too
@@ -273,7 +277,8 @@ class Agent:
     def _exchange_stdio_message(self, message):
         try:
             payload = json.dumps(message)
-            self._child_process.sendline(payload, timeout=NATIVE_AGENT_TIMEOUT)
+            self.logger.debug(f"{payload=}")
+            self._child_process.sendline(payload)
         except Exception as e:
             self._errors.append(
                 {
@@ -287,7 +292,8 @@ class Agent:
             return None
 
         try:
-            response_str = self._child_process.readline(timeout=NATIVE_AGENT_TIMEOUT)
+            response_str = self._child_process.readline()
+            self.logger.debug(f"{response_str=}")
             response = json.loads(response_str)
             return response
         except json.JSONDecodeError as e:
@@ -337,6 +343,7 @@ class Agent:
             return response
 
     def _exchange_http_message(self, message):
+        raise NotImplementedError
         pass
 
     def _boot_agent(self):
@@ -350,6 +357,11 @@ class Agent:
 
         # Docker agent
         return PopenSpawn(
-            ["./colosseum/docker_http_wrapper.py", self._agent_path, self.id],
-            timeout=DOCKER_AGENT_TIMEOUT,
+            [
+                "./colosseum/docker_http_wrapper.py",
+                self._agent_path,
+                self.id,
+                str(self._docker_agent_port),
+            ],
+            timeout=NATIVE_AGENT_TIMEOUT,
         )
