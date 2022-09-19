@@ -242,7 +242,8 @@ class GameRunner:
 class MatchRunner:
     @classmethod
     def run_next_match(cls, game=None):
-        print(f"{USE_DOCKER=}")
+        print("\n----------------\nstarting new match")
+        print(f"{USE_DOCKER=} {FORCE_DOCKER=}")
         send_heartbeat()
         next_match = get_next_match(game=game)
         if not next_match.get("id"):
@@ -289,6 +290,8 @@ class MatchRunner:
 
         game_runner = GameRunner(*participants, match=match_data)
         game_runner.set_results(run_match(game, agents=agents))
+
+        print("----------------\n")
 
 
 def get_next_match(game=None):
