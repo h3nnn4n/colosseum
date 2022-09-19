@@ -32,6 +32,7 @@ load_dotenv()
 API_URL = os.environ.get("API_URL")
 API_TOKEN = os.environ.get("API_TOKEN")
 USE_DOCKER = config("USE_DOCKER", default=False, cast=bool)
+FORCE_DOCKER = config("FORCE_DOCKER", default=False, cast=bool)
 AGENT_FOLDER = "agents_tmp"
 
 
@@ -93,7 +94,15 @@ class Participant:
                         agent_path_js = agent_path_js.replace(" ", "_")
                         print(f'found "agent.js" entrypoint at {agent_path_js}')
 
-        if USE_DOCKER:
+        if FORCE_DOCKER:
+            if agent_path_docker:
+                print("using DOCKER agent_path")
+                self._agent_path = agent_path_docker
+                push_agent_type_metrics("docker")
+            else:
+                print("FORCE_DOCKER is set but not docker agent was found!")
+                push_agent_type_metrics("not_found")
+        elif USE_DOCKER:
             if agent_path_docker:
                 print("using DOCKER agent_path")
                 self._agent_path = agent_path_docker
@@ -111,6 +120,7 @@ class Participant:
                     push_agent_type_metrics("js")
                 else:
                     print("no fallback agent was found! Panicking!!!")
+                    push_agent_type_metrics("not_found")
                     raise RuntimeError(f"No agent was found for {base_path}")
         else:
             if agent_path_python:
@@ -369,6 +379,7 @@ def send_heartbeat():
         tags={
             "source": "colosseum_worker",
             "use_docker": USE_DOCKER,
+            "force_docker": FORCE_DOCKER,
         },
     )
 
