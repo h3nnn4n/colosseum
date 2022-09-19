@@ -2,24 +2,32 @@ import atexit
 import json
 import logging
 import os
+import os.path
 import shlex
 import shutil
 import socket
 import subprocess
 import sys
 import tempfile
+from random import randint
 from tempfile import mkdtemp
 from time import time
 from uuid import uuid4
 
 import pexpect
+import requests
 from pexpect.popen_spawn import PopenSpawn
+from retrying import retry
 
 from colosseum.utils import get_internal_id
 
 
 DOCKER_AGENT_TIMEOUT = 30
 NATIVE_AGENT_TIMEOUT = 5
+
+DEFAULT_AGENT_CHANNEL = "STDIO"
+
+logging.basicConfig(level=logging.INFO)
 
 
 class Agent:
@@ -49,231 +57,126 @@ class Agent:
         self._step_limit_pool = time_config.step_limit_pool
         self._overtime = None
 
+        self._docker_agent_port = randint(1025, 65535)
+
     def start(self):
+        # The log message is both helpful, and warms the cache too
+        self.logger.info(f"using agent_channel = {self.agent_channel}")
+
         self._child_process = self._boot_agent()
 
-        try:
-            payload = json.dumps({"set_agent_id": self.id})
-            self._child_process.sendline(payload)
-        except Exception as e:
+        response = self._exchange_message({"set_agent_id": self.id})
+
+        if not response:
+            self.logger.warn(f"agent {self.id} failed to start")
             self._agent_started = False
-            self._log_error_count()
-
-            self._errors.append(
-                {
-                    "error": "startup_failed",
-                    "payload": payload,
-                    "exception": e.__str__(),
-                }
-            )
-            return
-
-        try:
-            response_str = self._child_process.readline()
-            response = json.loads(response_str)
-
-            if response.get("agent_id") != self.id or response.get("agent_id") is None:
-                self.logger.warning(f"agent failed to set id. got: {response}")
-                self._set_agent_id = False
-                self._log_error_count()
-            else:
-                self._set_agent_id = True
-
-            if response.get("agent_name"):
-                self.name = response.get("agent_name")
-
-            if response.get("agent_version"):
-                self.version = response.get("agent_version")
-
-            if self.name:
-                self.logger.info(f"agent name {self.name} {self.version}")
-
-            self.logger.info(f"agent {self.id} started")
-            self._agent_started = True
-        except Exception as e:
-            if not hasattr(self, "response_str"):
-                response_str = "NOT_SET"
-            else:
-                self.logger.info(f"agent said: {response_str}")
-
-            self._agent_started = False
-            self.logger.warn(
-                f"agent {self.id} failed to start with error: {e} "
-                f"payload sent: {payload}   payload_received: {response_str}"
-            )
             self.logger.warn("This is an unrecoverable error")
-            self._log_error_count()
-            self._errors.append(
-                {
-                    "error": "startup_failed",
-                    "payload": response_str,
-                    "exception": e.__str__(),
-                }
-            )
             self._tainted = True
             self._tainted_reason = "STARTUP_FAIL"
-
-    def ping(self):
-        try:
-            payload = {"ping": "foobar"}
-            agent_output_raw = self._child_process.sendline(json.dumps(payload))
-        except Exception as e:
-            if not hasattr(self, "agent_output_raw"):
-                agent_output_raw = "NOT_SET"
-
-            self.logger.info(f"agent said: {agent_output_raw}")
-            self.logger.info(f"failed to send ping payload {payload} {e}")
-            self._log_error_count()
-
-            self._errors.append(
-                {
-                    "error": "send_ping_failed",
-                    "payload": payload,
-                    "exception": e.__str__(),
-                }
-            )
-            self._successful_ping = False
-            return False
-
-        try:
-            response_str = self._child_process.readline()
-            data = json.loads(response_str)
-            valid_ping = data.get("pong") is not None
-            if not valid_ping:
-                self.logger.warning(
-                    f"agent {self.id} sent invalid response to ping: {data}"
-                )
-            self._successful_ping = valid_ping
-            return valid_ping
-        except Exception as e:
-            if not hasattr(self, "response_str"):
-                response_str = "NOT_SET"
-            else:
-                self.logger.info(f"agent said: {response_str}")
-
-            self.logger.warning(
-                f"agent {self.id} failed to ack ping: Exception {e}\n{locals()}"
-            )
-            self._log_error_count()
-            self._errors.append(
-                {
-                    "error": "ping_failed",
-                    "payload": response_str,
-                    "exception": e.__str__(),
-                }
-            )
-            self._successful_ping = False
-            return False
-
-    def set_config(self, config):
-        try:
-            payload = {"config": config}
-            self._child_process.sendline(json.dumps(payload))
-        except Exception as e:
-            self.logger.info(f"failed to send config payload {payload} {e}")
-            self._log_error_count()
-            self._errors.append(
-                {
-                    "error": "send_set_config",
-                    "payload": payload,
-                    "exception": e.__str__(),
-                }
-            )
-            self._set_config = False
             return
 
-        try:
-            self._child_process.readline()
-            self._set_config = True
-        except Exception as e:
-            self.logger.info(f"failed to get config payload back {payload} {e}")
+        if response.get("agent_id") != self.id or response.get("agent_id") is None:
+            self.logger.warning(f"agent failed to set id. got: {response}")
+            self._set_agent_id = False
             self._log_error_count()
-            self._errors.append(
-                {
-                    "error": "send_ping_failed",
-                    "payload": payload,
-                    "exception": e.__str__(),
-                }
+        else:
+            self._set_agent_id = True
+
+        if response.get("agent_name"):
+            self.name = response.get("agent_name")
+
+        if response.get("agent_version"):
+            self.version = response.get("agent_version")
+
+        if self.name:
+            self.logger.info(f"agent name {self.name} {self.version}")
+
+        self.logger.info(f"agent {self.id} started")
+        self._agent_started = True
+
+    def ping(self):
+        response = self._exchange_message({"ping": "ping"})
+
+        if not response:
+            self._successful_ping = False
+            return False
+
+        valid_ping = response.get("pong") is not None
+        if not valid_ping:
+            self.logger.warning(
+                f"agent {self.id} sent invalid response to ping: {response}"
             )
+        self._successful_ping = valid_ping
+        return valid_ping
+
+    def set_config(self, config):
+        response = self._exchange_message({"config": config})
+
+        if response is None:
             self._set_config = False
 
     def stop(self, reason="end_of_game"):
-        try:
-            payload = json.dumps({"stop": {"reason": reason}})
-            self._child_process.sendline(payload)
-            self.logger.info(f"agent {self.id} stopped")
-        except Exception as e:
-            self.logger.info(f"failed to stop agent {payload} {e}")
-            self._log_error_count()
-            self._errors.append(
-                {"error": "stop_failed", "payload": payload, "exception": e.__str__()}
-            )
+        self._exchange_message({"stop": {"reason": reason}})
 
     def update_state(self, state):
-        payload = json.dumps(state)
-        try:
-            self._tick()
-            self._child_process.sendline(payload)
-        except Exception as e:
-            self.logger.info(f"failed to update agent state {payload} {e}")
-            self._log_error_count()
-            self._errors.append(
-                {
-                    "error": "update_state_failed",
-                    "payload": payload,
-                    "exception": e.__str__(),
-                }
-            )
+        self._tick()
+        self.__next_action = self._exchange_message(state)
+        self._tock()
 
     def get_actions(self):
-        actions_raw = self._child_process.readline()
-        # FIXME: The duration should start counting when update_state is called
-        # and stop when get_actions gets called
-        self._tock()
-        try:
-            actions = json.loads(actions_raw)
-            agent_id = actions.get("agent_id")
-
-            if agent_id is None:
-                self.logger.warning(f"agent {self.id} did not give an agent id")
-            elif agent_id != self.id:
-                self.logger.warning(f"agent {self.id} return invalid agent id")
-
-            return actions
-        except json.JSONDecodeError as e:
-            self.logger.info(
-                f"failed to parse agent actions. Got invalid json payload. Error: {e}"
-            )
-            self.logger.info(f"agent said: {actions_raw}")
-            while True:
-                try:
-                    agent_output = self._child_process.read_nonblocking(
-                        size=2048, timeout=1
-                    )
-                    if agent_output:
-                        self.logger.info(agent_output)
-                except pexpect.exceptions.EOF:
-                    break
-            self._log_error_count()
-            self._errors.append(
-                {"error": "get_actions_failed", "exception": e.__str__()}
-            )
-            return {}
-        except Exception as e:
-            self.logger.info(f"failed to get agent actions with error: {e}")
-            self._log_error_count()
-            self._errors.append(
-                {"error": "get_actions_failed", "exception": e.__str__()}
-            )
+        if self.__next_action is None:
+            self.logger.info("failed to get agent actions")
             return {}
 
-    # FIXME: All calls to this should be after the error gets added, not before
+        actions = self.__next_action
+        agent_id = actions.get("agent_id")
+
+        if agent_id is None:
+            self.logger.warning(f"agent {self.id} did not give an agent id")
+        elif agent_id != self.id:
+            self.logger.warning(f"agent {self.id} return invalid agent id")
+
+        return actions
+
     def _log_error_count(self):
         self.logger.warning(f"error_count: {self.error_count}")
 
     @property
     def agent_path(self):
         return self._agent_path
+
+    @property
+    def agent_manifest(self):
+        if hasattr(self, "_manifest"):
+            return self._manifest
+
+        agent_folder = os.path.dirname(os.path.normpath(self.agent_path))
+        manifest_path = os.path.join(agent_folder, "manifest.json")
+
+        self.logger.info(f"reading manifest from {manifest_path=}")
+
+        if not os.path.isfile(manifest_path):
+            self.logger.info(
+                f"manifest file at {manifest_path=} does not exist. Assuming defaults"
+            )
+            self._manifest = {}
+            return self._manifest
+
+        with open(manifest_path, "rt") as f:
+            manifest_raw = f.read()
+
+        try:
+            manifest = json.loads(manifest_raw)
+            self._manifest = manifest
+            self.logger.info(f"manifest file at {manifest_path=} parsed successfully")
+        except Exception:
+            self.logger.info(f"failed to parsemanifest file at {manifest_path=}")
+
+        return self._manifest
+
+    @property
+    def agent_channel(self):
+        return self.agent_manifest.get("channel", DEFAULT_AGENT_CHANNEL).upper()
 
     @property
     def error_count(self):
@@ -297,6 +200,7 @@ class Agent:
 
         if self._agent_started is False:
             # Agent failed to start
+            self._tainted_reason = "STARTUP_FAIL"
             self._tainted = True
 
         if self._successful_ping is False:
@@ -365,6 +269,98 @@ class Agent:
             self.logger.warning(f"agent is overtime by {self._overtime_pool}")
             self._overtime = True
 
+    def _exchange_message(self, message):
+        if not self.agent_channel or self.agent_channel == "STDIO":
+            return self._exchange_stdio_message(message)
+
+        return self._exchange_http_message(message)
+
+    def _exchange_stdio_message(self, message):
+        try:
+            payload = json.dumps(message)
+            self.logger.debug(f"{payload=}")
+            self._child_process.sendline(payload)
+        except Exception as e:
+            self._errors.append(
+                {
+                    "error": "failed to send message",
+                    "payload": payload,
+                    "exception": e.__str__(),
+                }
+            )
+
+            self._log_error_count()
+            return None
+
+        try:
+            response_str = self._child_process.readline()
+            self.logger.debug(f"{response_str=}")
+            response = json.loads(response_str)
+            return response
+        except json.JSONDecodeError as e:
+            self.logger.info(
+                f"failed to parse agent actions. Got invalid json payload. Error: {e}"
+            )
+            self.logger.info("agent said:")
+
+            if hasattr(self, "response_str"):
+                self.logger.info(response_str)
+
+            while True:
+                try:
+                    agent_output = self._child_process.read_nonblocking(
+                        size=2048, timeout=1
+                    )
+                    if agent_output:
+                        self.logger.info(agent_output)
+                except pexpect.exceptions.EOF:
+                    break
+
+            self._errors.append(
+                {
+                    "error": "failed to receive message",
+                    "payload": response_str,
+                    "exception": e.__str__(),
+                }
+            )
+            self._log_error_count()
+            return None
+        except Exception as e:
+            if not hasattr(self, "response_str"):
+                response_str = "NOT_SET"
+            else:
+                self.logger.info(f"agent said: {response_str}")
+
+            self._errors.append(
+                {
+                    "error": "failed to receive message",
+                    "payload": response_str,
+                    "exception": e.__str__(),
+                }
+            )
+            self._log_error_count()
+            return None
+        else:
+            return response
+
+    def _exchange_http_message(self, message):
+        @retry(wait_exponential_multiplier=10, wait_exponential_max=5000)
+        def _exchange_data(data, port=None):
+            self.logger.debug(f"post to http://localhost:{port}")
+            self.logger.debug(f"data = {json.dumps(data)}")
+            response = requests.post(f"http://localhost:{port}", json=data)
+            data_back = response.content.decode()
+
+            self.logger.debug(f"got from bot: {data_back}")
+
+            try:
+                return json.loads(data_back)
+            except json.JSONDecodeError:
+                self.logger.warning(f"got invalid payload from bot: {data_back}")
+                return {}
+
+        return _exchange_data(message, port=self._docker_agent_port)
+
     def _boot_agent(self):
         # Pure python agent
         if "agent.py" in self.agent_path:
@@ -376,6 +372,11 @@ class Agent:
 
         # Docker agent
         return PopenSpawn(
-            ["./colosseum/docker_http_wrapper.py", self._agent_path, self.id],
-            timeout=DOCKER_AGENT_TIMEOUT,
+            [
+                "./colosseum/docker_http_wrapper.py",
+                self._agent_path,
+                self.id,
+                str(self._docker_agent_port),
+            ],
+            timeout=NATIVE_AGENT_TIMEOUT,
         )
