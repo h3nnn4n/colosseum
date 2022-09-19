@@ -15,22 +15,32 @@ from retrying import retry
 
 self_id = str(uuid.uuid4())
 
-DOCKER_AGENT_PORT = randint(1024, 65535)
+DOCKER_AGENT_PORT = randint(1025, 65535)
 
-logging.basicConfig(filename=f"network_wrapper_{self_id}.log", level=logging.DEBUG)
+logging.basicConfig(filename=f"network_wrapper_{self_id}.log", level=logging.INFO)
 
 
 @retry(wait_exponential_multiplier=10, wait_exponential_max=5000)
-def _exchange_data(data):
-    response = requests.post(
-        f"http://localhost:{DOCKER_AGENT_PORT}", json=json.loads(data)
-    )
+def _exchange_data(data, port=None):
+    port = port or DOCKER_AGENT_PORT
+    logging.debug(f"{DOCKER_AGENT_PORT=}")
+    logging.debug(f"{port=}")
+    logging.debug(f"http://localhost:{port}")
+    logging.debug(data)
+    logging.debug(json.loads(data))
+
+    response = requests.post(f"http://localhost:{port}", json=json.loads(data))
     return response.content.decode()
 
 
-def main(agent_path, agent_id):
-    logging.info(f"running with {agent_path=} {agent_id=}")
-    http_agent = HttpAgent(agent_path, agent_id)
+def main(agent_path, agent_id, port):
+    try:
+        port = int(port)
+    except Exception:
+        port = None
+
+    logging.info(f"running with {agent_path=} {agent_id=} {port=}")
+    http_agent = HttpAgent(agent_path, agent_id, port)
     try:
         http_agent.boot()
     finally:
@@ -38,9 +48,10 @@ def main(agent_path, agent_id):
 
 
 class HttpAgent:
-    def __init__(self, agent_path, agent_id):
+    def __init__(self, agent_path, agent_id, port=None):
         self._agent_path = agent_path
         self.id = agent_id
+        self.docker_agent_port = port or DOCKER_AGENT_PORT
 
     def boot(self):
         agent_path = self._agent_path.replace("Dockerfile", "")
@@ -69,12 +80,21 @@ class HttpAgent:
                 got_blank_from_master = True
 
             try:
-                data_in = _exchange_data(data_out)
+                data_in = _exchange_data(data_out, port=self.docker_agent_port)
 
                 if not data_in:
                     got_blank_from_agent = True
+
             except Exception as e:
+                logging.debug("3")
                 logging.exception(e)
+                logging.debug("4")
+                logging.debug("got no data from agent")
+                sys.stdout.write("{}")
+                logging.debug("5")
+                sys.stdout.flush()
+                logging.debug("6")
+                continue
 
             logging.debug("3")
 
@@ -88,7 +108,7 @@ class HttpAgent:
     def start_container(self, tag):
         logging.info(f"starting container with {tag=}")
         cmd = (
-            f"docker run -p 127.0.0.1:{DOCKER_AGENT_PORT}:80/tcp --rm=true --detach "
+            f"docker run -p 127.0.0.1:{self.docker_agent_port}:80/tcp --rm=true --detach "
             + tag
         )
         logging.info(f"starting container with {cmd}")
