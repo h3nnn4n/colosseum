@@ -189,6 +189,7 @@ class GameRunner:
             "outcome": outcome,
             "raw_result": raw_result,
         }
+        __import__("pprint").pprint(payload)
         response = requests.patch(
             API_URL + f"matches/{self._match['id']}/",
             json=payload,
