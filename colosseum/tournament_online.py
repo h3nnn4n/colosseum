@@ -100,8 +100,11 @@ class Participant:
                 self._agent_path = agent_path_docker
                 push_agent_type_metrics("docker")
             else:
-                print("FORCE_DOCKER is set but not docker agent was found!")
+                print(
+                    f"FORCE_DOCKER is set but not docker agent was found for {base_path=}!"
+                )
                 push_agent_type_metrics("not_found")
+                self._agent_path = os.path.join(base_path, "MISSING_AGENT_FILE")
         elif USE_DOCKER:
             if agent_path_docker:
                 print("using DOCKER agent_path")
@@ -119,9 +122,9 @@ class Participant:
                     self._agent_path = agent_path_js
                     push_agent_type_metrics("js")
                 else:
-                    print("no fallback agent was found! Panicking!!!")
+                    print(f"agent file was not found for {base_path=}")
                     push_agent_type_metrics("not_found")
-                    raise RuntimeError(f"No agent was found for {base_path}")
+                    self._agent_path = os.path.join(base_path, "MISSING_AGENT_FILE")
         else:
             if agent_path_python:
                 print("using PYTHON agent_path")
@@ -132,9 +135,9 @@ class Participant:
                 self._agent_path = agent_path_js
                 push_agent_type_metrics("js")
             else:
-                print("no NATIVE agent_path was found! Panicking!!!")
+                print(f"agent file was not found for {base_path=}")
                 push_agent_type_metrics("not_found")
-                raise RuntimeError(f"No agent was found for {base_path}")
+                self._agent_path = os.path.join(base_path, "MISSING_AGENT_FILE")
 
         if not self._agent_path:
             print(f"entrypoint not found for {self.name} / {self.id}")
