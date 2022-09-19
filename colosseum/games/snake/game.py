@@ -143,9 +143,18 @@ class Game(BaseGame):
 
     @property
     def scores(self):
-        return {
+        score_data = {
             snake.agent_id: self.snakes_score[snake.agent_id] for snake in self.snakes
         }
+
+        # This makes sure that if a game ends in a draw because an agent failed
+        # to start, the non-tainted agent will win. Also acts as a tie-braker when
+        # no agents are tainted
+        for snake in self.snakes:
+            if snake.dead:
+                score_data[snake.agent_id] -= 1
+
+        return score_data
 
     @property
     def finished(self):
