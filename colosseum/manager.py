@@ -143,17 +143,21 @@ class Manager:
 
         for agent_id, score in self.world.scores.items():
             agent = self._get_agent(agent_id)
-            scores.append(
-                {
-                    "name": agent.name,
-                    "version": agent.version,
-                    "score": score,
-                    "agent_id": agent_id,
-                    "agent_path": agent.agent_path,
-                    "tainted": agent.tainted,
-                    "tainted_reason": agent.tainted_reason,
-                }
-            )
+
+            score = {
+                "name": agent.name,
+                "version": agent.version,
+                "score": score,
+                "agent_id": agent_id,
+                "agent_path": agent.agent_path,
+                "tainted": agent.tainted,
+                "tainted_reason": agent.tainted_reason,
+            }
+
+            if score["tainted"]:
+                score["score"] = -10
+
+            scores.append(score)
 
         return sorted(scores, key=lambda x: x["score"], reverse=True)
 

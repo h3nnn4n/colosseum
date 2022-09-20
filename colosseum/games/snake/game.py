@@ -162,7 +162,11 @@ class Game(BaseGame):
 
     @property
     def finished(self):
-        return self._tick >= self._config.n_epochs or self._snake_alive_count == 0
+        return (
+            self._tick >= self._config.n_epochs
+            or self._snake_alive_count == 0
+            or len(self.tainted_agents) >= 2
+        )
 
     def update(self, agent_actions):
         self._tick += 1

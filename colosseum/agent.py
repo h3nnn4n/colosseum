@@ -131,10 +131,19 @@ class Agent:
         actions = self.__next_action
         agent_id = actions.get("agent_id")
 
-        if agent_id is None:
+        # Check if agent gave an agent_id
+        if not agent_id:
             self.logger.warning(f"agent {self.id} did not give an agent id")
-        elif agent_id != self.id:
+            self._tainted = True
+            self._tainted_reason = "MISSING_AGENT_ID"
+            return {}
+
+        # Check if agent isn't trying to spoof his agent_id
+        if agent_id != self.id:
+            self._tainted = True
+            self._tainted_reason = "AGENT_ID_SPOOFING"
             self.logger.warning(f"agent {self.id} return invalid agent id")
+            return {}
 
         return actions
 
@@ -362,21 +371,24 @@ class Agent:
         return _exchange_data(message, port=self._docker_agent_port)
 
     def _boot_agent(self):
-        # Pure python agent
-        if "agent.py" in self.agent_path:
-            return PopenSpawn([self._agent_path], timeout=NATIVE_AGENT_TIMEOUT)
+        try:
+            # Pure python agent
+            if "agent.py" in self.agent_path:
+                return PopenSpawn([self._agent_path], timeout=NATIVE_AGENT_TIMEOUT)
 
-        # Pure node agent
-        if "agent.js" in self.agent_path:
-            return PopenSpawn([self._agent_path], timeout=NATIVE_AGENT_TIMEOUT)
+            # Pure node agent
+            if "agent.js" in self.agent_path:
+                return PopenSpawn([self._agent_path], timeout=NATIVE_AGENT_TIMEOUT)
 
-        # Docker agent
-        return PopenSpawn(
-            [
-                "./colosseum/docker_http_wrapper.py",
-                self._agent_path,
-                self.id,
-                str(self._docker_agent_port),
-            ],
-            timeout=NATIVE_AGENT_TIMEOUT,
-        )
+            # Docker agent
+            return PopenSpawn(
+                [
+                    "./colosseum/docker_http_wrapper.py",
+                    self._agent_path,
+                    self.id,
+                    str(self._docker_agent_port),
+                ],
+                timeout=NATIVE_AGENT_TIMEOUT,
+            )
+        except FileNotFoundError:
+            logging.info(f"agent at path={self._agent_path} not found!")
