@@ -362,21 +362,24 @@ class Agent:
         return _exchange_data(message, port=self._docker_agent_port)
 
     def _boot_agent(self):
-        # Pure python agent
-        if "agent.py" in self.agent_path:
-            return PopenSpawn([self._agent_path], timeout=NATIVE_AGENT_TIMEOUT)
+        try:
+            # Pure python agent
+            if "agent.py" in self.agent_path:
+                return PopenSpawn([self._agent_path], timeout=NATIVE_AGENT_TIMEOUT)
 
-        # Pure node agent
-        if "agent.js" in self.agent_path:
-            return PopenSpawn([self._agent_path], timeout=NATIVE_AGENT_TIMEOUT)
+            # Pure node agent
+            if "agent.js" in self.agent_path:
+                return PopenSpawn([self._agent_path], timeout=NATIVE_AGENT_TIMEOUT)
 
-        # Docker agent
-        return PopenSpawn(
-            [
-                "./colosseum/docker_http_wrapper.py",
-                self._agent_path,
-                self.id,
-                str(self._docker_agent_port),
-            ],
-            timeout=NATIVE_AGENT_TIMEOUT,
-        )
+            # Docker agent
+            return PopenSpawn(
+                [
+                    "./colosseum/docker_http_wrapper.py",
+                    self._agent_path,
+                    self.id,
+                    str(self._docker_agent_port),
+                ],
+                timeout=NATIVE_AGENT_TIMEOUT,
+            )
+        except FileNotFoundError:
+            logging.info(f"agent at path={self._agent_path} not found!")
