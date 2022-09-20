@@ -29,7 +29,9 @@ def _exchange_data(data, port=None):
     logging.debug(data)
     logging.debug(json.loads(data))
 
-    response = requests.post(f"http://localhost:{port}", json=json.loads(data))
+    response = requests.post(
+        f"http://localhost:{port}", json=json.loads(data), timeout=3
+    )
     return response.content.decode()
 
 

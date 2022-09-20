@@ -100,8 +100,11 @@ class Participant:
                 self._agent_path = agent_path_docker
                 push_agent_type_metrics("docker")
             else:
-                print("FORCE_DOCKER is set but not docker agent was found!")
+                print(
+                    f"FORCE_DOCKER is set but not docker agent was found for {base_path=}!"
+                )
                 push_agent_type_metrics("not_found")
+                self._agent_path = os.path.join(base_path, "MISSING_AGENT_FILE")
         elif USE_DOCKER:
             if agent_path_docker:
                 print("using DOCKER agent_path")
@@ -119,9 +122,9 @@ class Participant:
                     self._agent_path = agent_path_js
                     push_agent_type_metrics("js")
                 else:
-                    print("no fallback agent was found! Panicking!!!")
+                    print(f"agent file was not found for {base_path=}")
                     push_agent_type_metrics("not_found")
-                    raise RuntimeError(f"No agent was found for {base_path}")
+                    self._agent_path = os.path.join(base_path, "MISSING_AGENT_FILE")
         else:
             if agent_path_python:
                 print("using PYTHON agent_path")
@@ -132,9 +135,9 @@ class Participant:
                 self._agent_path = agent_path_js
                 push_agent_type_metrics("js")
             else:
-                print("no NATIVE agent_path was found! Panicking!!!")
+                print(f"agent file was not found for {base_path=}")
                 push_agent_type_metrics("not_found")
-                raise RuntimeError(f"No agent was found for {base_path}")
+                self._agent_path = os.path.join(base_path, "MISSING_AGENT_FILE")
 
         if not self._agent_path:
             print(f"entrypoint not found for {self.name} / {self.id}")
@@ -189,6 +192,7 @@ class GameRunner:
             "outcome": outcome,
             "raw_result": raw_result,
         }
+        __import__("pprint").pprint(payload)
         response = requests.patch(
             API_URL + f"matches/{self._match['id']}/",
             json=payload,
@@ -241,7 +245,8 @@ class GameRunner:
 class MatchRunner:
     @classmethod
     def run_next_match(cls, game=None):
-        print(f"{USE_DOCKER=}")
+        print("\n----------------\nstarting new match")
+        print(f"{USE_DOCKER=} {FORCE_DOCKER=}")
         send_heartbeat()
         next_match = get_next_match(game=game)
         if not next_match.get("id"):
@@ -288,6 +293,8 @@ class MatchRunner:
 
         game_runner = GameRunner(*participants, match=match_data)
         game_runner.set_results(run_match(game, agents=agents))
+
+        print("----------------\n")
 
 
 def get_next_match(game=None):
