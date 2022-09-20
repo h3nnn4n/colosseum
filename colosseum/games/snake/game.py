@@ -149,15 +149,14 @@ class Game(BaseGame):
 
         tainted_agent_ids = set(x.id for x in self.tainted_agents)
 
-        # This makes sure that if a game ends in a draw because an agent failed
-        # to start, the non-tainted agent will win. Also acts as a tie-braker when
-        # no agents are tainted
+        # Dead agents get penalized one point as a tie breaker
+        # Tainted agents get negative points
         for snake in self.snakes:
             if snake.dead:
                 score_data[snake.agent_id] -= 1
 
             if snake.agent_id in tainted_agent_ids:
-                score_data[snake.agent_id] -= 1
+                score_data[snake.agent_id] = -10
 
         return score_data
 
