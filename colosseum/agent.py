@@ -131,10 +131,19 @@ class Agent:
         actions = self.__next_action
         agent_id = actions.get("agent_id")
 
-        if agent_id is None:
+        # Check if agent gave an agent_id
+        if not agent_id:
             self.logger.warning(f"agent {self.id} did not give an agent id")
-        elif agent_id != self.id:
+            self._tainted = True
+            self._tainted_reason = "MISSING_AGENT_ID"
+            return {}
+
+        # Check if agent isn't trying to spoof his agent_id
+        if agent_id != self.id:
+            self._tainted = True
+            self._tainted_reason = "AGENT_ID_SPOOFING"
             self.logger.warning(f"agent {self.id} return invalid agent id")
+            return {}
 
         return actions
 
