@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import atexit
 import json
 import logging
 import os
@@ -63,6 +64,7 @@ class HttpAgent:
 
         self._event_loop()
 
+    @atexit.register
     def cleanup(self):
         self.kill_container(self.container_id)
 
