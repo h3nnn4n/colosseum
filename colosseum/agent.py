@@ -390,5 +390,8 @@ class Agent:
                 ],
                 timeout=NATIVE_AGENT_TIMEOUT,
             )
-        except FileNotFoundError:
-            logging.info(f"agent at path={self._agent_path} not found!")
+        except Exception as e:
+            logging.info(
+                f"somethid went very wrong with agent at {self._agent_path}: {e}!"
+            )
+            return PopenSpawn(["./dummy.sh"], timeout=NATIVE_AGENT_TIMEOUT)
