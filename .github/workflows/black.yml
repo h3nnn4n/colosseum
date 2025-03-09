@@ -15,8 +15,8 @@ jobs:
 
       - name: Install black
         run: |
-          python3 -m pip install black==22.3.0
+          python -m pip install black==22.3.0
 
       - name: Run black
         run: |
-          python3 -m black --check .
+          python -m black --check .

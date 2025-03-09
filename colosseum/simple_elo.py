@@ -127,11 +127,15 @@ def compute_updated_ratings(
                     - (
                         expected_results[pair]
                         if pair in expected_results and pair[0] == item
-                        else 1 - expected_results[pair]
-                        if pair in expected_results
-                        else expected_results[(pair[1], pair[0])]
-                        if pair[1] == item
-                        else 1 - expected_results[(pair[1], pair[0])]
+                        else (
+                            1 - expected_results[pair]
+                            if pair in expected_results
+                            else (
+                                expected_results[(pair[1], pair[0])]
+                                if pair[1] == item
+                                else 1 - expected_results[(pair[1], pair[0])]
+                            )
+                        )
                     )
                 )
                 for pair, result in results.items()
