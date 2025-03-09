@@ -15,7 +15,7 @@ jobs:
     - name: Install poetry
       uses: snok/install-poetry@v1
       with:
-        version: 1.1.14
+        version: 2.1.1
 
     - name: Install project deps
       run: |
@@ -55,7 +55,7 @@ jobs:
     - name: Install poetry
       uses: snok/install-poetry@v1
       with:
-        version: 1.1.14
+        version: 2.1.1
 
     - name: Install project deps
       run: |
@@ -95,7 +95,7 @@ jobs:
     - name: Install poetry
       uses: snok/install-poetry@v1
       with:
-        version: 1.1.14
+        version: 2.1.1
 
     - name: Install project deps
       run: |
@@ -107,6 +107,6 @@ jobs:
 
     - name: Run smoke test
       run: |
-        poetry run python skirmish.py --game=food_catcher \
-          --agent=colosseum_agents/food_catcher/rusher/agent.py \
-          --agent=colosseum_agents/food_catcher/exterminator/agent.py
+        poetry run python skirmish.py --game=chess \
+          --agent=colosseum_agents/chess/first/agent.py \
+          --agent=colosseum_agents/chess/random/agent.py

@@ -57,8 +57,6 @@ class Agent:
         self._step_limit_pool = time_config.step_limit_pool
         self._overtime = None
 
-        self._docker_agent_port = randint(1025, 65535)
-
     def start(self):
         # The log message is both helpful, and warms the cache too
         self.logger.info(f"using agent_channel = {self.agent_channel}")
@@ -279,10 +277,7 @@ class Agent:
             self._overtime = True
 
     def _exchange_message(self, message):
-        if not self.agent_channel or self.agent_channel == "STDIO":
-            return self._exchange_stdio_message(message)
-
-        return self._exchange_http_message(message)
+        return self._exchange_stdio_message(message)
 
     def _exchange_stdio_message(self, message):
         try:
@@ -313,7 +308,8 @@ class Agent:
             self.logger.info("agent said:")
 
             if hasattr(self, "response_str"):
-                self.logger.info(response_str)
+                self.logger.info(f"`{response_str}`")
+                print(response_str.decode())
 
             while True:
                 try:
@@ -349,26 +345,6 @@ class Agent:
             )
             self._log_error_count()
             return None
-        else:
-            return response
-
-    def _exchange_http_message(self, message):
-        @retry(wait_exponential_multiplier=10, wait_exponential_max=5000)
-        def _exchange_data(data, port=None):
-            self.logger.debug(f"post to http://localhost:{port}")
-            self.logger.debug(f"data = {json.dumps(data)}")
-            response = requests.post(f"http://localhost:{port}", json=data)
-            data_back = response.content.decode()
-
-            self.logger.debug(f"got from bot: {data_back}")
-
-            try:
-                return json.loads(data_back)
-            except json.JSONDecodeError:
-                self.logger.warning(f"got invalid payload from bot: {data_back}")
-                return {}
-
-        return _exchange_data(message, port=self._docker_agent_port)
 
     def _boot_agent(self):
         try:
@@ -383,10 +359,9 @@ class Agent:
             # Docker agent
             return PopenSpawn(
                 [
-                    "./colosseum/docker_http_wrapper.py",
+                    "./colosseum/docker_wrapper.py",
                     self._agent_path,
                     self.id,
-                    str(self._docker_agent_port),
                 ],
                 timeout=NATIVE_AGENT_TIMEOUT,
             )
