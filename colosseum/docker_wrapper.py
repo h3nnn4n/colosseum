@@ -4,8 +4,9 @@ import atexit
 import logging
 import shlex
 import subprocess
-import uuid
 import sys
+import uuid
+
 import pexpect
 from pexpect.popen_spawn import PopenSpawn
 
