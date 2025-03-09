@@ -46,8 +46,8 @@ class DockerAgent:
     def cleanup(self):
         if self.container_process:
             try:
-                self.container_process.sendcontrol('c')
-                self.container_process.sendline('exit')
+                self.container_process.sendcontrol("c")
+                self.container_process.sendline("exit")
                 self.container_process.close()
             except:
                 logging.info("Terminating container forcefully")
@@ -119,7 +119,7 @@ class DockerAgent:
         logging.info(f"starting container with: {cmd}")
 
         # Use PopenSpawn for interactive communication
-        self.container_process = PopenSpawn(cmd, encoding='utf-8')
+        self.container_process = PopenSpawn(cmd, encoding="utf-8")
         logging.debug("Container started in interactive mode")
 
     def build_container(self, tag, dockerfile):
