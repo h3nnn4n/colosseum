@@ -12,7 +12,7 @@ from pexpect.popen_spawn import PopenSpawn
 
 self_id = str(uuid.uuid4())
 
-logging.basicConfig(filename=f"docker_wrapper_{self_id}.log", level=logging.DEBUG)
+logging.basicConfig(filename=f"docker_wrapper_{self_id}.log", level=logging.WARNING)
 
 
 def main(agent_path, agent_id):
